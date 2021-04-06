@@ -41,6 +41,7 @@ namespace LRs
             this.framerate = new System.Windows.Forms.Timer(this.components);
             this.num_max_points = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.trail = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.objects_grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frame_box)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_max_points)).BeginInit();
@@ -63,7 +64,8 @@ namespace LRs
             this.objects_grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.objects_grid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.id,
-            this.position});
+            this.position,
+            this.trail});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -76,8 +78,9 @@ namespace LRs
             this.objects_grid.Name = "objects_grid";
             this.objects_grid.ReadOnly = true;
             this.objects_grid.RowHeadersVisible = false;
-            this.objects_grid.Size = new System.Drawing.Size(221, 434);
+            this.objects_grid.Size = new System.Drawing.Size(321, 434);
             this.objects_grid.TabIndex = 0;
+            this.objects_grid.SelectionChanged += new System.EventHandler(this.Objects_Grid_SelectionChanged);
             // 
             // id
             // 
@@ -150,12 +153,18 @@ namespace LRs
             this.label1.TabIndex = 4;
             this.label1.Text = "Maximum of points";
             // 
+            // trail
+            // 
+            this.trail.HeaderText = "trail";
+            this.trail.Name = "trail";
+            this.trail.ReadOnly = true;
+            // 
             // Application
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(761, 466);
+            this.ClientSize = new System.Drawing.Size(856, 466);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.num_max_points);
             this.Controls.Add(this.btn_pp);
@@ -185,6 +194,7 @@ namespace LRs
         private System.Windows.Forms.Timer framerate;
         private System.Windows.Forms.NumericUpDown num_max_points;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn trail;
     }
 }
 
