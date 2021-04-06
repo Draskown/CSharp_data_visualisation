@@ -15,9 +15,14 @@ namespace LRs
     {
         bool pause_flag = false;
 
-        readonly List<List<int>> data = new List<List<int>>();
-        readonly List<FoundObject> found_objects = new List<FoundObject>();
-        public List<Point> current_points = new List<Point>();
+        private readonly int trail_length = 60;
+        private readonly int centroid_thresh = 100;
+
+        private readonly List<List<int>> data = new List<List<int>>();
+        private readonly List<FoundObject> found_objects = new List<FoundObject>();
+        private readonly List<FoundObject> frame_objects = new List<FoundObject>();
+        private readonly List<Point> frame_points = new List<Point>();
+        private readonly List<Point> frame_centroids = new List<Point>();
 
         int current_value = 0, current_line = 0;
         Bitmap frame;
@@ -101,12 +106,12 @@ namespace LRs
             {
                 current_line++;
                 current_value = 0;
-                current_points.Clear();
+                frame_points.Clear();
             }
 
             if (current_line >= data.Count)
             {
-                current_points.Clear();
+                frame_points.Clear();
                 current_line = 0;
             }
 
@@ -125,7 +130,7 @@ namespace LRs
                 x = (int)(x * 0.08 + this.frame_box.Width / 2);
                 y = (int)(y * 0.08 + this.frame_box.Height / 1.2);
 
-                current_points.Add(new Point(x, y));
+                frame_points.Add(new Point(x, y));
 
                 if (data[current_line][current_value] <= 19)
                 {
@@ -145,7 +150,8 @@ namespace LRs
 
         private void Find_Objects()
         {
-            found_objects.Clear();
+            frame_objects.Clear();
+            frame_centroids.Clear();
             var processed_frame = data[current_line];
             FoundObject fo;
 
@@ -153,34 +159,28 @@ namespace LRs
             {
                 if (Math.Abs(processed_frame[i] - processed_frame[i - 1]) >= 100)
                 {
-                    fo = new FoundObject(processed_frame[i], current_points[i]);
-                    fo.points.Add(current_points[i]);
+                    fo = new FoundObject(processed_frame[i], frame_points[i]);
+                    fo.points.Add(frame_points[i]);
                     fo.values.Add(processed_frame[i]);
 
-                    found_objects.Add(fo);
+                    frame_objects.Add(fo);
                 }
 
-                if (found_objects.Count > 0)
+                if (frame_objects.Count > 0)
                 {
-                    if (found_objects.Last().values.Count < this.num_max_points.Value)
+                    if (frame_objects.Last().values.Count < this.num_max_points.Value)
                     {
-                        var last_obj = found_objects.Last();
+                        var last_obj = frame_objects.Last();
 
-                        last_obj.points.Add(current_points[i]);
+                        last_obj.points.Add(frame_points[i]);
                         last_obj.values.Add(processed_frame[i]);
-
-                        if (found_objects.Last().values.Count > found_objects.Last().values.Count - 6)
-                        last_obj.centroid_frames.Add( new Point(
-                                current_points[i].X + last_obj.centroid_frames.Last().X / 2,
-                                current_points[i].Y + last_obj.centroid_frames.Last().Y / 2
-                            ));
                     }
                     else
                     {
-                        fo = new FoundObject(processed_frame[i], current_points[i]);
-                        fo.points.Add(current_points[i]);
+                        fo = new FoundObject(processed_frame[i], frame_points[i]);
+                        fo.points.Add(frame_points[i]);
                         fo.values.Add(processed_frame[i]);
-                        found_objects.Add(fo);
+                        frame_objects.Add(fo);
                     }
                 }
             }
@@ -188,12 +188,13 @@ namespace LRs
             frame = new Bitmap(frame);
             this.objects_grid.Rows.Clear();
 
-            found_objects.RemoveAll(o => o.values.Count < 5);
+            frame_objects.RemoveAll(o => o.values.Count < 5 ||
+                                    o.points.All(p => (Math.Abs(p.X - o.points[0].X) < 3) || (Math.Abs(p.Y - o.points[0].Y) < 3)));
 
             if (found_objects.Count == 0)
-                found_objects.ForEach(o => found_objects.Add(o));
+                frame_objects.ForEach(o => found_objects.Add(o));
 
-            foreach (var obj in found_objects)
+            foreach (var obj in frame_objects)
             {
                 int min_x = obj.points.Min(p => p.X),
                     min_y = obj.points.Min(p => p.Y),
@@ -204,9 +205,17 @@ namespace LRs
                       endpoint = obj.points.Last(p => p.X == min_x),
                       startpoint = obj.points.Last(p => p.X == max_x);
 
-                Find_Closest_Centroid(obj, centroid);
+                frame_centroids.Add(centroid);
 
-                this.objects_grid.Rows.Add(new object[] { found_objects.IndexOf(obj), obj.centroid_frames.Last() });
+                if (obj.centroid_frames.Count >= trail_length)
+                    obj.centroid_frames.RemoveAt(0);
+                obj.centroid_frames.Add(centroid);
+
+                this.objects_grid.Rows.Add(new object[] { 
+                    frame_objects.IndexOf(obj),
+                    obj.centroid_frames.Last(),
+                    obj.centroid_frames.Count
+                });
 
                 using (Graphics g = Graphics.FromImage(frame))
                 {
@@ -225,20 +234,23 @@ namespace LRs
                             obj.points.Count - obj.points.Count(p => Math.Abs(p.Y - slope * p.X - y_intersect) <= 60) < 3)
                             g.DrawLine(new Pen(Color.Blue, 4), startpoint, endpoint);
                         else
+                        {
                             g.DrawRectangle(Pens.Fuchsia, min_x, min_y, max_x - min_x, max_y - min_y);
+                            Find_Closest_Centroid(obj, centroid);
 
-                        g.FillEllipse(
-                            Brushes.Red,
-                            centroid.X,
-                            centroid.Y,
-                            5,
-                            5
-                            );
+                            g.FillEllipse(Brushes.Red, centroid.X, centroid.Y, 5, 5);
+
+                            found_objects.ForEach(o => {
+                                if (o.centroid_frames.Count > 1)
+                                    g.DrawLines(new Pen(Color.Green, 2), o.centroid_frames.ToArray());
+                                Console.WriteLine(o.centroid_frames.Count);
+                            });
+                        }
                     }
-
-                    obj.centroid_frames.ForEach(cf => g.FillEllipse(Brushes.Green, cf.X, cf.Y, 2, 2));
                 }
             }
+
+            found_objects.RemoveAll(foo => !frame_centroids.Contains(foo.centroid_frames.Last()));
 
             this.frame_box.Image = frame;
         }
@@ -246,34 +258,68 @@ namespace LRs
 
         private void Find_Closest_Centroid(FoundObject o, Point c)
         {
-            int goal_distance = (o.centroid_frames.Last().X + c.X) / 2 +
-                                (o.centroid_frames.Last().Y + c.Y) / 2;
+            int goal_distance = (found_objects[0].centroid_frames.Last().X + c.X) / 2 +
+                                (found_objects[0].centroid_frames.Last().Y + c.Y) / 2;
 
-            for (int i = 0; i < found_objects.Count; i++)
+            var closest_object = found_objects[0];
+
+            foreach (var obj_j in found_objects)
             {
-                var obj_j = found_objects[i];
-
                 int obj_distance = (obj_j.centroid_frames.Last().X + c.X) / 2 +
                                    (obj_j.centroid_frames.Last().Y - c.Y) / 2;
 
-                if (Math.Abs(obj_distance - goal_distance) <= 100)
+                if (obj_distance < goal_distance)
                 {
-                    obj_j = o;
-
-                    if (obj_j.centroid_frames.Count == 5)
-                        obj_j.centroid_frames.RemoveAt(0);
-
-                    obj_j.centroid_frames.Add(c);
+                    goal_distance = obj_distance;
+                    closest_object = obj_j;
                 }
-                else
-                    obj_j.centroid_frames.Add(c);
+            }
+
+            if (goal_distance <= centroid_thresh)
+            {
+                if (o.centroid_frames.Count >= trail_length)
+                    o.centroid_frames.RemoveAt(0);
+                o.centroid_frames.Add(c);
+
+                found_objects.Remove(closest_object);
+                found_objects.Add(o);
+            }
+            else if (!found_objects.Contains(o))
+                found_objects.Add(o);
+        }
+
+
+        private void Objects_Grid_SelectionChanged(object sender, EventArgs e)
+        {
+            var bmp = new Bitmap(frame);
+
+            if (pause_flag)
+            {
+                var obj = frame_objects.ElementAt(objects_grid.SelectedCells[0].RowIndex);
+
+                int min_x = obj.points.Min(p => p.X),
+                    min_y = obj.points.Min(p => p.Y),
+                    max_x = obj.points.Max(p => p.X),
+                    max_y = obj.points.Max(p => p.Y);
+
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    g.DrawRectangle(new Pen(Color.Yellow, 2),
+                                    min_x,
+                                    min_y,
+                                    max_x - min_x,
+                                    max_y - min_y
+                        );
+                }
+
+                this.frame_box.Image = bmp;
             }
         }
 
 
         private class FoundObject
         {
-            public readonly List<Point> points, centroid_frames;
+            public List<Point> points, centroid_frames;
             public readonly List<int> values;
 
             public FoundObject(int v, Point p)

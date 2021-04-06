@@ -13,6 +13,12 @@ namespace CPDT_LR1
 {
     public partial class Bitmapshit : Form
     {
+        List<Point> test = new List<Point> { new Point(20, 80),
+                                             new Point(20, 40),
+                                             new Point(12, 50),
+                                             new Point(1, 90)
+        };
+
         Point[] line1 = new Point[] {   new Point(35, 76),
                                         new Point(44, 66),
                                         new Point(57, 51),
@@ -78,6 +84,13 @@ namespace CPDT_LR1
         {
             Bitmap bmp = new Bitmap(this.pictureBox1.Width, this.pictureBox1.Height);
             Random r = new Random();
+
+            var temp = line1;
+
+            temp = line2;
+
+            Console.WriteLine(string.Join(" ", line1));
+            this.Close();
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
