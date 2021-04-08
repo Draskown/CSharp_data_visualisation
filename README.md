@@ -16,4 +16,4 @@ DVT_1:
 
 DVT_2:
 
-- Everything's done except of moving the bitmap (2D as well as 3D)
+- Everything's done except of moving and zooming the bitmap (2D (only zooming) as well as 3D)
