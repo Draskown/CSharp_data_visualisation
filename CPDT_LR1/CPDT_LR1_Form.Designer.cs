@@ -35,14 +35,14 @@ namespace LRs
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.objects_grid = new System.Windows.Forms.DataGridView();
+            this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.position = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.trail = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.frame_box = new System.Windows.Forms.PictureBox();
             this.btn_pp = new System.Windows.Forms.Button();
             this.framerate = new System.Windows.Forms.Timer(this.components);
             this.num_max_points = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
-            this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.position = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trail = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.objects_grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frame_box)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_max_points)).BeginInit();
@@ -95,6 +95,28 @@ namespace LRs
             this.objects_grid.TabIndex = 0;
             this.objects_grid.SelectionChanged += new System.EventHandler(this.Objects_Grid_SelectionChanged);
             // 
+            // id
+            // 
+            this.id.HeaderText = "obj_id";
+            this.id.Name = "id";
+            this.id.ReadOnly = true;
+            this.id.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // position
+            // 
+            this.position.HeaderText = "obj_position";
+            this.position.Name = "position";
+            this.position.ReadOnly = true;
+            this.position.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.position.Width = 120;
+            // 
+            // trail
+            // 
+            this.trail.HeaderText = "trail";
+            this.trail.Name = "trail";
+            this.trail.ReadOnly = true;
+            this.trail.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
             // frame_box
             // 
             this.frame_box.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -115,6 +137,8 @@ namespace LRs
             this.btn_pp.Text = "Pause";
             this.btn_pp.UseVisualStyleBackColor = false;
             this.btn_pp.Click += new System.EventHandler(this.Btn_pp_Click);
+            this.btn_pp.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Btn_pp_MouseDown);
+            this.btn_pp.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Btn_pp_MouseUp);
             // 
             // framerate
             // 
@@ -156,28 +180,6 @@ namespace LRs
             this.label1.Size = new System.Drawing.Size(119, 15);
             this.label1.TabIndex = 4;
             this.label1.Text = "Maximum of points";
-            // 
-            // id
-            // 
-            this.id.HeaderText = "obj_id";
-            this.id.Name = "id";
-            this.id.ReadOnly = true;
-            this.id.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            // 
-            // position
-            // 
-            this.position.HeaderText = "obj_position";
-            this.position.Name = "position";
-            this.position.ReadOnly = true;
-            this.position.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.position.Width = 120;
-            // 
-            // trail
-            // 
-            this.trail.HeaderText = "trail";
-            this.trail.Name = "trail";
-            this.trail.ReadOnly = true;
-            this.trail.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // Application
             // 

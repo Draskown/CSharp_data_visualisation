@@ -66,6 +66,20 @@ namespace LRs
         }
 
 
+        private void Btn_pp_MouseDown(object sender, MouseEventArgs e)
+        {
+            this.btn_pp.BackColor = Color.Fuchsia;
+        }
+
+
+        private void Btn_pp_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.btn_pp.BackColor = Color.FromArgb(64, 64, 64);
+
+        }
+
+
+
         private void Framerate_Tick(object sender, EventArgs e)
         {
             Draw_Data();
