@@ -257,9 +257,9 @@ namespace DVT_LR2
             // 
             this.btn_save.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_save.ForeColor = System.Drawing.Color.White;
-            this.btn_save.Location = new System.Drawing.Point(621, 551);
+            this.btn_save.Location = new System.Drawing.Point(627, 547);
             this.btn_save.Name = "btn_save";
-            this.btn_save.Size = new System.Drawing.Size(71, 30);
+            this.btn_save.Size = new System.Drawing.Size(65, 30);
             this.btn_save.TabIndex = 3;
             this.btn_save.Text = "Save";
             this.btn_save.UseVisualStyleBackColor = false;
@@ -268,9 +268,9 @@ namespace DVT_LR2
             // 
             this.btn_load.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_load.ForeColor = System.Drawing.Color.White;
-            this.btn_load.Location = new System.Drawing.Point(704, 551);
+            this.btn_load.Location = new System.Drawing.Point(708, 547);
             this.btn_load.Name = "btn_load";
-            this.btn_load.Size = new System.Drawing.Size(69, 30);
+            this.btn_load.Size = new System.Drawing.Size(65, 30);
             this.btn_load.TabIndex = 3;
             this.btn_load.Text = "Load";
             this.btn_load.UseVisualStyleBackColor = false;

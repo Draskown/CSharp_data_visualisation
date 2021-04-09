@@ -129,6 +129,8 @@ namespace LRs
             // btn_pp
             // 
             this.btn_pp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.btn_pp.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.btn_pp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_pp.ForeColor = System.Drawing.Color.White;
             this.btn_pp.Location = new System.Drawing.Point(15, 14);
             this.btn_pp.Name = "btn_pp";

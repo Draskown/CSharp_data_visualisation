@@ -75,7 +75,6 @@ namespace LRs
         private void Btn_pp_MouseUp(object sender, MouseEventArgs e)
         {
             this.btn_pp.BackColor = Color.FromArgb(64, 64, 64);
-
         }
 
 

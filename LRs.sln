@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVT_LR1", "DVT_LR1\DVT_LR1.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPDT_LR1", "CPDT_LR1\CPDT_LR1.csproj", "{8CC3D6B1-380C-4833-B51D-BE07116933E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVT_LR2", "DVT_LR2\DVT_LR2.csproj", "{E47115D6-5D57-417E-8571-E08DF83EA650}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8CC3D6B1-380C-4833-B51D-BE07116933E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CC3D6B1-380C-4833-B51D-BE07116933E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CC3D6B1-380C-4833-B51D-BE07116933E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E47115D6-5D57-417E-8571-E08DF83EA650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E47115D6-5D57-417E-8571-E08DF83EA650}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E47115D6-5D57-417E-8571-E08DF83EA650}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E47115D6-5D57-417E-8571-E08DF83EA650}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

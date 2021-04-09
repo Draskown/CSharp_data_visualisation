@@ -256,8 +256,8 @@ namespace DVT_LR2
             PointF final_point = e.Location;
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-            final_point.X /= 1920;
-            final_point.Y /= 1080;
+            final_point.X /= Screen.PrimaryScreen.WorkingArea.Width;
+            final_point.Y /= Screen.PrimaryScreen.WorkingArea.Height;
 
             foreach (var row in movable_coords)
             {
