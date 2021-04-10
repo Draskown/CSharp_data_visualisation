@@ -13,8 +13,9 @@ namespace DVT_LR2
 {
     public partial class DVT_LR2_Form : Form
     {
-        private List<double[]> coords, movable_coords;
-        private readonly Random r;
+        private List<int[]> frame_coords;
+        private List<double[]> coords;
+        private readonly Random row;
         PointF initial_point;
         private Bitmap bmp;
 
@@ -23,8 +24,9 @@ namespace DVT_LR2
         {
             InitializeComponent();
 
+            frame_coords = new List<int[]>();
             coords = new List<double[]>();
-            r = new Random();
+            row = new Random();
         }
 
 
@@ -69,21 +71,20 @@ namespace DVT_LR2
 
             for (int _ = 0; _ < num_rnd_count.Value; _++)
             {
-                var da = new double[] { Math.Round(r.NextDouble(), 2),
-                                        Math.Round(r.NextDouble(), 2),
-                                        Math.Round(r.NextDouble(), 2) 
+                var da = new double[] { Math.Round(row.NextDouble(), 2),
+                                        Math.Round(row.NextDouble(), 2),
+                                        Math.Round(row.NextDouble(), 2) 
                 };
 
                 coords.Add(da);
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (i == r.Next(0, 3))
+                    if (i == row.Next(0, 3))
                         da.SetValue(da[i] * -1, i);
                 }
 
                 this.points_view.Rows.Add(new object[] { string.Join(", ", da) });
-                movable_coords = coords;
 
                 Show_Points();
             }
@@ -138,7 +139,6 @@ namespace DVT_LR2
                 this.points_view.Rows.Add(new[] { string.Join(", ", da) });
             }
 
-            movable_coords = coords;
             Show_Points();
         }
 
@@ -192,7 +192,6 @@ namespace DVT_LR2
                     }
                 }
 
-                movable_coords = coords;
                 Show_Points();
             }
             catch (IOException ex)
@@ -222,6 +221,9 @@ namespace DVT_LR2
         {
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
+            if (frame_coords.Count != 0)
+                frame_coords.Clear();
+
             foreach (var row in coords)
             {
                 using (Graphics g = Graphics.FromImage(bmp))
@@ -230,6 +232,8 @@ namespace DVT_LR2
                         y = (int)((row[1] + 1) * frame.Height / 2),
                         z = (int)((row[2] + 1) * 255/2);
 
+                    frame_coords.Add(new[] { x, y, z });
+                    
                     g.FillEllipse(new SolidBrush(Color.FromArgb(z, 255, 0, 255)), x, y, 7, 7);
                 }
             }
@@ -259,19 +263,13 @@ namespace DVT_LR2
             final_point.X /= Screen.PrimaryScreen.WorkingArea.Width;
             final_point.Y /= Screen.PrimaryScreen.WorkingArea.Height;
 
-            foreach (var row in movable_coords)
+            foreach (var row in frame_coords)
             {
-                row[0] += final_point.X - initial_point.X;
-                row[1] += final_point.Y - initial_point.Y;
+                row[0] += (int)(final_point.X - initial_point.X);
+                row[1] += (int)(final_point.Y - initial_point.Y);
 
                 using (Graphics g = Graphics.FromImage(bmp))
-                {
-                    int x = (int)((row[0] + 1) * frame.Width / 2),
-                        y = (int)((row[1] + 1) * frame.Height / 2),
-                        z = (int)((row[2] + 1) * 255 / 2);
-
-                    g.FillEllipse(new SolidBrush(Color.FromArgb(z, 255, 0, 255)), x, y, 7, 7);
-                }
+                    g.FillEllipse(new SolidBrush(Color.FromArgb(row[2], 255, 0, 255)), row[0], row[1], 7, 7);
             }
 
             initial_point = final_point;
@@ -282,7 +280,21 @@ namespace DVT_LR2
 
         private void PicImage_MouseWheel(object sender, MouseEventArgs e)
         {
-            
+            bmp = new Bitmap(this.frame.Width, this.frame.Height);
+
+            if (e.Delta > 0)
+            {
+                foreach (var row in frame_coords)
+                {
+                    row[0] = row[0] > e.Location.X ? row[0] + (int)(e.Delta / 12) : row[0] - (int)(e.Delta / 12);
+                    row[1] = row[1] > e.Location.X ? row[1] + (int)(e.Delta / 12) : row[1] - (int)(e.Delta / 12);
+
+                    using (Graphics g = Graphics.FromImage(bmp))
+                        g.FillEllipse(new SolidBrush(Color.FromArgb(row[2], 255, 0, 255)), row[0], row[1], 7, 7);
+                }
+
+                this.frame.InitialImage = bmp;
+            }
         }
 
 
@@ -313,7 +325,6 @@ namespace DVT_LR2
                 if (r.Cells[0].Value != null)
                     coords.Add(r.Cells[0].Value.ToString().Split(new[] { ", " }, StringSplitOptions.None).Select(Double.Parse).ToArray());
 
-            movable_coords = coords;
             Show_Points();
         }
     }
