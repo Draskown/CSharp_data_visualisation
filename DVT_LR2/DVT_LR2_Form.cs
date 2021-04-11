@@ -245,9 +245,6 @@ namespace DVT_LR2
         private void PicImage_MouseDown(object sender, MouseEventArgs e)
         {
             initial_point = e.Location;
-
-            initial_point.X = initial_point.X > 0 ? initial_point.X / 1873 : initial_point.X / 46;
-            initial_point.Y = initial_point.Y > 0 ? initial_point.Y / 880 : initial_point.Y / 199;
         }
 
 
@@ -259,9 +256,6 @@ namespace DVT_LR2
 
             PointF final_point = e.Location;
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
-
-            final_point.X /= Screen.PrimaryScreen.WorkingArea.Width;
-            final_point.Y /= Screen.PrimaryScreen.WorkingArea.Height;
 
             foreach (var row in frame_coords)
             {
@@ -280,21 +274,12 @@ namespace DVT_LR2
 
         private void PicImage_MouseWheel(object sender, MouseEventArgs e)
         {
+            if (this.frame.Image == null)
+                return;
+
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-            if (e.Delta > 0)
-            {
-                foreach (var row in frame_coords)
-                {
-                    row[0] = row[0] > e.Location.X ? row[0] + (int)(e.Delta / 12) : row[0] - (int)(e.Delta / 12);
-                    row[1] = row[1] > e.Location.X ? row[1] + (int)(e.Delta / 12) : row[1] - (int)(e.Delta / 12);
-
-                    using (Graphics g = Graphics.FromImage(bmp))
-                        g.FillEllipse(new SolidBrush(Color.FromArgb(row[2], 255, 0, 255)), row[0], row[1], 7, 7);
-                }
-
-                this.frame.InitialImage = bmp;
-            }
+            // Turned out the zoom is not needed after all, do not concern yf with it for now
         }
 
 
