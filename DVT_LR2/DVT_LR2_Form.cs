@@ -226,9 +226,10 @@ namespace DVT_LR2
             if (frame_coords.Count != 0)
                 frame_coords.Clear();
 
-            foreach (var row in coords)
+
+            using (Graphics g = Graphics.FromImage(bmp))
             {
-                using (Graphics g = Graphics.FromImage(bmp))
+                foreach (var row in coords)
                 {
                     int x = (int)((row[0] + 1) * frame.Width / divider + frame.Width / 2 - frame.Width / divider),
                         y = (int)((row[1] + 1) * frame.Height / divider + frame.Width / 2 - frame.Height / divider),
@@ -238,6 +239,8 @@ namespace DVT_LR2
                     
                     g.FillEllipse(new SolidBrush(Color.FromArgb(z, 255, 0, 255)), x, y, 7, 7);
                 }
+
+                Draw_Axises(g);
             }
 
             this.frame.Image = bmp;
@@ -259,13 +262,17 @@ namespace DVT_LR2
             PointF final_point = e.Location;
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-            foreach (var row in frame_coords)
+            using (Graphics g = Graphics.FromImage(bmp))
             {
-                row[0] += (int)(final_point.X - initial_point.X);
-                row[1] += (int)(final_point.Y - initial_point.Y);
+                foreach (var row in frame_coords)
+                {
+                    row[0] += (int)(final_point.X - initial_point.X);
+                    row[1] += (int)(final_point.Y - initial_point.Y);
 
-                using (Graphics g = Graphics.FromImage(bmp))
                     g.FillEllipse(new SolidBrush(Color.FromArgb(row[2], 255, 0, 255)), row[0], row[1], 7, 7);
+                }
+
+                Draw_Axises(g);
             }
 
             initial_point = final_point;
@@ -313,6 +320,27 @@ namespace DVT_LR2
                     coords.Add(r.Cells[0].Value.ToString().Split(new[] { ", " }, StringSplitOptions.None).Select(Double.Parse).ToArray());
 
             Show_Points();
+        }
+
+
+        private void Draw_Axises(Graphics g)
+        {
+            var min_x = frame_coords.Min(r => r[0]);
+            var min_y = frame_coords.Min(r => r[1]);
+            var max_x = frame_coords.Max(r => r[0]);
+            var max_y = frame_coords.Max(r => r[1]);
+            var y_center = min_y + (max_y - min_y) / 2;
+            var x_center = min_x + (max_x - min_x) / 2;
+
+            g.DrawLine(new Pen(Color.Yellow, 3), min_x, max_y, min_x, y_center);
+            g.DrawLine(new Pen(Color.Yellow, 3), min_x, y_center, min_x - 5, y_center + 10);
+            g.DrawLine(new Pen(Color.Yellow, 3), min_x, y_center, min_x + 5, y_center + 10);
+            g.DrawString("Y", new Font("Gilroy Black", 16), Brushes.Yellow, min_x - 30, y_center);
+
+            g.DrawLine(new Pen(Color.Red, 3), min_x, max_y, x_center, max_y);
+            g.DrawLine(new Pen(Color.Red, 3), x_center, max_y, x_center - 10, max_y + 5);
+            g.DrawLine(new Pen(Color.Red, 3), x_center, max_y, x_center - 10, max_y - 5);
+            g.DrawString("X", new Font("Gilroy Black", 16), Brushes.Red, x_center - 5, max_y + 5);
         }
     }
 }
