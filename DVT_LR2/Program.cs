@@ -16,7 +16,8 @@ namespace DVT_LR2
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DVT_LR2_Form());
+            //Application.Run(new DVT_LR2_Form());
+            Application.Run(new CodingTrain());
         }
     }
 }
