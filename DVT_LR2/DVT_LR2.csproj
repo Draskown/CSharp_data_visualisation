@@ -46,12 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodingTrain.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CodingTrain.Designer.cs">
-      <DependentUpon>CodingTrain.cs</DependentUpon>
-    </Compile>
     <Compile Include="DVT_LR2_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -60,9 +54,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="CodingTrain.resx">
-      <DependentUpon>CodingTrain.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="DVT_LR2_Form.resx">
       <DependentUpon>DVT_LR2_Form.cs</DependentUpon>
     </EmbeddedResource>
