@@ -221,6 +221,8 @@ namespace DVT_LR2
         {
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
+            var divider = 4;
+
             if (frame_coords.Count != 0)
                 frame_coords.Clear();
 
@@ -228,8 +230,8 @@ namespace DVT_LR2
             {
                 using (Graphics g = Graphics.FromImage(bmp))
                 {
-                    int x = (int)((row[0] + 1) * frame.Width / 2),
-                        y = (int)((row[1] + 1) * frame.Height / 2),
+                    int x = (int)((row[0] + 1) * frame.Width / divider + frame.Width / 2 - frame.Width / divider),
+                        y = (int)((row[1] + 1) * frame.Height / divider + frame.Width / 2 - frame.Height / divider),
                         z = (int)((row[2] + 1) * 255/2);
 
                     frame_coords.Add(new[] { x, y, z });
@@ -279,7 +281,7 @@ namespace DVT_LR2
 
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-            // Turned out the zoom is not needed after all, do not concern yf with it for now
+            // Turned out the zoom is not needed after all, do not concern yf with it yet
         }
 
 
