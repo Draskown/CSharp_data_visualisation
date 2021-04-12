@@ -156,7 +156,7 @@ namespace DVT_LR2
             this.num_rnd_count.TabIndex = 3;
             this.num_rnd_count.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.num_rnd_count.Value = new decimal(new int[] {
-            1000,
+            100,
             0,
             0,
             0});
