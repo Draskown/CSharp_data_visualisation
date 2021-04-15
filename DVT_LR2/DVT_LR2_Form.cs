@@ -13,7 +13,7 @@ namespace DVT_LR2
 {
     public partial class DVT_LR2_Form : Form
     {
-        private double[][] rotationY, default_multipliers;
+        private double[][] rotationY, default_multipliers, a;
         private double distance, angleX, angle_delta;
         private readonly PVector[] lineX, lineY;
         private PointF initial_point, delta;
@@ -39,10 +39,10 @@ namespace DVT_LR2
             angleX = 0;
 
 
-            default_multipliers = new double[][] {
-                                  new double[] { 1, 0, -1 },
-                                  new double[] { 0, 1, 0 },
-                                  new double[] { 1, 0, 1 }
+            default_multipliers = a = new double[][] {
+                                new double[] { 1, 0, -1 },
+                                new double[] { 0, 1, 0 },
+                                new double[] { 1, 0, 1 }
             };
 
             foreach (var row in default_multipliers)
@@ -236,19 +236,16 @@ namespace DVT_LR2
 
             Match m = Regex.Match(input, pattern);
 
-
-
-            if (m.Success)
-                Console.WriteLine("Hello, world!");
-
-            if (this.rotationY_grid.CurrentCell.Value.ToString().Any(x => x.ToString().Contains(',')))
+            if (!m.Success)
             {
-                MessageBox.Show("An input should not contain commas in English VS version!");
+                MessageBox.Show("Please make sure that inputs are following the pattern \'X" + separator + "XX\' or \'XX\'");
 
                 this.rotationY_grid.CurrentCell.Value = 0;
+
+                return;
             }
 
-            double[][] a = new double[3][];
+            a = new double[3][];
 
             for (int i = 0; i < a.Length; i++)
             {
@@ -258,11 +255,7 @@ namespace DVT_LR2
                     a[i][j] = Convert.ToDouble(this.rotationY_grid.Rows[i].Cells[j].Value);
             }
 
-            rotationY = new double[][] {
-                        new double[] { Math.Cos(angleX) * a[0][0], 0* a[0][1], Math.Sin(angleX)*a[0][2] },
-                        new double[] { 0*a[1][0], 1* a[1][1], 0*a[1][2] },
-                        new double[] { Math.Sin(angleX)* a[2][0], 0* a[2][1], Math.Cos(angleX)* a[2][2] }
-            };
+            Draw_Points();
         }
 
 
@@ -301,36 +294,39 @@ namespace DVT_LR2
         {
             bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-            var min_x = coords.Min(v => v.x);
-            var min_y = coords.Min(v => v.y);
-            var max_x = coords.Min(v => v.x);
-            var max_y = coords.Min(v => v.y);
-            var x_center = min_x + (max_x - min_x) / 2;
-            var y_center = min_y + (max_y - min_y) / 2;
-            var arrow = 0.02;
+            lineY[0] = new PVector(-1, 1);
+            lineY[1] = new PVector(-1, 0);
+            lineY[2] = new PVector(-0.96, 0.1);
+            lineY[3] = new PVector(-1.04, 0.1);
+            var y_string = new PVector(-1.2, 0.1);
 
-            lineX[0] = new PVector(min_x, max_y);
-            lineX[1] = new PVector(x_center, max_y);
-            lineX[2] = new PVector(x_center - arrow, max_y - arrow / 2);
-            lineX[3] = new PVector(x_center - arrow, max_y + arrow / 2);
+            lineX[0] = new PVector(-1, 1);
+            lineX[1] = new PVector(0, 1);
+            lineX[2] = new PVector(-0.1, 0.96);
+            lineX[3] = new PVector(-0.1, 1.04);
+            var x_string = new PVector(-0.2, 1.04);
 
-            lineY[0] = new PVector(min_x, max_y);
-            lineY[1] = new PVector(min_x, y_center);
-            lineY[2] = new PVector(min_x + arrow / 2, y_center + arrow);
-            lineY[3] = new PVector(min_x - arrow / 2, y_center + arrow);
+            rotationY = new double[][] {
+                        new double[] { Math.Cos(angleX) * a[0][0], 0* a[0][1], Math.Sin(angleX)*a[0][2] },
+                        new double[] { 0*a[1][0], 1* a[1][1], 0*a[1][2] },
+                        new double[] { Math.Sin(angleX)* a[2][0], 0* a[2][1], Math.Cos(angleX)* a[2][2] }
+            };
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 foreach (var v in coords)
                 {
-                    PVector rotated = Mat_Mul(rotationY, v);
+                    PVector rotated = MatMul(rotationY, v);
+
+                    var x_string_rot = MatMul(rotationY, x_string);
+                    var y_string_rot = MatMul(rotationY, y_string);
 
                     var rotatedX = new PVector[lineX.Length];
                     var rotatedY = new PVector[lineY.Length];
                     for (int i = 0; i < lineX.Length; i++)
                     {
-                        rotatedX[i] = Mat_Mul(rotationY, lineX[i]);
-                        rotatedY[i] = Mat_Mul(rotationY, lineY[i]);
+                        rotatedX[i] = MatMul(rotationY, lineX[i]);
+                        rotatedY[i] = MatMul(rotationY, lineY[i]);
                     }
 
                     double[][] projection =
@@ -339,33 +335,41 @@ namespace DVT_LR2
                         new double[] { 0, 1, 0 }
                     };
 
-                    PVector projected2d = Mat_Mul(projection, rotated);
+                    PVector projected2d = MatMul(projection, rotated);
                     projected2d.mult(distance);
-                    projected2d.x += delta.X;
-                    projected2d.y += delta.Y;
+                    projected2d.add(delta);
                     int alpha = (int)((rotated.z + 0.86) * 255 / 0.85 / 2);
                     alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
                     g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, point_size, point_size);
 
+                    var x_string_proj = MatMul(projection, x_string_rot);
+                    x_string_proj.mult(distance);
+                    x_string_proj.add(delta);
+
+                    var y_string_proj = MatMul(projection, y_string_rot);
+                    y_string_proj.mult(distance);
+                    y_string_proj.add(delta);
+
+                    g.DrawString("X", new Font("Gilroy Black", 14), Brushes.Red, (float)x_string_proj.x, (float)x_string_proj.y);
+                    g.DrawString("Y", new Font("Gilroy Black", 14), Brushes.Yellow, (float)y_string_proj.x, (float)y_string_proj.y);
+
                     var projectedX = new PVector[lineX.Length];
                     var projectedY = new PVector[lineY.Length];
                     for (int i = 0; i < lineX.Length; i++)
                     {
-                        projectedX[i] = Mat_Mul(projection, rotatedX[i]);
-                        projectedX[i].mult(700);
-                        projectedX[i].x += this.frame.Width / 2;
-                        projectedX[i].y += this.frame.Height / 2;
+                        projectedX[i] = MatMul(projection, rotatedX[i]);
+                        projectedX[i].mult(distance);
+                        projectedX[i].add(delta);
 
-                        projectedY[i] = Mat_Mul(projection, rotatedY[i]);
-                        projectedY[i].mult(700);
-                        projectedY[i].x += this.frame.Width / 2;
-                        projectedY[i].y += this.frame.Height / 2;
+                        projectedY[i] = MatMul(projection, rotatedY[i]);
+                        projectedY[i].mult(distance);
+                        projectedY[i].add(delta);
 
                         if (i != 0)
                         {
-                            g.DrawLine(new Pen(Color.Red, 4), (float)projectedX[i / 2].x, (float)projectedX[i / 2].y, (float)projectedX[i % 4].x, (float)projectedX[i % 4].y);
-                            g.DrawLine(new Pen(Color.Yellow, 4), (float)projectedY[i / 2].x, (float)projectedY[i / 2].y, (float)projectedY[i % 4].x, (float)projectedY[i % 4].y);
+                            g.DrawLine(new Pen(Color.Red, 3), (float)projectedX[i / 2].x, (float)projectedX[i / 2].y, (float)projectedX[i % 4].x, (float)projectedX[i % 4].y);
+                            g.DrawLine(new Pen(Color.Yellow, 3), (float)projectedY[i / 2].x, (float)projectedY[i / 2].y, (float)projectedY[i % 4].x, (float)projectedY[i % 4].y);
                         }
                     }
                 }
@@ -383,32 +387,7 @@ namespace DVT_LR2
             distance += e.Delta / 10;
             distance = distance < 0 ? 0 : distance;
 
-            Console.WriteLine(distance);
-
             Draw_Points();
-        }
-
-
-        private void Add_Or_Delete_Row(object sender, KeyEventArgs e)
-        {
-            //if (e.KeyCode == Keys.Enter && !this.points_view.CurrentCell.IsInEditMode)
-            //{
-            //    this.points_view.Rows.Add(new object[] { });
-            //    coords.Add(new PVector(0, 0, -1));
-            //}
-
-            //if (e.KeyCode == Keys.Delete &&
-            //    this.points_view.Rows.Count != 0)
-            //{
-            //    int index = this.points_view.SelectedCells[0].RowIndex;
-
-            //    Console.WriteLine(index);
-
-            //    this.points_view.Rows.RemoveAt(index);
-            //    coords.RemoveAt(index);
-            //}
-
-            //Draw_Points();
         }
 
 
@@ -426,9 +405,11 @@ namespace DVT_LR2
 
         private PVector Mat_To_vec(double[][] m)
         {
-            PVector v = new PVector();
-            v.x = m[0][0];
-            v.y = m[1][0];
+            PVector v = new PVector
+            {
+                x = m[0][0],
+                y = m[1][0]
+            };
 
             if (m.Length > 2)
                 v.z = m[2][0];
@@ -437,7 +418,7 @@ namespace DVT_LR2
         }
 
 
-        private PVector Mat_Mul(double[][] a, PVector b)
+        private PVector MatMul(double[][] a, PVector b)
         {
             double[][] m = Vec_To_Mat(b);
             return Mat_To_vec(MatMul(a, m));
@@ -503,7 +484,6 @@ namespace DVT_LR2
             this.x = x; this.y = y; this.z = z;
         }
 
-
         public PVector()
         {
             this.x = 0; this.y = 0; this.z = 0;
@@ -511,19 +491,22 @@ namespace DVT_LR2
 
         public PVector(double x, double y)
         {
-            this.x = x; this.y = y; this.z = 1;
+            this.x = x; this.y = y; this.z = 0;
         }
-
 
         public void mult(int d)
         {
             this.x *= d; this.y *= d; this.z *= d;
         }
 
-
         public void mult(double d)
         {
             this.x *= d; this.y *= d; this.z *= d;
+        }
+
+        public void add(PointF p)
+        {
+            this.x += p.X; this.y += p.Y;
         }
     }
 }
