@@ -1,38 +1,61 @@
-﻿using System;
+﻿using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+using System.Windows.Forms;
+using System.Globalization;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
+using System.Data;
 using System.IO;
+using System;
 
 namespace DVT_LR2
 {
     public partial class DVT_LR2_Form : Form
     {
-        private List<PVector> coords, movable_coords;
+        private double[][] rotationY, default_multipliers;
+        private double distance, angleX, angle_delta;
+        private readonly PVector[] lineX, lineY;
+        private PointF initial_point, delta;
+        private readonly int point_size;
+        private List<PVector> coords;
         private readonly Random r;
-        float distance;
-        PointF initial_point;
-        PointF delta;
-
         private Bitmap bmp;
-        int size;
 
 
         public DVT_LR2_Form()
         {
             InitializeComponent();
 
-            movable_coords = new List<PVector>();
             coords = new List<PVector>();
-            delta = new Point(300, 300);
+            lineX = new PVector[4];
+            lineY = new PVector[4];
+            angle_delta = 0.01;
             r = new Random();
-            distance = 4;
-            size = 7;
+            point_size = 7;
+            distance = 150;
+            delta.X = 300;
+            delta.Y = 300;
+            angleX = 0;
+
+
+            default_multipliers = new double[][] {
+                                  new double[] { 1, 0, -1 },
+                                  new double[] { 0, 1, 0 },
+                                  new double[] { 1, 0, 1 }
+            };
+
+            foreach (var row in default_multipliers)
+            {
+                DataGridViewRow r = new DataGridViewRow();
+                r.CreateCells(this.rotationY_grid);
+
+                for (int i = 0; i < 3; i++)
+                    r.Cells[i].Value = row[i];
+
+                r.Height = 40;
+                this.rotationY_grid.Rows.Add(r);
+            }
         }
 
 
@@ -54,28 +77,24 @@ namespace DVT_LR2
             this.btn_load.MouseUp += Button_Fashion_Up;
             this.btn_load.Click += Load_Points;
 
-            this.points_view.CellEndEdit += Edit_Row;
-            this.points_view.KeyUp += Add_Or_Delete_Row;
-
             this.frame.MouseWheel += PicImage_MouseWheel;
             this.frame.MouseDown += PicImage_MouseDown;
             this.frame.MouseMove += PicImage_MouseMove;
+
+            this.rotationY_grid.CellEndEdit += Edit_Cell;
         }
 
 
         private void DVT_LR2_Form_Click(object sender, EventArgs e)
         {
             this.ActiveControl = null;
-            this.points_view.ClearSelection();
+            this.rotationY_grid.ClearSelection();
         }
 
 
         private void Random_Generate(object sender, EventArgs e)
         {
             coords.Clear();
-            movable_coords.Clear();
-            this.points_view.Rows.Clear();
-            delta = new Point(300, 300);
 
             for (int _ = 0; _ < num_rnd_count.Value; _++)
             {
@@ -100,22 +119,15 @@ namespace DVT_LR2
                 }
 
                 coords.Add(v);
-
-                this.points_view.Rows.Add(new object[] { $"{v.x}, {v.y}, {v.z}" });
-
-                To_Pixels(v);
             }
 
-            Show_Points();
+            Draw_Points();
         }
 
 
         private void Function_Generate(object sender, EventArgs e)
         {
             coords.Clear();
-            movable_coords.Clear();
-            this.points_view.Rows.Clear();
-            delta = new Point(300, 300);
 
             var N = num_func_count.Value;
             var sigma = 1.1 - (double)this.num_func_deviation.Value;
@@ -153,13 +165,9 @@ namespace DVT_LR2
                 v.z = v.z > 1 ? 1 : v.z < -1 ? -1 : v.z;
 
                 coords.Add(v);
-
-                this.points_view.Rows.Add(new[] { $"{v.x}, {v.y}, {v.z}" });
-
-                To_Pixels(v);
             }
 
-            Show_Points();
+            Draw_Points();
         }
 
 
@@ -186,9 +194,6 @@ namespace DVT_LR2
             var backup = coords;
 
             coords.Clear();
-            movable_coords.Clear();
-            this.points_view.Rows.Clear();
-            delta = new Point(300, 300);
 
             try
             {
@@ -201,17 +206,13 @@ namespace DVT_LR2
                     foreach (var line in read_lines)
                     {
                         var arr = line.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Select(Double.Parse).ToArray();
-                        var v = new PVector(arr[0], arr[1], arr[2]); v.Round();
+                        var v = new PVector(arr[0], arr[1], arr[2]);
 
                         coords.Add(v);
-
-                        this.points_view.Rows.Add(new[] { $"{v.x}, {v.y}, {v.z}" });
-
-                        To_Pixels(v);
                     }
                 }
 
-                Show_Points();
+                Draw_Points();
             }
             catch (IOException ex)
             {
@@ -221,72 +222,47 @@ namespace DVT_LR2
         }
 
 
-        private void Edit_Row(object sender, DataGridViewCellEventArgs e)
+        private void Edit_Cell(object sender, DataGridViewCellEventArgs e)
         {
-            if (this.points_view.CurrentCell.Value == null)
+            if (this.rotationY_grid.CurrentCell.Value == null)
                 return;
 
-            var backup = coords;
+            NumberFormatInfo nfi = CultureInfo.CurrentCulture.NumberFormat;
+            string separator = nfi.CurrencyDecimalSeparator;
 
-            if (this.points_view.CurrentCell.Value.ToString().Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Any(xyz => xyz.ToString().Contains(',')))
+            string input = this.rotationY_grid.CurrentCell.Value.ToString();
+
+            string pattern = @"^-?\d+(\" + separator + @"\d{1,2})?$";
+
+            Match m = Regex.Match(input, pattern);
+
+
+
+            if (m.Success)
+                Console.WriteLine("Hello, world!");
+
+            if (this.rotationY_grid.CurrentCell.Value.ToString().Any(x => x.ToString().Contains(',')))
             {
-                MessageBox.Show("An input should not contain commas!");
-                coords = backup;
+                MessageBox.Show("An input should not contain commas in English VS version!");
 
-                this.points_view.Rows.Clear();
-                coords.ForEach(c => {
-                    c.Round();
-                    this.points_view.Rows.Add(new[] { $"{c.x}, {c.y}, {c.z}" });
-                });
-
-                return;
+                this.rotationY_grid.CurrentCell.Value = 0;
             }
 
-            var arr = this.points_view.CurrentCell.Value.ToString().Split(new[] { ", " }, StringSplitOptions.None).Select(Double.Parse).ToArray();
-            var v = new PVector(arr[0], arr[1], arr[2]);
+            double[][] a = new double[3][];
 
-            int index = this.points_view.CurrentCell.RowIndex;
-
-            coords.RemoveAt(index);
-            coords.Insert(index, v);
-
-            movable_coords.RemoveAt(index);
-
-            double z = 1 / (distance - v.z);
-
-            double[][] projection =
+            for (int i = 0; i < a.Length; i++)
             {
-                        new[] { z, 0, 0 },
-                        new[] { 0, z, 0 },
-                    };
+                a[i] = new double[3];
 
-            PVector pd = MatMul(projection, v);
-
-            pd.x = pd.x * 700 + this.frame.Width / 2;
-            pd.y = pd.y * 700 + this.frame.Height / 2;
-            pd.z = ((v.z + 1) * 255 / 2);
-            pd.z = pd.z > 255 ? 255 : pd.z < 50 ? 50 : pd.z;
-
-            pd.x += delta.X - 300;
-            pd.y += delta.Y - 300;
-
-            movable_coords.Insert(index, pd);
-
-            Show_Points();
-        }
-
-
-        private void Show_Points()
-        {
-            bmp = new Bitmap(this.frame.Width, this.frame.Height);
-
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                foreach (var v in movable_coords)
-                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)v.z, 255, 0, 255)), (float)v.x, (float)v.y, size, size);
+                for (int j = 0; j < a[i].Length; j++)
+                    a[i][j] = Convert.ToDouble(this.rotationY_grid.Rows[i].Cells[j].Value);
             }
 
-            this.frame.Image = bmp;
+            rotationY = new double[][] {
+                        new double[] { Math.Cos(angleX) * a[0][0], 0* a[0][1], Math.Sin(angleX)*a[0][2] },
+                        new double[] { 0*a[1][0], 1* a[1][1], 0*a[1][2] },
+                        new double[] { Math.Sin(angleX)* a[2][0], 0* a[2][1], Math.Cos(angleX)* a[2][2] }
+            };
         }
 
 
@@ -305,35 +281,97 @@ namespace DVT_LR2
             if (e.Button == MouseButtons.Left)
             {
                 PointF final_point = e.Location;
-                bmp = new Bitmap(this.frame.Width, this.frame.Height);
 
-                if (Control.ModifierKeys != Keys.Shift)
-                {
-                    using (Graphics g = Graphics.FromImage(bmp))
-                    {
-                        foreach (var v in movable_coords)
-                        {
-                            v.x += (final_point.X - initial_point.X);
-                            v.y += (final_point.Y - initial_point.Y);
-
-                            Console.WriteLine($"{delta.X}, {delta.Y}");
-
-                            g.FillEllipse(new SolidBrush(Color.FromArgb((int)v.z, 255, 0, 255)), (float)v.x, (float)v.y, size, size);
-                        }
-                    }
-
-                    delta.X += (final_point.X - initial_point.X);
-                    delta.Y += (final_point.Y - initial_point.Y);
-                }
+                if (ModifierKeys == Keys.Shift)
+                    angleX -= (final_point.X - initial_point.X) * angle_delta;
                 else
                 {
-
+                    delta.X += final_point.X - initial_point.X;
+                    delta.Y += final_point.Y - initial_point.Y;
                 }
 
-                initial_point = final_point;
+                Draw_Points();
 
-                this.frame.Image = bmp;
+                initial_point = final_point;
             }
+        }
+
+
+        private void Draw_Points()
+        {
+            bmp = new Bitmap(this.frame.Width, this.frame.Height);
+
+            var min_x = coords.Min(v => v.x);
+            var min_y = coords.Min(v => v.y);
+            var max_x = coords.Min(v => v.x);
+            var max_y = coords.Min(v => v.y);
+            var x_center = min_x + (max_x - min_x) / 2;
+            var y_center = min_y + (max_y - min_y) / 2;
+            var arrow = 0.02;
+
+            lineX[0] = new PVector(min_x, max_y);
+            lineX[1] = new PVector(x_center, max_y);
+            lineX[2] = new PVector(x_center - arrow, max_y - arrow / 2);
+            lineX[3] = new PVector(x_center - arrow, max_y + arrow / 2);
+
+            lineY[0] = new PVector(min_x, max_y);
+            lineY[1] = new PVector(min_x, y_center);
+            lineY[2] = new PVector(min_x + arrow / 2, y_center + arrow);
+            lineY[3] = new PVector(min_x - arrow / 2, y_center + arrow);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                foreach (var v in coords)
+                {
+                    PVector rotated = Mat_Mul(rotationY, v);
+
+                    var rotatedX = new PVector[lineX.Length];
+                    var rotatedY = new PVector[lineY.Length];
+                    for (int i = 0; i < lineX.Length; i++)
+                    {
+                        rotatedX[i] = Mat_Mul(rotationY, lineX[i]);
+                        rotatedY[i] = Mat_Mul(rotationY, lineY[i]);
+                    }
+
+                    double[][] projection =
+                    {
+                        new double[] { 1, 0, 0 },
+                        new double[] { 0, 1, 0 }
+                    };
+
+                    PVector projected2d = Mat_Mul(projection, rotated);
+                    projected2d.mult(distance);
+                    projected2d.x += delta.X;
+                    projected2d.y += delta.Y;
+                    int alpha = (int)((rotated.z + 0.86) * 255 / 0.85 / 2);
+                    alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, point_size, point_size);
+
+                    var projectedX = new PVector[lineX.Length];
+                    var projectedY = new PVector[lineY.Length];
+                    for (int i = 0; i < lineX.Length; i++)
+                    {
+                        projectedX[i] = Mat_Mul(projection, rotatedX[i]);
+                        projectedX[i].mult(700);
+                        projectedX[i].x += this.frame.Width / 2;
+                        projectedX[i].y += this.frame.Height / 2;
+
+                        projectedY[i] = Mat_Mul(projection, rotatedY[i]);
+                        projectedY[i].mult(700);
+                        projectedY[i].x += this.frame.Width / 2;
+                        projectedY[i].y += this.frame.Height / 2;
+
+                        if (i != 0)
+                        {
+                            g.DrawLine(new Pen(Color.Red, 4), (float)projectedX[i / 2].x, (float)projectedX[i / 2].y, (float)projectedX[i % 4].x, (float)projectedX[i % 4].y);
+                            g.DrawLine(new Pen(Color.Yellow, 4), (float)projectedY[i / 2].x, (float)projectedY[i / 2].y, (float)projectedY[i % 4].x, (float)projectedY[i % 4].y);
+                        }
+                    }
+                }
+            }
+
+            this.frame.Image = bmp;
         }
 
 
@@ -342,77 +380,35 @@ namespace DVT_LR2
             if (this.frame.Image == null)
                 return;
 
-            bmp = new Bitmap(this.frame.Width, this.frame.Height);
+            distance += e.Delta / 10;
+            distance = distance < 0 ? 0 : distance;
 
-            // TODO: increment and decrement of the distance parameter
+            Console.WriteLine(distance);
+
+            Draw_Points();
         }
 
 
         private void Add_Or_Delete_Row(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && !this.points_view.CurrentCell.IsInEditMode)
-            {
-                this.points_view.Rows.Add(new object[] { });
-                coords.Add(new PVector(0, 0, -1));
-                movable_coords.Add(new PVector(0, 0, 0));
-            }
-            
-            if (e.KeyCode == Keys.Delete &&
-                this.points_view.Rows.Count != 0)
-            {
-                int index = this.points_view.SelectedCells[0].RowIndex;
+            //if (e.KeyCode == Keys.Enter && !this.points_view.CurrentCell.IsInEditMode)
+            //{
+            //    this.points_view.Rows.Add(new object[] { });
+            //    coords.Add(new PVector(0, 0, -1));
+            //}
 
-                Console.WriteLine(index);
+            //if (e.KeyCode == Keys.Delete &&
+            //    this.points_view.Rows.Count != 0)
+            //{
+            //    int index = this.points_view.SelectedCells[0].RowIndex;
 
-                this.points_view.Rows.RemoveAt(index);
-                movable_coords.RemoveAt(index);
-                coords.RemoveAt(index);
-            }
+            //    Console.WriteLine(index);
 
-            Show_Points();
-        }
+            //    this.points_view.Rows.RemoveAt(index);
+            //    coords.RemoveAt(index);
+            //}
 
-
-
-        private void Draw_Axises(Graphics g)
-        {
-            //var min_x = frame_coords.Min(r => r[0]);
-            //var min_y = frame_coords.Min(r => r[1]);
-            //var max_x = frame_coords.Max(r => r[0]);
-            //var max_y = frame_coords.Max(r => r[1]);
-            //var y_center = min_y + (max_y - min_y) / 2;
-            //var x_center = min_x + (max_x - min_x) / 2;
-
-            //g.DrawLine(new Pen(Color.Yellow, 3), min_x, max_y, min_x, y_center);
-            //g.DrawLine(new Pen(Color.Yellow, 3), min_x, y_center, min_x - 5, y_center + 10);
-            //g.DrawLine(new Pen(Color.Yellow, 3), min_x, y_center, min_x + 5, y_center + 10);
-            //g.DrawString("Y", new Font("Gilroy Black", 16), Brushes.Yellow, min_x - 30, y_center);
-
-            //g.DrawLine(new Pen(Color.Red, 3), min_x, max_y, x_center, max_y);
-            //g.DrawLine(new Pen(Color.Red, 3), x_center, max_y, x_center - 10, max_y + 5);
-            //g.DrawLine(new Pen(Color.Red, 3), x_center, max_y, x_center - 10, max_y - 5);
-            //g.DrawString("X", new Font("Gilroy Black", 16), Brushes.Red, x_center - 5, max_y + 5);
-        }
-
-
-        private void To_Pixels(PVector v)
-        {
-            double z = 1 / (distance - v.z);
-
-            double[][] projection =
-            {
-                        new[] { z, 0, 0 },
-                        new[] { 0, z, 0 },
-                    };
-
-            PVector pd = MatMul(projection, v);
-
-            pd.x = pd.x * 700 + this.frame.Width / 2;
-            pd.y = pd.y * 700 + this.frame.Height / 2;
-            z = ((v.z + 1) * 255 / 2);
-            z = z > 255 ? 255 : z < 50 ? 50 : z;
-
-            movable_coords.Add(new PVector(pd.x, pd.y, z));
+            //Draw_Points();
         }
 
 
@@ -441,12 +437,12 @@ namespace DVT_LR2
         }
 
 
-        private PVector MatMul(double[][] a, PVector b)
+        private PVector Mat_Mul(double[][] a, PVector b)
         {
             double[][] m = Vec_To_Mat(b);
             return Mat_To_vec(MatMul(a, m));
         }
-        
+
 
         private double[][] MatMul(double[][] a, double[][] b)
         {
@@ -508,8 +504,14 @@ namespace DVT_LR2
         }
 
 
-        public PVector() {
+        public PVector()
+        {
             this.x = 0; this.y = 0; this.z = 0;
+        }
+
+        public PVector(double x, double y)
+        {
+            this.x = x; this.y = y; this.z = 1;
         }
 
 
@@ -518,11 +520,10 @@ namespace DVT_LR2
             this.x *= d; this.y *= d; this.z *= d;
         }
 
-        public void Round()
+
+        public void mult(double d)
         {
-            this.x = Math.Round(this.x, 2);
-            this.y = Math.Round(this.y, 2);
-            this.z = Math.Round(this.z, 2);
+            this.x *= d; this.y *= d; this.z *= d;
         }
     }
 }
