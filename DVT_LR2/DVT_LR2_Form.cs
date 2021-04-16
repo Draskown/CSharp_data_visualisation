@@ -336,20 +336,20 @@ namespace DVT_LR2
                     };
 
                     PVector projected2d = MatMul(projection, rotated);
-                    projected2d.mult(distance);
-                    projected2d.add(delta);
+                    projected2d.Mult(distance);
+                    projected2d.Move(delta);
                     int alpha = (int)((rotated.z + 0.86) * 255 / 0.85 / 2);
                     alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
                     g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, point_size, point_size);
 
                     var x_string_proj = MatMul(projection, x_string_rot);
-                    x_string_proj.mult(distance);
-                    x_string_proj.add(delta);
+                    x_string_proj.Mult(distance);
+                    x_string_proj.Move(delta);
 
                     var y_string_proj = MatMul(projection, y_string_rot);
-                    y_string_proj.mult(distance);
-                    y_string_proj.add(delta);
+                    y_string_proj.Mult(distance);
+                    y_string_proj.Move(delta);
 
                     g.DrawString("X", new Font("Gilroy Black", 14), Brushes.Red, (float)x_string_proj.x, (float)x_string_proj.y);
                     g.DrawString("Y", new Font("Gilroy Black", 14), Brushes.Yellow, (float)y_string_proj.x, (float)y_string_proj.y);
@@ -359,12 +359,12 @@ namespace DVT_LR2
                     for (int i = 0; i < lineX.Length; i++)
                     {
                         projectedX[i] = MatMul(projection, rotatedX[i]);
-                        projectedX[i].mult(distance);
-                        projectedX[i].add(delta);
+                        projectedX[i].Mult(distance);
+                        projectedX[i].Move(delta);
 
                         projectedY[i] = MatMul(projection, rotatedY[i]);
-                        projectedY[i].mult(distance);
-                        projectedY[i].add(delta);
+                        projectedY[i].Mult(distance);
+                        projectedY[i].Move(delta);
 
                         if (i != 0)
                         {
@@ -494,17 +494,12 @@ namespace DVT_LR2
             this.x = x; this.y = y; this.z = 0;
         }
 
-        public void mult(int d)
+        public void Mult(double d)
         {
             this.x *= d; this.y *= d; this.z *= d;
         }
 
-        public void mult(double d)
-        {
-            this.x *= d; this.y *= d; this.z *= d;
-        }
-
-        public void add(PointF p)
+        public void Move(PointF p)
         {
             this.x += p.X; this.y += p.Y;
         }
