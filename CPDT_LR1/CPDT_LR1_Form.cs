@@ -18,14 +18,15 @@ namespace LRs
         private readonly int trail_length = 60;
         private readonly int centroid_thresh = 100;
 
-        private readonly List<List<int>> data = new List<List<int>>();
-        private readonly List<FoundObject> found_objects = new List<FoundObject>();
         private readonly List<FoundObject> frame_objects = new List<FoundObject>();
-        private readonly List<Point> frame_points = new List<Point>();
+        private readonly List<FoundObject> found_objects = new List<FoundObject>();
         private readonly List<Point> frame_centroids = new List<Point>();
+        private readonly List<Point> frame_points = new List<Point>();
+        private readonly List<List<int>> data = new List<List<int>>();
 
-        int current_value = 0, current_line = 0;
-        Bitmap frame;
+        private int current_value = 0, current_line = 0;
+        private List<string> time = new List<string>();
+        private Bitmap frame;
 
         public Application()
         {
@@ -40,7 +41,7 @@ namespace LRs
             this.framerate.Interval = 100;
             this.framerate.Start();
         }
-        
+
 
         private void Application_Click(object sender, EventArgs e)
         {
@@ -103,6 +104,7 @@ namespace LRs
                             e_index = line.Count() - 2 - l_index;
 
                         data.Add(line.Substring(l_index, e_index).Split(' ').Select(Int32.Parse).ToList());
+                        time.Add(line.Substring(0, l_index - 2));
                     }
                 }
             }
@@ -224,12 +226,6 @@ namespace LRs
                     obj.centroid_frames.RemoveAt(0);
                 obj.centroid_frames.Add(centroid);
 
-                this.objects_grid.Rows.Add(new object[] { 
-                    frame_objects.IndexOf(obj),
-                    obj.centroid_frames.Last(),
-                    obj.centroid_frames.Count
-                });
-
                 using (Graphics g = Graphics.FromImage(frame))
                 {
                     if (min_x == max_x)
@@ -251,9 +247,16 @@ namespace LRs
                             g.DrawRectangle(Pens.Fuchsia, min_x, min_y, max_x - min_x, max_y - min_y);
                             Find_Closest_Centroid(obj, centroid);
 
+                            this.objects_grid.Rows.Add(new object[] {
+                                time[current_line],
+                                frame_objects.IndexOf(obj),
+                                obj.centroid_frames.Last()
+                            });
+
                             g.FillEllipse(Brushes.Red, centroid.X, centroid.Y, 5, 5);
 
-                            found_objects.ForEach(o => {
+                            found_objects.ForEach(o =>
+                            {
                                 if (o.centroid_frames.Count > 1)
                                     g.DrawLines(new Pen(Color.Green, 2), o.centroid_frames.ToArray());
                             });
@@ -305,9 +308,10 @@ namespace LRs
         {
             var bmp = new Bitmap(frame);
 
-            if (pause_flag)
+            if (pause_flag && objects_grid.SelectedCells.Count != 0)
             {
-                var obj = frame_objects.ElementAt(objects_grid.SelectedCells[0].RowIndex);
+                var index = objects_grid.SelectedCells[0].RowIndex;
+                var obj = frame_objects.ElementAt((int)objects_grid.Rows[index].Cells[1].Value);
 
                 int min_x = obj.points.Min(p => p.X),
                     min_y = obj.points.Min(p => p.Y),
@@ -326,6 +330,15 @@ namespace LRs
 
                 this.frame_box.Image = bmp;
             }
+        }
+
+
+        private void objects_grid_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Space)
+                this.btn_pp.PerformClick();
+            if (e.KeyCode == Keys.W && ModifierKeys == Keys.Control)
+                this.Close();
         }
 
 
