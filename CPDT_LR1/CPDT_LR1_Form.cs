@@ -256,7 +256,6 @@ namespace LRs
                             found_objects.ForEach(o => {
                                 if (o.centroid_frames.Count > 1)
                                     g.DrawLines(new Pen(Color.Green, 2), o.centroid_frames.ToArray());
-                                Console.WriteLine(o.centroid_frames.Count);
                             });
                         }
                     }
