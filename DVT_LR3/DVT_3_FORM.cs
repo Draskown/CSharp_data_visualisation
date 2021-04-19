@@ -1,21 +1,29 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
-using System.Data;
-using System.Linq;
-using System.IO;
-using SharpGL;
+﻿using SharpGL;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace DVT_LR3
 {
     public partial class Application : Form
     {
+        #region Initialization and timer conditions
+
+        private readonly OpenGL scatterGL, histGL;
+        private bool pauseFlag, loadedFlag;
+        private readonly float angleDelta;
+        private readonly float cellDelta;
+        private PointF initPoint, angle;
+        private readonly int pointSize;
         private List<PointF3> points;
-        OpenGL scatterGL, histGL;
-        bool pauseFlag;
-        int pointSize;
-        Random r;
+        private int[] xFreq, yFreq;
+        private readonly Random r;
+        private int actualAmount;
+        private float distance;
 
         public Application()
         {
@@ -25,13 +33,20 @@ namespace DVT_LR3
             this.histPlot.FrameRate = 60;
             this.timer1.Interval = 1500;
 
+            points = new List<PointF3>();
+            initPoint = new PointF();
+            r = new Random();
+
             scatterGL = this.scatterPlot.OpenGL;
             histGL = this.histPlot.OpenGL;
-            points = new List<PointF3>();
-            pauseFlag = false;
-            r = new Random();
-            pointSize = 3;
+
+            distance = (float)(this.scatterPlot.Width / 100);
+            pauseFlag = loadedFlag = false;
+            angleDelta = 0.1f;
+            cellDelta = 0.2f;
+            pointSize = 5;
         }
+
 
         private void Application_Load(object sender, EventArgs e)
         {
@@ -41,75 +56,33 @@ namespace DVT_LR3
             {
                 var nuds = (NumericUpDown)ss;
                 this.thinning.Maximum = nuds.Value;
+                loadedFlag = false;
             };
 
             this.Click += (ss, ee) => this.ActiveControl = null;
 
+            this.scatterPlot.MouseDown += (ss, ee) => initPoint = ee.Location;
+            this.scatterPlot.MouseWheel += ChangeDistance;
+            this.scatterPlot.MouseMove += ChangePosition;
             this.scatterPlot.OpenGLDraw += DrawPoints;
-
-            this.timer1.Tick += TimerTick;
 
             this.btnStart.Click += Start;
 
             this.btnLoad.Click += LoadPoints;
 
             this.btnSave.Click += SavePlots;
-        }
 
-
-        private void SavePlots(object sender, EventArgs e)
-        {
-            var lockMode = System.Drawing.Imaging.ImageLockMode.WriteOnly;
-            var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-
-            var width = this.scatterPlot.Width;
-            var height = this.scatterPlot.Height;
-
-            var bitmap = new Bitmap(width, height, format);
-            var bitmapRectangle = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(bitmapRectangle, lockMode, format); 
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    scatterGL.ReadPixels(i, j, width, height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, bmpData.Scan0);  
-                }
-            }
-            bitmap.UnlockBits(bmpData);
-            bitmap.RotateFlip(RotateFlipType.Rotate180FlipX);
-            bitmap.Save("scatterImage.bmp");
-
-            this.Close();
-
-            //var width = this.scatterPlot.Width;
-            //var height = this.scatterPlot.Height;
-
-            //Bitmap bmp = new Bitmap(width, height);
-
-            //byte[] scatterImage = new byte[3*width*height];
-
-            //scatterGL.ReadPixels(0, 0, width, height, OpenGL.GL_RGB, OpenGL.GL_UNSIGNED_BYTE, scatterImage);
-
-            //Console.WriteLine(string.Join(", ", scatterImage));
-
-            //for (int i = 0; i < width; ++i)
-            //{
-            //    for (int j = 0; j < height; ++j)
-            //    {
-            //        bmp.SetPixel(i, j, Color.FromArgb(scatterImage[i*j % 3], scatterImage[(i*j + 1) % 3], scatterImage[(i*j + 2) % 3]));
-            //    }
-            //}
-
-            //bmp.Save("scatterPlot.bmp");
+            this.timer1.Tick += TimerTick;
         }
 
 
         private void Start(object sender, EventArgs e)
         {
-            if (!pauseFlag && points.Count == 0)
+            if (!pauseFlag && (points.Count == 0 || loadedFlag))
             {
                 this.timer1.Start();
                 this.btnStart.Text = "Pause";
+                loadedFlag = false;
                 return;
             }
 
@@ -127,12 +100,21 @@ namespace DVT_LR3
             pauseFlag = !pauseFlag;
         }
 
+        #endregion
+
+
 
         #region Points generation
 
         private void TimerTick(object sender, EventArgs e)
         {
+            xFreq = new int[10];
+            yFreq = new int[10];
+
             var amount = this.pointsAmount.Value;
+
+            if (amount == 0)
+                return;
 
             if (points.Count == 0 || amount > points.Count)
             {
@@ -175,35 +157,125 @@ namespace DVT_LR3
 
             points.Add(v);
         }
+
         #endregion
 
 
+
         #region Drawing
+
         private void DrawPoints(object sender, SharpGL.RenderEventArgs args)
         {
+            float mainIndent = 0.5f;
+            float scale = 0.07f;
+
+            scatterGL.Enable(OpenGL.GL_BLEND);
+            scatterGL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
             scatterGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             scatterGL.LoadIdentity();
 
-            scatterGL.Translate(0.0f, 0.0f, -4.0f);
+            scatterGL.Translate(-mainIndent, -mainIndent, -distance);
+            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
 
             scatterGL.PointSize(pointSize);
             scatterGL.Begin(OpenGL.GL_POINTS);
             scatterGL.Color(1.0f, 0.0f, 1.0f);
 
+            xFreq = new int[10];
+            yFreq = new int[10];
+
+            actualAmount = 0;
             for (int i = 0; i < points.Count; i++)
             {
                 if (i % this.thinning.Value == 0)
                 {
                     var p = points[i];
+                    CountPoint(p);
+                    this.actualAmount++;
                     scatterGL.Vertex(p.X, p.Y, p.Z);
                 }
             }
-
             scatterGL.End();
+
+            scatterGL.LoadIdentity();
+            scatterGL.Translate(-mainIndent, -mainIndent, -distance);
+            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
+
+            float xIndent = 1.2f;
+            float yIndent = 1.2f;
+            float zIndent = -1.0f;
+
+            scatterGL.Begin(OpenGL.GL_QUADS);
+
+            if (this.actualAmount != 0)
+            {
+                for (int i = -5; i < 5; i++)
+                {
+                    scatterGL.Color(1.0f, 0.0f, 0.0f, 0.7f);
+                    scatterGL.Vertex(i * 0.2f, yIndent, zIndent);
+                    scatterGL.Vertex(i * 0.2f, (float)xFreq[i + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(i * 0.2f + 0.2f, (float)xFreq[i + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(i * 0.2f + 0.2f, yIndent, zIndent);
+
+                    scatterGL.Color(1.0f, 1.0f, 0.0f, 0.7f);
+                    scatterGL.Vertex(xIndent, i*0.2f, zIndent);
+                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * 0.2f , zIndent);
+                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * 0.2f + 0.2f, zIndent);
+                    scatterGL.Vertex(xIndent, i * 0.2f + 0.2f, zIndent);
+                }
+            }
+            scatterGL.End();
+
             scatterGL.Flush();
-        } 
+        }
+
         #endregion
 
+
+        #region Histograms calculation
+
+        private void CountPoint(PointF3 p)
+        {
+            for (int i = -5; i < 10; i++)
+            {
+                if ((int)(p.X / cellDelta) == i)
+                    xFreq[i + 5]++;
+                if ((int)(p.Y / cellDelta) == i)
+                    yFreq[i + 5]++;
+            }
+        }
+
+        #endregion
+
+
+
+        #region Mouse moving
+
+        private void ChangePosition(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left ||
+                            points.Count == 0)
+                return;
+
+            PointF finalPoint = e.Location;
+
+            angle.X += (finalPoint.X - initPoint.X)*angleDelta;
+            angle.Y += (finalPoint.Y - initPoint.Y)*angleDelta;
+
+            initPoint = finalPoint;
+        }
+
+
+        private void ChangeDistance(object sender, MouseEventArgs e)
+        {
+            distance -= e.Delta / 120;
+        }
+
+        #endregion
+
+
+
+        #region Loading and saving
 
         private void LoadPoints(object sender, EventArgs e)
         {
@@ -227,6 +299,8 @@ namespace DVT_LR3
                         points.Add(v);
                     }
                 }
+
+                loadedFlag = true;
             }
             catch (IOException ex)
             {
@@ -236,7 +310,25 @@ namespace DVT_LR3
         }
 
 
-        
+        private void SavePlots(object sender, EventArgs e)
+        {
+            var lockMode = System.Drawing.Imaging.ImageLockMode.WriteOnly;
+            var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+
+            var width = this.scatterPlot.Width;
+            var height = this.scatterPlot.Height;
+
+            var bmp = new Bitmap(width, height, format);
+            var bmpRect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(bmpRect, lockMode, format);
+            scatterGL.ReadPixels(0, 0, width, height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, bmpData.Scan0);
+
+            bmp.UnlockBits(bmpData);
+            bmp.RotateFlip(RotateFlipType.Rotate180FlipX);
+            bmp.Save("scatterPlot.bmp");
+        }
+
+        #endregion
     }
 
 
@@ -245,6 +337,7 @@ namespace DVT_LR3
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
+
 
         public PointF3(float x, float y, float z)
         {

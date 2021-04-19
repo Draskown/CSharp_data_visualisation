@@ -13,11 +13,11 @@ namespace DVT_LR2
 {
     public partial class DVT_LR2_Form : Form
     {
-        private double[][] rotationY, default_multipliers, a;
-        private double distance, angleX, angle_delta;
+        private double[][] rotationY, defaultMultipliers, a;
+        private double distance, angleX, angleDelta;
         private readonly PVector[] lineX, lineY;
         private PointF initial_point, delta;
-        private readonly int point_size;
+        private readonly int pointSize;
         private List<PVector> coords;
         private readonly Random r;
         private Bitmap bmp;
@@ -30,22 +30,22 @@ namespace DVT_LR2
             coords = new List<PVector>();
             lineX = new PVector[4];
             lineY = new PVector[4];
-            angle_delta = 0.01;
+            angleDelta = 0.01;
             r = new Random();
-            point_size = 7;
+            pointSize = 7;
             distance = 150;
             delta.X = 300;
             delta.Y = 300;
             angleX = 0;
 
 
-            default_multipliers = a = new double[][] {
+            defaultMultipliers = a = new double[][] {
                                 new double[] { 1, 0, -1 },
                                 new double[] { 0, 1, 0 },
                                 new double[] { 1, 0, 1 }
             };
 
-            foreach (var row in default_multipliers)
+            foreach (var row in defaultMultipliers)
             {
                 DataGridViewRow r = new DataGridViewRow();
                 r.CreateCells(this.rotationY_grid);
@@ -276,7 +276,7 @@ namespace DVT_LR2
                 PointF final_point = e.Location;
 
                 if (ModifierKeys == Keys.Shift)
-                    angleX -= (final_point.X - initial_point.X) * angle_delta;
+                    angleX -= (final_point.X - initial_point.X) * angleDelta;
                 else
                 {
                     delta.X += final_point.X - initial_point.X;
@@ -341,7 +341,7 @@ namespace DVT_LR2
                     int alpha = (int)((rotated.z + 0.86) * 255 / 0.85 / 2);
                     alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, point_size, point_size);
+                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, pointSize, pointSize);
 
                     var x_string_proj = MatMul(projection, x_string_rot);
                     x_string_proj.mult(distance);
