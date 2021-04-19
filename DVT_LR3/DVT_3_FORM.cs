@@ -14,10 +14,10 @@ namespace DVT_LR3
         #region Initialization and timer conditions
 
         private readonly OpenGL scatterGL, histGL;
+        private PointF initPoint, angle, delta;
         private bool pauseFlag, loadedFlag;
         private readonly float angleDelta;
         private readonly float cellDelta;
-        private PointF initPoint, angle;
         private readonly int pointSize;
         private List<PointF3> points;
         private int[] xFreq, yFreq;
@@ -35,6 +35,7 @@ namespace DVT_LR3
 
             points = new List<PointF3>();
             initPoint = new PointF();
+            delta = new PointF(-0.5f, -0.5f);
             r = new Random();
 
             scatterGL = this.scatterPlot.OpenGL;
@@ -42,7 +43,7 @@ namespace DVT_LR3
 
             distance = (float)(this.scatterPlot.Width / 100);
             pauseFlag = loadedFlag = false;
-            angleDelta = 0.1f;
+            angleDelta = 0.2f;
             cellDelta = 0.2f;
             pointSize = 5;
         }
@@ -166,7 +167,6 @@ namespace DVT_LR3
 
         private void DrawPoints(object sender, SharpGL.RenderEventArgs args)
         {
-            float mainIndent = 0.5f;
             float scale = 0.07f;
 
             scatterGL.Enable(OpenGL.GL_BLEND);
@@ -174,7 +174,7 @@ namespace DVT_LR3
             scatterGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             scatterGL.LoadIdentity();
 
-            scatterGL.Translate(-mainIndent, -mainIndent, -distance);
+            scatterGL.Translate(delta.X, delta.Y, -distance);
             scatterGL.Rotate(angle.Y, angle.X, 0.0f);
 
             scatterGL.PointSize(pointSize);
@@ -198,7 +198,7 @@ namespace DVT_LR3
             scatterGL.End();
 
             scatterGL.LoadIdentity();
-            scatterGL.Translate(-mainIndent, -mainIndent, -distance);
+            scatterGL.Translate(delta.X, delta.Y, -distance);
             scatterGL.Rotate(angle.Y, angle.X, 0.0f);
 
             float xIndent = 1.2f;
@@ -212,19 +212,33 @@ namespace DVT_LR3
                 for (int i = -5; i < 5; i++)
                 {
                     scatterGL.Color(1.0f, 0.0f, 0.0f, 0.7f);
-                    scatterGL.Vertex(i * 0.2f, yIndent, zIndent);
-                    scatterGL.Vertex(i * 0.2f, (float)xFreq[i + 5] * scale + yIndent, zIndent);
-                    scatterGL.Vertex(i * 0.2f + 0.2f, (float)xFreq[i + 5] * scale + yIndent, zIndent);
-                    scatterGL.Vertex(i * 0.2f + 0.2f, yIndent, zIndent);
+                    scatterGL.Vertex(i * cellDelta, yIndent, zIndent);
+                    scatterGL.Vertex(i * cellDelta, (float)xFreq[i + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(i * cellDelta + cellDelta, (float)xFreq[i + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(i * cellDelta + cellDelta, yIndent, zIndent);
 
                     scatterGL.Color(1.0f, 1.0f, 0.0f, 0.7f);
-                    scatterGL.Vertex(xIndent, i*0.2f, zIndent);
-                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * 0.2f , zIndent);
-                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * 0.2f + 0.2f, zIndent);
-                    scatterGL.Vertex(xIndent, i * 0.2f + 0.2f, zIndent);
+                    scatterGL.Vertex(xIndent, i*cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * cellDelta , zIndent);
+                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * cellDelta + cellDelta, zIndent);
+                    scatterGL.Vertex(xIndent, i * cellDelta + cellDelta, zIndent);
                 }
             }
             scatterGL.End();
+
+            scatterGL.Begin(OpenGL.GL_QUADS);
+
+            scatterGL.Color(1.0f, 0.0f, 1.0f, 0.5f);
+            for (int i = -5; i < 5; i++)
+            {
+                for (int j = -5; j < 5; j++)
+                {
+                    for (int k = -5; k < 5; k++)
+                    {
+
+                    }
+                }
+            }
 
             scatterGL.Flush();
         }
@@ -259,8 +273,16 @@ namespace DVT_LR3
 
             PointF finalPoint = e.Location;
 
-            angle.X += (finalPoint.X - initPoint.X)*angleDelta;
-            angle.Y += (finalPoint.Y - initPoint.Y)*angleDelta;
+            if (ModifierKeys == Keys.Shift)
+            {
+                angle.X += (finalPoint.X - initPoint.X)*angleDelta;
+                angle.Y += (finalPoint.Y - initPoint.Y)*angleDelta;
+            }
+            else
+            {
+                delta.X += (finalPoint.X - initPoint.X) / 100;
+                delta.Y -= (finalPoint.Y - initPoint.Y) / 100;
+            }
 
             initPoint = finalPoint;
         }
