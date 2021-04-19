@@ -20,6 +20,7 @@ namespace DVT_LR3
         private readonly float cellDelta;
         private readonly int pointSize;
         private List<PointF3> points;
+        private int[,,] voxelFreq;
         private int[] xFreq, yFreq;
         private readonly Random r;
         private int actualAmount;
@@ -183,6 +184,7 @@ namespace DVT_LR3
 
             xFreq = new int[10];
             yFreq = new int[10];
+            voxelFreq = new int[10,10,10];
 
             actualAmount = 0;
             for (int i = 0; i < points.Count; i++)
@@ -226,19 +228,55 @@ namespace DVT_LR3
             }
             scatterGL.End();
 
+            scatterGL.LoadIdentity();
+            scatterGL.Translate(delta.X, delta.Y, -distance);
+            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
+
             scatterGL.Begin(OpenGL.GL_QUADS);
 
-            scatterGL.Color(1.0f, 0.0f, 1.0f, 0.5f);
-            for (int i = -5; i < 5; i++)
-            {
-                for (int j = -5; j < 5; j++)
-                {
-                    for (int k = -5; k < 5; k++)
-                    {
+            scatterGL.Color(0.0f, 0.0f, 1.0f, 0.5f);
 
-                    }
-                }
+            if (actualAmount != 0)
+            {
+                for (int x = -5; x < 5; x++)
+                    for (int y = -5; y < 5; y++)
+                        for (int z = -5; z < 5; z++)
+                        {
+                            float voxelSize = (float)voxelFreq[x + 5, y + 5, z + 5] / 100;
+                            voxelSize = voxelSize > 0.1f ? 0.1f : voxelSize;
+
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta + voxelSize * 2, z * cellDelta + voxelSize);
+
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+                            scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
+                            scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
+                        }
             }
+            scatterGL.End();
 
             scatterGL.Flush();
         }
@@ -250,12 +288,19 @@ namespace DVT_LR3
 
         private void CountPoint(PointF3 p)
         {
-            for (int i = -5; i < 10; i++)
+            for (int i = -5; i < 5; i++)
             {
                 if ((int)(p.X / cellDelta) == i)
                     xFreq[i + 5]++;
                 if ((int)(p.Y / cellDelta) == i)
                     yFreq[i + 5]++;
+
+                if ((int)(p.X / cellDelta) == i)
+                    for (int j = -5; j < 5; j++)
+                        if ((int)(p.Y / cellDelta) == j)
+                            for (int k = -5; k < 5; k++)
+                                if ((int)(p.Z / cellDelta) == k)
+                                    voxelFreq[i + 5, j + 5, k + 5]++;
             }
         }
 
