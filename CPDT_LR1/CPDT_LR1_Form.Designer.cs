@@ -35,14 +35,14 @@ namespace LRs
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.objects_grid = new System.Windows.Forms.DataGridView();
-            this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.position = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trail = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.frame_box = new System.Windows.Forms.PictureBox();
             this.btn_pp = new System.Windows.Forms.Button();
             this.framerate = new System.Windows.Forms.Timer(this.components);
             this.num_max_points = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.trail = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.position = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.objects_grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frame_box)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_max_points)).BeginInit();
@@ -63,9 +63,9 @@ namespace LRs
             this.objects_grid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.objects_grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.objects_grid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.trail,
             this.id,
-            this.position,
-            this.trail});
+            this.position});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -94,28 +94,7 @@ namespace LRs
             this.objects_grid.Size = new System.Drawing.Size(321, 434);
             this.objects_grid.TabIndex = 0;
             this.objects_grid.SelectionChanged += new System.EventHandler(this.Objects_Grid_SelectionChanged);
-            // 
-            // id
-            // 
-            this.id.HeaderText = "obj_id";
-            this.id.Name = "id";
-            this.id.ReadOnly = true;
-            this.id.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            // 
-            // position
-            // 
-            this.position.HeaderText = "obj_position";
-            this.position.Name = "position";
-            this.position.ReadOnly = true;
-            this.position.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.position.Width = 120;
-            // 
-            // trail
-            // 
-            this.trail.HeaderText = "trail";
-            this.trail.Name = "trail";
-            this.trail.ReadOnly = true;
-            this.trail.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.objects_grid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.objects_grid_KeyUp);
             // 
             // frame_box
             // 
@@ -183,6 +162,28 @@ namespace LRs
             this.label1.TabIndex = 4;
             this.label1.Text = "Maximum of points";
             // 
+            // trail
+            // 
+            this.trail.HeaderText = "time";
+            this.trail.Name = "trail";
+            this.trail.ReadOnly = true;
+            this.trail.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // id
+            // 
+            this.id.HeaderText = "obj_id";
+            this.id.Name = "id";
+            this.id.ReadOnly = true;
+            this.id.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // position
+            // 
+            this.position.HeaderText = "obj_position";
+            this.position.Name = "position";
+            this.position.ReadOnly = true;
+            this.position.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.position.Width = 120;
+            // 
             // Application
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -216,9 +217,9 @@ namespace LRs
         private System.Windows.Forms.Timer framerate;
         private System.Windows.Forms.NumericUpDown num_max_points;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn trail;
         private System.Windows.Forms.DataGridViewTextBoxColumn id;
         private System.Windows.Forms.DataGridViewTextBoxColumn position;
-        private System.Windows.Forms.DataGridViewTextBoxColumn trail;
     }
 }
 
