@@ -30,6 +30,7 @@ namespace DVT_LR3
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.scatterPlot = new SharpGL.OpenGLControl();
             this.label1 = new System.Windows.Forms.Label();
             this.histPlot = new SharpGL.OpenGLControl();
@@ -200,6 +201,7 @@ namespace DVT_LR3
             this.Controls.Add(this.scatterPlot);
             this.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ForeColor = System.Drawing.Color.White;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Application";
             this.Text = "Application";
             this.Load += new System.EventHandler(this.Application_Load);

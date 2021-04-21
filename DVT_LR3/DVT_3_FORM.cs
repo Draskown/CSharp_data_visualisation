@@ -168,8 +168,6 @@ namespace DVT_LR3
 
         private void DrawPoints(object sender, SharpGL.RenderEventArgs args)
         {
-            float scale = 0.07f;
-
             scatterGL.Enable(OpenGL.GL_BLEND);
             scatterGL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
             scatterGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
@@ -184,7 +182,7 @@ namespace DVT_LR3
 
             xFreq = new int[10];
             yFreq = new int[10];
-            voxelFreq = new int[10,10,10];
+            voxelFreq = new int[10, 10, 10];
 
             actualAmount = 0;
             for (int i = 0; i < points.Count; i++)
@@ -206,45 +204,67 @@ namespace DVT_LR3
             float xIndent = 1.2f;
             float yIndent = 1.2f;
             float zIndent = -1.0f;
-
-            scatterGL.Begin(OpenGL.GL_QUADS);
+            float scale = 0.07f;
 
             if (this.actualAmount != 0)
             {
-                for (int i = -5; i < 5; i++)
+                for (int x = -5; x < 5; x++)
                 {
                     scatterGL.Color(1.0f, 0.0f, 0.0f, 0.7f);
-                    scatterGL.Vertex(i * cellDelta, yIndent, zIndent);
-                    scatterGL.Vertex(i * cellDelta, (float)xFreq[i + 5] * scale + yIndent, zIndent);
-                    scatterGL.Vertex(i * cellDelta + cellDelta, (float)xFreq[i + 5] * scale + yIndent, zIndent);
-                    scatterGL.Vertex(i * cellDelta + cellDelta, yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta, yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta + cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta + cellDelta, yIndent, zIndent);
 
                     scatterGL.Color(1.0f, 1.0f, 0.0f, 0.7f);
-                    scatterGL.Vertex(xIndent, i*cellDelta, zIndent);
-                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * cellDelta , zIndent);
-                    scatterGL.Vertex((float)yFreq[i + 5] * scale + xIndent, i * cellDelta + cellDelta, zIndent);
-                    scatterGL.Vertex(xIndent, i * cellDelta + cellDelta, zIndent);
-                }
-            }
-            scatterGL.End();
+                    scatterGL.Vertex(xIndent, x * cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[x + 5] * scale + xIndent, x * cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[x + 5] * scale + xIndent, x * cellDelta + cellDelta, zIndent);
+                    scatterGL.Vertex(xIndent, x * cellDelta + cellDelta, zIndent);
 
-            scatterGL.LoadIdentity();
-            scatterGL.Translate(delta.X, delta.Y, -distance);
-            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
-
-            scatterGL.Begin(OpenGL.GL_QUADS);
-
-            scatterGL.Color(0.0f, 0.0f, 1.0f, 0.5f);
-
-            if (actualAmount != 0)
-            {
-                for (int x = -5; x < 5; x++)
                     for (int y = -5; y < 5; y++)
+                    {
+                        float height = (float)(xFreq[x + 5] + yFreq[y + 5]) / (float)(xFreq.Max() + yFreq.Max());
+                        float histYIndent = -2.0f;
+                        float histSize = 0.2f;
+
+                        scatterGL.Color(0.0f, 0.8f, 0.0f);
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta);
+
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+
                         for (int z = -5; z < 5; z++)
                         {
                             float voxelSize = (float)voxelFreq[x + 5, y + 5, z + 5] / 100;
                             voxelSize = voxelSize > 0.1f ? 0.1f : voxelSize;
 
+                            scatterGL.Color(0.0f, 0.0f, 1.0f, 0.5f);
                             scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
                             scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
                             scatterGL.Vertex(x * cellDelta - voxelSize, y * cellDelta + voxelSize * 2, z * cellDelta - voxelSize * 2);
@@ -275,8 +295,61 @@ namespace DVT_LR3
                             scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta - voxelSize * 2);
                             scatterGL.Vertex(x * cellDelta + voxelSize * 2, y * cellDelta - voxelSize, z * cellDelta + voxelSize);
                         }
+                    }
+                }
             }
             scatterGL.End();
+
+            scatterGL.LoadIdentity();
+            scatterGL.Translate(delta.X, delta.Y, -distance);
+            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
+
+            scatterGL.Begin(OpenGL.GL_LINES);
+
+            for (int x = -5; x < 5; x++)
+            {
+                scatterGL.Color(0.0f, 0.0f, 0.0f);
+
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+                
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+
+                scatterGL.Vertex();
+                scatterGL.Vertex();
+
+
+                for (int y = -5; y < 5; y++)
+                {
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+
+                    scatterGL.Vertex();
+                    scatterGL.Vertex();
+                }
+            }
 
             scatterGL.Flush();
         }
@@ -320,8 +393,8 @@ namespace DVT_LR3
 
             if (ModifierKeys == Keys.Shift)
             {
-                angle.X += (finalPoint.X - initPoint.X)*angleDelta;
-                angle.Y += (finalPoint.Y - initPoint.Y)*angleDelta;
+                angle.X += (finalPoint.X - initPoint.X) * angleDelta;
+                angle.Y += (finalPoint.Y - initPoint.Y) * angleDelta;
             }
             else
             {
