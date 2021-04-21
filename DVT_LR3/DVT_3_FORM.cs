@@ -13,10 +13,10 @@ namespace DVT_LR3
     {
         #region Initialization and timer conditions
 
-        private readonly OpenGL scatterGL, histGL;
         private PointF initPoint, angle, delta;
         private bool pauseFlag, loadedFlag;
         private readonly float angleDelta;
+        private readonly OpenGL scatterGL;
         private readonly float cellDelta;
         private readonly int pointSize;
         private List<PointF3> points;
@@ -31,7 +31,6 @@ namespace DVT_LR3
             InitializeComponent();
 
             this.scatterPlot.FrameRate = 60;
-            this.histPlot.FrameRate = 60;
             this.timer1.Interval = 1500;
 
             points = new List<PointF3>();
@@ -40,7 +39,6 @@ namespace DVT_LR3
             r = new Random();
 
             scatterGL = this.scatterPlot.OpenGL;
-            histGL = this.histPlot.OpenGL;
 
             distance = (float)(this.scatterPlot.Width / 100);
             pauseFlag = loadedFlag = false;
@@ -168,6 +166,7 @@ namespace DVT_LR3
 
         private void DrawPoints(object sender, SharpGL.RenderEventArgs args)
         {
+
             scatterGL.Enable(OpenGL.GL_BLEND);
             scatterGL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
             scatterGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
@@ -201,10 +200,28 @@ namespace DVT_LR3
             scatterGL.Translate(delta.X, delta.Y, -distance);
             scatterGL.Rotate(angle.Y, angle.X, 0.0f);
 
+            scatterGL.Begin(OpenGL.GL_QUADS);
+
             float xIndent = 1.2f;
             float yIndent = 1.2f;
             float zIndent = -1.0f;
             float scale = 0.07f;
+            float histYIndent = -2.0f;
+            float histSize = 0.2f;
+
+            float[,] heights = new float[10, 10];
+
+            float max = -1;
+            int[,] sums = new int[10, 10];
+
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 10; y++)
+                    for (int z = 0; z < 10; z++)
+                    {
+                        var a = voxelFreq[x, y, z];
+                        max = a > max ? a : max;
+                        sums[x, z] += a;
+                    }
 
             if (this.actualAmount != 0)
             {
@@ -218,17 +235,16 @@ namespace DVT_LR3
 
                     scatterGL.Color(1.0f, 1.0f, 0.0f, 0.7f);
                     scatterGL.Vertex(xIndent, x * cellDelta, zIndent);
-                    scatterGL.Vertex((float)yFreq[x + 5] * scale + xIndent, x * cellDelta, zIndent);
-                    scatterGL.Vertex((float)yFreq[x + 5] * scale + xIndent, x * cellDelta + cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta + cellDelta, zIndent);
                     scatterGL.Vertex(xIndent, x * cellDelta + cellDelta, zIndent);
 
                     for (int y = -5; y < 5; y++)
                     {
-                        float height = (float)(xFreq[x + 5] + yFreq[y + 5]) / (float)(xFreq.Max() + yFreq.Max());
-                        float histYIndent = -2.0f;
-                        float histSize = 0.2f;
+                        heights[(x + 5), (y + 5)] = (float)sums[(x + 5), (y + 5)] / max * 0.4f;
+                        float height = heights[(x + 5), (y + 5)];
 
-                        scatterGL.Color(0.0f, 0.8f, 0.0f);
+                        scatterGL.Color(0.0f, 0.8f, 0.0f, 0.5f);
                         scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta);
                         scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta - histSize);
                         scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
@@ -297,59 +313,67 @@ namespace DVT_LR3
                         }
                     }
                 }
-            }
-            scatterGL.End();
+                scatterGL.End();
 
-            scatterGL.LoadIdentity();
-            scatterGL.Translate(delta.X, delta.Y, -distance);
-            scatterGL.Rotate(angle.Y, angle.X, 0.0f);
+                scatterGL.LoadIdentity();
+                scatterGL.Translate(delta.X, delta.Y, -distance);
+                scatterGL.Rotate(angle.Y, angle.X, 0.0f);
 
-            scatterGL.Begin(OpenGL.GL_LINES);
+                scatterGL.LineWidth(2.0f);
+                scatterGL.Begin(OpenGL.GL_LINES);
 
-            for (int x = -5; x < 5; x++)
-            {
-                scatterGL.Color(0.0f, 0.0f, 0.0f);
-
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-                
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-
-                scatterGL.Vertex();
-                scatterGL.Vertex();
-
-
-                for (int y = -5; y < 5; y++)
+                for (int x = -5; x < 5; x++)
                 {
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Color(1.0f, 1.0f, 1.0f);
 
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Vertex(x * cellDelta, yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
 
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Vertex(x * cellDelta + cellDelta, yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta + cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
 
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Vertex(x * cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
+                    scatterGL.Vertex(x * cellDelta + cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
 
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Vertex(xIndent, x * cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta, zIndent);
 
-                    scatterGL.Vertex();
-                    scatterGL.Vertex();
+                    scatterGL.Vertex(xIndent, x * cellDelta + cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta + cellDelta, zIndent);
+
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta, zIndent);
+                    scatterGL.Vertex((float)yFreq[-x + 4] * scale + xIndent, x * cellDelta + cellDelta, zIndent);
+
+                    for (int y = -5; y < 5; y++)
+                    {
+                        float height = heights[(x + 5), (y + 5)];
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta);
+
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+
+                        scatterGL.Vertex(x * cellDelta, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta + histSize, 0.0f + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta);
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta + histSize, height + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta - histSize);
+                        scatterGL.Vertex(x * cellDelta, height + histYIndent, y * cellDelta);
+                    }
                 }
             }
+            scatterGL.End();
 
             scatterGL.Flush();
         }
@@ -357,23 +381,25 @@ namespace DVT_LR3
         #endregion
 
 
-        #region Histograms calculation
+
+        #region Histograms' calculations
 
         private void CountPoint(PointF3 p)
         {
             for (int i = -5; i < 5; i++)
             {
-                if ((int)(p.X / cellDelta) == i)
+                if (Math.Round(p.X / cellDelta) == i)
                     xFreq[i + 5]++;
-                if ((int)(p.Y / cellDelta) == i)
-                    yFreq[i + 5]++;
 
-                if ((int)(p.X / cellDelta) == i)
-                    for (int j = -5; j < 5; j++)
-                        if ((int)(p.Y / cellDelta) == j)
-                            for (int k = -5; k < 5; k++)
-                                if ((int)(p.Z / cellDelta) == k)
-                                    voxelFreq[i + 5, j + 5, k + 5]++;
+                if (Math.Round(p.Y / cellDelta) == i)
+                    yFreq[-i + 4]++;
+
+                if (Math.Round(p.X / cellDelta) == i)
+                    for (int y = -5; y < 5; y++)
+                        if (Math.Round(p.Y / cellDelta) == y)
+                            for (int z = -5; z < 5; z++)
+                                if (Math.Round(p.Z / cellDelta) == z)
+                                    voxelFreq[i + 5, y + 5, z + 5]++;
             }
         }
 

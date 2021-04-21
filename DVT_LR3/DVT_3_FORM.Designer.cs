@@ -33,8 +33,6 @@ namespace DVT_LR3
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.scatterPlot = new SharpGL.OpenGLControl();
             this.label1 = new System.Windows.Forms.Label();
-            this.histPlot = new SharpGL.OpenGLControl();
-            this.label2 = new System.Windows.Forms.Label();
             this.pointsAmount = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -44,7 +42,6 @@ namespace DVT_LR3
             this.btnLoad = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scatterPlot)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.histPlot)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pointsAmount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thinning)).BeginInit();
             this.SuspendLayout();
@@ -58,45 +55,29 @@ namespace DVT_LR3
             this.scatterPlot.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL4_4;
             this.scatterPlot.RenderContextType = SharpGL.RenderContextType.DIBSection;
             this.scatterPlot.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
-            this.scatterPlot.Size = new System.Drawing.Size(450, 450);
+            this.scatterPlot.Size = new System.Drawing.Size(500, 500);
             this.scatterPlot.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(212, 14);
+            this.label1.Location = new System.Drawing.Point(237, 14);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(51, 15);
             this.label1.TabIndex = 1;
             this.label1.Text = "Scatter";
             // 
-            // histPlot
-            // 
-            this.histPlot.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.histPlot.DrawFPS = false;
-            this.histPlot.Location = new System.Drawing.Point(617, 39);
-            this.histPlot.Name = "histPlot";
-            this.histPlot.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL4_4;
-            this.histPlot.RenderContextType = SharpGL.RenderContextType.DIBSection;
-            this.histPlot.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
-            this.histPlot.Size = new System.Drawing.Size(450, 450);
-            this.histPlot.TabIndex = 0;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(808, 14);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(69, 15);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Histogram";
-            // 
             // pointsAmount
             // 
             this.pointsAmount.ForeColor = System.Drawing.Color.White;
-            this.pointsAmount.Location = new System.Drawing.Point(498, 147);
+            this.pointsAmount.Location = new System.Drawing.Point(538, 176);
             this.pointsAmount.Maximum = new decimal(new int[] {
             1000,
+            0,
+            0,
+            0});
+            this.pointsAmount.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
@@ -113,7 +94,7 @@ namespace DVT_LR3
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(486, 125);
+            this.label3.Location = new System.Drawing.Point(526, 154);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(108, 15);
             this.label3.TabIndex = 1;
@@ -122,7 +103,7 @@ namespace DVT_LR3
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(512, 199);
+            this.label4.Location = new System.Drawing.Point(552, 228);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(56, 15);
             this.label4.TabIndex = 1;
@@ -131,7 +112,7 @@ namespace DVT_LR3
             // thinning
             // 
             this.thinning.ForeColor = System.Drawing.Color.White;
-            this.thinning.Location = new System.Drawing.Point(498, 217);
+            this.thinning.Location = new System.Drawing.Point(538, 246);
             this.thinning.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -155,7 +136,7 @@ namespace DVT_LR3
             // btnStart
             // 
             this.btnStart.BackColor = System.Drawing.SystemColors.Control;
-            this.btnStart.Location = new System.Drawing.Point(503, 259);
+            this.btnStart.Location = new System.Drawing.Point(543, 288);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 3;
@@ -165,7 +146,7 @@ namespace DVT_LR3
             // btnLoad
             // 
             this.btnLoad.BackColor = System.Drawing.SystemColors.Control;
-            this.btnLoad.Location = new System.Drawing.Point(488, 303);
+            this.btnLoad.Location = new System.Drawing.Point(528, 332);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(104, 23);
             this.btnLoad.TabIndex = 3;
@@ -175,11 +156,11 @@ namespace DVT_LR3
             // btnSave
             // 
             this.btnSave.BackColor = System.Drawing.SystemColors.Control;
-            this.btnSave.Location = new System.Drawing.Point(488, 347);
+            this.btnSave.Location = new System.Drawing.Point(528, 376);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(104, 23);
             this.btnSave.TabIndex = 3;
-            this.btnSave.Text = "Save images";
+            this.btnSave.Text = "Save image";
             this.btnSave.UseVisualStyleBackColor = false;
             // 
             // Application
@@ -187,7 +168,7 @@ namespace DVT_LR3
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(1079, 525);
+            this.ClientSize = new System.Drawing.Size(648, 555);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnLoad);
             this.Controls.Add(this.btnStart);
@@ -195,9 +176,7 @@ namespace DVT_LR3
             this.Controls.Add(this.pointsAmount);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.histPlot);
             this.Controls.Add(this.scatterPlot);
             this.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ForeColor = System.Drawing.Color.White;
@@ -206,7 +185,6 @@ namespace DVT_LR3
             this.Text = "Application";
             this.Load += new System.EventHandler(this.Application_Load);
             ((System.ComponentModel.ISupportInitialize)(this.scatterPlot)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.histPlot)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pointsAmount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.thinning)).EndInit();
             this.ResumeLayout(false);
@@ -218,8 +196,6 @@ namespace DVT_LR3
 
         private SharpGL.OpenGLControl scatterPlot;
         private System.Windows.Forms.Label label1;
-        private SharpGL.OpenGLControl histPlot;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown pointsAmount;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
