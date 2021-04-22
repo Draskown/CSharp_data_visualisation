@@ -322,10 +322,79 @@ namespace DVT_LR3
                 scatterGL.LineWidth(2.0f);
                 scatterGL.Begin(OpenGL.GL_LINES);
 
+                scatterGL.Color(1.0f, 0.0f, 0.0f);
+
+                scatterGL.Vertex(0.0f, 0.0f, 0.0f);
+                scatterGL.Vertex(0.5f, 0.0f, 0.0f);
+
+                scatterGL.Vertex(0.5f, 0.0f, 0.0f);
+                scatterGL.Vertex(0.44f, 0.0f, -0.03f);
+
+                scatterGL.Vertex(0.5f, 0.0f, 0.0f);
+                scatterGL.Vertex(0.44f, 0.0f, 0.03f);
+
+                scatterGL.Color(0.0f, 0.0f, 1.0f);
+
+                scatterGL.Vertex(0.0f, 0.0f, 0.0f);
+                scatterGL.Vertex(0.0f, 0.0f, 0.5f);
+
+                scatterGL.Vertex(0.0f, 0.0f, 0.5f);
+                scatterGL.Vertex(0.03f, 0.0f, 0.44f);
+
+                scatterGL.Vertex(0.0f, 0.0f, 0.5f);
+                scatterGL.Vertex(-0.03f, 0.0f, 0.44f);
+
+                scatterGL.Color(1.0f, 1.0f, 0.0f);
+
+                scatterGL.Vertex(0.0f, 0.0f, 0.0f);
+                scatterGL.Vertex(0.0f, 0.5f, 0.0f);
+
+                scatterGL.Vertex(0.0f, 0.5f, 0.0f);
+                scatterGL.Vertex(0.03f, 0.44f, 0.0f);
+
+                scatterGL.Vertex(0.0f, 0.5f, 0.0f);
+                scatterGL.Vertex(-0.03f, 0.44f, 0.0f);
+
+                scatterGL.Color(1.0f, 1.0f, 1.0f);
+
+                scatterGL.Vertex(-1.0f, -1.0f, -1.0f);
+                scatterGL.Vertex(1.0f, -1.0f, -1.0f);
+
+                scatterGL.Vertex(1.0f, -1.0f, -1.0f);
+                scatterGL.Vertex(1.0f, -1.0f, 1.0f);
+
+                scatterGL.Vertex(1.0f, -1.0f, 1.0f);
+                scatterGL.Vertex(-1.0f, -1.0f, 1.0f);
+
+                scatterGL.Vertex(-1.0f, -1.0f, 1.0f);
+                scatterGL.Vertex(-1.0f, -1.0f, -1.0f);
+
+                scatterGL.Vertex(-1.0f, -1.0f, -1.0f);
+                scatterGL.Vertex(-1.0f, 1.0f, -1.0f);
+
+                scatterGL.Vertex(-1.0f, -1.0f, 1.0f);
+                scatterGL.Vertex(-1.0f, 1.0f, 1.0f);
+
+                scatterGL.Vertex(1.0f, -1.0f, 1.0f);
+                scatterGL.Vertex(1.0f, 1.0f, 1.0f);
+
+                scatterGL.Vertex(1.0f, -1.0f, -1.0f);
+                scatterGL.Vertex(1.0f, 1.0f, -1.0f);
+
+                scatterGL.Vertex(-1.0f, 1.0f, -1.0f);
+                scatterGL.Vertex(1.0f, 1.0f, -1.0f);
+
+                scatterGL.Vertex(1.0f, 1.0f, -1.0f);
+                scatterGL.Vertex(1.0f, 1.0f, 1.0f);
+
+                scatterGL.Vertex(1.0f, 1.0f, 1.0f);
+                scatterGL.Vertex(-1.0f, 1.0f, 1.0f);
+
+                scatterGL.Vertex(-1.0f, 1.0f, 1.0f);
+                scatterGL.Vertex(-1.0f, 1.0f, -1.0f);
+
                 for (int x = -5; x < 5; x++)
                 {
-                    scatterGL.Color(1.0f, 1.0f, 1.0f);
-
                     scatterGL.Vertex(x * cellDelta, yIndent, zIndent);
                     scatterGL.Vertex(x * cellDelta, (float)xFreq[x + 5] * scale + yIndent, zIndent);
 
