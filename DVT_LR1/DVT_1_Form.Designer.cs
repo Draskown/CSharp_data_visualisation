@@ -1,7 +1,7 @@
 ﻿
 namespace LRs
 {
-    partial class Application
+    partial class DVT_1_Form
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -55,7 +55,7 @@ namespace LRs
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint18 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint19 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint20 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 0D);
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DVT_1_Form));
             this.scatter_plot = new System.Windows.Forms.PictureBox();
             this.rb_X1X2 = new System.Windows.Forms.RadioButton();
             this.rb_X1Y1 = new System.Windows.Forms.RadioButton();

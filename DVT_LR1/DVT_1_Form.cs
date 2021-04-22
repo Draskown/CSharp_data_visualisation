@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
+using System.Collections.Generic;
 using MathNet.Numerics.Statistics;
 
 
 namespace LRs
 {
-    public partial class Application : Form
+    public partial class DVT_1_Form : Form
     {
         public List<double> X1 = new List<double>();
         public List<double> X2 = new List<double>();
@@ -31,7 +27,8 @@ namespace LRs
         int[] x_freq_count = new int[10];
         int[] y_freq_count = new int[10];
 
-        public Application()
+
+        public DVT_1_Form()
         {
             InitializeComponent();
 
@@ -216,7 +213,7 @@ namespace LRs
             {
                 X1.Add(Math.Round(rand.NextDouble(), 3));
                 X2.Add(Math.Round(rand.NextDouble(), 3));
-            }            
+            }
 
             Calculate_Y(X1, Y1, 1);
             Calculate_Y(X2, Y2, 2);
@@ -357,7 +354,7 @@ namespace LRs
                 Count_Frequency(x, delta_x, 0);
                 Count_Frequency(y, delta_y, 1);
 
-                int[] cell = new int[] {(int)(x / delta_x), (int)(y / delta_y)};
+                int[] cell = new int[] { (int)(x / delta_x), (int)(y / delta_y) };
 
                 cell[0] = cell[0] > 9 ? 9 : cell[0];
                 cell[1] = cell[1] > 9 ? 9 : cell[1];

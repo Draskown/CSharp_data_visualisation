@@ -53,16 +53,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DVT_LR1_Form.cs">
+    <Compile Include="DVT_1_Form.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DVT_LR1_Form.Designer.cs">
-      <DependentUpon>DVT_LR1_Form.cs</DependentUpon>
+    <Compile Include="DVT_1_Form.Designer.cs">
+      <DependentUpon>DVT_1_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DVT_1_Form.Designer.cs">
+      <DependentUpon>DVT_1_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="DVT_LR1_Form.resx">
-      <DependentUpon>DVT_LR1_Form.cs</DependentUpon>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="DVT_1_Form.resx">
+      <DependentUpon>DVT_1_Form.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
