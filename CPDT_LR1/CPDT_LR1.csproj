@@ -64,9 +64,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bitmapshit.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Bitmapshit.Designer.cs">
       <DependentUpon>Bitmapshit.cs</DependentUpon>
     </Compile>
@@ -78,9 +75,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Bitmapshit.resx">
-      <DependentUpon>Bitmapshit.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="CPDT_LR1_Form.resx">
       <DependentUpon>CPDT_LR1_Form.cs</DependentUpon>
     </EmbeddedResource>
