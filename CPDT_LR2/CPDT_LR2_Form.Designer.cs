@@ -133,7 +133,7 @@ namespace CPDT_LR2
             this.boxLog.Name = "boxLog";
             this.boxLog.ReadOnly = true;
             this.boxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.boxLog.Size = new System.Drawing.Size(197, 500);
+            this.boxLog.Size = new System.Drawing.Size(219, 500);
             this.boxLog.TabIndex = 3;
             this.boxLog.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.boxLog.WordWrap = false;
@@ -474,7 +474,7 @@ namespace CPDT_LR2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1064, 608);
+            this.ClientSize = new System.Drawing.Size(1092, 608);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);

@@ -8,19 +8,36 @@ namespace CPDT_LR2
 {
     public partial class CPDT_LR2_Form : Form
     {
+        #region Initialization and events
+
         private readonly VerSector[] pointsCloud;
-        private readonly double[] shootingAngles;
-        private readonly double[] verAngles;
         private readonly FileStream stream;
         private readonly Angle[] horAngles;
-        private readonly float angleDelta;
+
+        private Bitmap bmpIsometric, bmpOverhead;
+        private PointF initialPoint;
+
+        private readonly double angleDelta;
+        private readonly double[] shootingAngles, verAngles;
+        private double[][] rotationX, rotationY;
+        private double distance, angleX, angleY;
+
         private readonly int pointSize;
+        private int messagesCount;
+
         private bool paused, started;
 
 
         public CPDT_LR2_Form()
         {
             InitializeComponent();
+
+            started = paused = false;
+            angleX = angleY = 0;
+            messagesCount = 0;
+            angleDelta = 0.01;
+            distance = 150;
+            pointSize = 4;
 
             stream = new FileStream("UDPFromVelodyneTest_lidardata.pcap", FileMode.Open);
 
@@ -37,23 +54,19 @@ namespace CPDT_LR2
             for (int i = 0; i < horAngles.Length; i++)
             {
                 if (i < verAngles.Length)
-                    verAngles[i] = Math.Sin(shootingAngles[i] * Math.PI / 180);
+                    verAngles[i] = -Math.Sin(shootingAngles[i] * Math.PI / 180);
 
                 horAngles[i] = new Angle(Math.Sin(i * Math.PI / 180),
                                          Math.Cos(i * Math.PI / 180));
 
                 pointsCloud[i] = new VerSector();
             }
-
-            angleDelta = 0.01f;
-            started = false;
-            paused = false;
-            pointSize = 4;
         }
 
 
         private void CPDT_LR2_Form_Load(object sender, System.EventArgs e)
         {
+            this.frameRate.Interval = 16; //(int)this.numFramerate.Value;
             this.frameRate.Tick += (ss, ee) => { ReadData(); DrawData(); };
 
             this.Click += (ss, ee) => this.ActiveControl = null;
@@ -62,35 +75,60 @@ namespace CPDT_LR2
                 this.frameRate.Interval = (int)this.numFramerate.Value;
 
             this.btnPp.Click += StartPause;
+
+            this.frameIsometric.MouseWheel += PicImageMouseWheel;
+            this.frameIsometric.MouseDown += PicImageMouseDown;
+            this.frameIsometric.MouseMove += PicImageMouseMove;
         }
 
+        #endregion
 
-        private void StartPause(object sender, EventArgs e)
+
+
+        #region MouseMovement
+
+        private void PicImageMouseDown(object sender, MouseEventArgs e)
         {
-            var o = (Button)sender;
-
-            if (!started)
-            {
-                this.frameRate.Start();
-                o.Text = "Pause";
-                started = true;
-                return;
-            }
-
-            if (paused)
-            {
-                o.Text = "Start";
-                this.frameRate.Stop();
-            }
-            else
-            {
-                o.Text = "Pause";
-                this.frameRate.Start();
-            }
-
-            paused = !paused;
+            initialPoint = e.Location;
         }
 
+
+        private void PicImageMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left ||
+                this.frameIsometric.Image == null)
+                return;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                PointF finalPoint = e.Location;
+
+                angleX -= (float)((finalPoint.X - initialPoint.X) * angleDelta);
+                angleY += (float)((finalPoint.Y - initialPoint.Y) * angleDelta);
+
+                DrawData();
+
+                initialPoint = finalPoint;
+            }
+        }
+
+
+        private void PicImageMouseWheel(object sender, MouseEventArgs e)
+        {
+            if (this.frameIsometric.Image == null)
+                return;
+
+            distance += e.Delta / 10;
+            distance = distance < 0 ? 0 : distance;
+
+            DrawData();
+        }
+
+        #endregion
+
+
+
+        #region Reading From Dump
 
         private void ReadData()
         {
@@ -117,7 +155,7 @@ namespace CPDT_LR2
 
                                 for (int instance = 0; instance < st.Count; instance += 3)
                                 {
-                                    float distance = (st[instance + 1] * 256 + st[instance]) * 0.002f;
+                                    double distance = (st[instance + 1] * 256 + st[instance]) * 0.002f;
 
                                     pointsCloud[(int)azimut].Beam[laserId] = new Vector(distance * (float)horAngles[(int)azimut].Sin,
                                                                                         distance * (float)verAngles[laserId],
@@ -126,7 +164,7 @@ namespace CPDT_LR2
                                     laserId++;
                                 }
                             }
-                            
+
                             st.Clear();
                         }
                     }
@@ -134,39 +172,155 @@ namespace CPDT_LR2
                 else
                     st.Add(line[i]);
             }
+
+            var message = DateTime.Now.ToString("HH:mm:ss") + $"> received {st.Count} points\r\n";
+
+            if (this.boxLog.Lines.Length % 32 == 0)
+                this.boxLog.Text = "";
+            else
+                this.boxLog.Text += message;
+
+            messagesCount = messagesCount > 32 ? 0 : messagesCount++;
         }
 
+        #endregion
+
+
+
+        #region Drawing
 
         private void DrawData()
         {
-            Bitmap bmp = new Bitmap(this.frameIsometric.Width, this.frameIsometric.Height);
+            bmpIsometric = new Bitmap(this.frameIsometric.Width, this.frameIsometric.Height);
+            bmpOverhead = new Bitmap(this.frameOverhead.Width, this.frameOverhead.Height);
 
-            for (int row = 0; row < pointsCloud.Length; row++)
+            rotationX = new double[][] {
+                        new double[] { 1, 0, 0},
+                        new double[] { 0, Math.Cos(angleY), -Math.Sin(angleY)},
+                        new double[] { 0, Math.Sin(angleY), Math.Cos(angleY)}
+            };
+
+            rotationY = new double[][] {
+                        new double[] { Math.Cos(angleX), 0, Math.Sin(angleX)},
+                        new double[] { 0, 1, 0 },
+                        new double[] { Math.Sin(angleX), 0, Math.Cos(angleX)}
+            };
+
+
+            using (Graphics g = Graphics.FromImage(bmpIsometric))
             {
-                for (int column = 0; column < pointsCloud[row].Beam.Length; column++)
+                for (int row = 0; row < pointsCloud.Length; row++)
                 {
-                    float x = pointsCloud[row].Beam[column].X;
-                    float y = pointsCloud[row].Beam[column].Y;
-                    float z = pointsCloud[row].Beam[column].Z;
-
-                    Console.WriteLine($"{x}, {y}, {z}");
-
-
-
-                    using (Graphics g = Graphics.FromImage(bmp))
+                    for (int column = 0; column < pointsCloud[row].Beam.Length; column++)
                     {
-                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)z, 255, 0, 255)), x, y, pointSize, pointSize);
+                        var v = pointsCloud[row].Beam[column];
+
+                        double allowedDistance = 0.2;
+
+                        if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
+                            continue;
+
+                        Vector rotated = MatMul(rotationX, v);
+                        rotated = MatMul(rotationY, rotated);
+
+                        double[][] projection =
+                        {
+                            new double[] { 1, 0, 0 },
+                            new double[] { 0, 1, 0 }
+                        };
+
+                        Vector projected2d = MatMul(projection, rotated);
+
+                        projected2d.Mult(distance);
+
+                        projected2d.Move(new PointF(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2));
+
+                        int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
+                        alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
                     }
                 }
             }
 
-            this.frameIsometric.Image = bmp;
+            this.frameIsometric.Image = bmpIsometric;
+
+            using (Graphics g = Graphics.FromImage(bmpOverhead))
+            {
+                for (int row = 0; row < pointsCloud.Length; row++)
+                {
+                    for (int column = 0; column < pointsCloud[row].Beam.Length; column++)
+                    {
+                        var v = pointsCloud[row].Beam[column];
+
+                        double allowedDistance = 0.2;
+
+                        if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
+                            continue;
+
+                        double[][] projection =
+                        {
+                            new double[] { 1, 0, 0 },
+                            new double[] { 0, 0, 0 },
+                            new double[] { 0, 0, 1 }
+                        };
+
+                        Vector projected2d = MatMul(projection, v);
+
+                        projected2d.Mult(25);
+
+                        int alpha = (int)((v.Z + 8.6) * 255 / 8.5 / 2);
+                        alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X + 175, (float)projected2d.Z + 100, pointSize, pointSize);
+                    }
+                }
+            }
+
+            this.frameOverhead.Image = bmpOverhead;
         }
 
+        #endregion
 
-        private float[][] Vec_To_Mat(Vector v)
+
+
+        #region Button Action
+
+        private void StartPause(object sender, EventArgs e)
         {
-            float[][] m = new float[3][];
+            var o = (Button)sender;
+
+            if (!started)
+            {
+                this.frameRate.Start();
+                o.Text = "Pause";
+                started = true;
+                return;
+            }
+
+            if (!paused)
+            {
+                o.Text = "Start";
+                this.frameRate.Stop();
+            }
+            else
+            {
+                o.Text = "Pause";
+                this.frameRate.Start();
+            }
+
+            paused = !paused;
+        }
+
+        #endregion
+
+
+
+        #region MatMaths
+
+        private double[][] Vec_To_Mat(Vector v)
+        {
+            double[][] m = new double[3][];
 
             m[0] = new[] { v.X };
             m[1] = new[] { v.Y };
@@ -176,7 +330,7 @@ namespace CPDT_LR2
         }
 
 
-        private Vector Mat_To_vec(float[][] m)
+        private Vector Mat_To_vec(double[][] m)
         {
             Vector v = new Vector
             {
@@ -191,14 +345,14 @@ namespace CPDT_LR2
         }
 
 
-        private Vector MatMul(float[][] a, Vector b)
+        private Vector MatMul(double[][] a, Vector b)
         {
-            float[][] m = Vec_To_Mat(b);
+            double[][] m = Vec_To_Mat(b);
             return Mat_To_vec(MatMul(a, m));
         }
 
 
-        private float[][] MatMul(float[][] a, float[][] b)
+        private double[][] MatMul(double[][] a, double[][] b)
         {
             int colsA = a[0].Length;
             int rowsA = a.Length;
@@ -211,15 +365,15 @@ namespace CPDT_LR2
                 return null;
             }
 
-            float[][] result = new float[rowsA][];
+            double[][] result = new double[rowsA][];
 
             for (int i = 0; i < rowsA; i++)
             {
                 for (int j = 0; j < colsB; j++)
                 {
-                    result[i] = new float[colsB];
+                    result[i] = new double[colsB];
 
-                    float sum = 0.0f;
+                    double sum = 0.0f;
                     for (int k = 0; k < colsA; k++)
                     {
                         sum += a[i][k] * b[k][j];
@@ -229,8 +383,12 @@ namespace CPDT_LR2
             }
             return result;
         }
+
+        #endregion
     }
 
+
+    #region Operational Classes (Vectors, Angles etc)
 
     public partial class Angle
     {
@@ -260,11 +418,9 @@ namespace CPDT_LR2
 
     public partial class Vector
     {
-        private readonly CPDT_LR2_Form f = new CPDT_LR2_Form();
-
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
 
 
         public Vector()
@@ -273,13 +429,13 @@ namespace CPDT_LR2
         }
 
 
-        public Vector(float x, float y, float z)
+        public Vector(double x, double y, double z)
         {
             this.X = x; this.Y = y; this.Z = z;
         }
 
 
-        public void Mult(float d)
+        public void Mult(double d)
         {
             this.X *= d; this.Y *= d; this.Z *= d;
         }
@@ -289,23 +445,7 @@ namespace CPDT_LR2
         {
             this.X += p.X; this.Y += p.Y;
         }
-
-
-        public int IsometricMap(float value, float fromLow, float fromHigh)
-        {
-            int toHigh = f.frameIsometric.Width;
-            int toLow = 0;
-
-            return (int)((value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow);
-        }
-
-
-        public int OverheadMap(float value, float fromLow, float fromHigh)
-        {
-            int toHigh = f.frameOverhead.Width;
-            int toLow = 0;
-
-            return (int)((value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow);
-        }
     }
+
+    #endregion
 }
