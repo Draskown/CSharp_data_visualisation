@@ -54,6 +54,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="CPDT_LR2_Form.resx">
       <DependentUpon>CPDT_LR2_Form.cs</DependentUpon>
     </EmbeddedResource>
@@ -75,6 +80,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="UDPFromVelodyneTest_lidardata.pcap" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

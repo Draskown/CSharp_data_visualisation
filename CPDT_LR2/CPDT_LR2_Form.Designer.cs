@@ -29,6 +29,7 @@ namespace CPDT_LR2
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPDT_LR2_Form));
             this.frameIsometric = new System.Windows.Forms.PictureBox();
             this.frameOverhead = new System.Windows.Forms.PictureBox();
@@ -54,12 +55,13 @@ namespace CPDT_LR2
             this.numAllowedPoints = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.numCorWidth = new System.Windows.Forms.NumericUpDown();
             this.numCorHeight = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             this.numCorAngle = new System.Windows.Forms.NumericUpDown();
             this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.numCorWidth = new System.Windows.Forms.NumericUpDown();
+            this.frameRate = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.frameIsometric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frameOverhead)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFOVHor)).BeginInit();
@@ -72,9 +74,9 @@ namespace CPDT_LR2
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAllowedPoints)).BeginInit();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).BeginInit();
             this.SuspendLayout();
             // 
             // frameIsometric
@@ -387,6 +389,24 @@ namespace CPDT_LR2
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "The corridor";
             // 
+            // numCorWidth
+            // 
+            this.numCorWidth.Location = new System.Drawing.Point(61, 81);
+            this.numCorWidth.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numCorWidth.Name = "numCorWidth";
+            this.numCorWidth.Size = new System.Drawing.Size(63, 23);
+            this.numCorWidth.TabIndex = 4;
+            this.numCorWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numCorWidth.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            // 
             // numCorHeight
             // 
             this.numCorHeight.Location = new System.Drawing.Point(61, 52);
@@ -413,6 +433,15 @@ namespace CPDT_LR2
             this.label11.Size = new System.Drawing.Size(41, 15);
             this.label11.TabIndex = 1;
             this.label11.Text = "Angle";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(9, 85);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(43, 15);
+            this.label13.TabIndex = 1;
+            this.label13.Text = "Width";
             // 
             // numCorAngle
             // 
@@ -441,33 +470,6 @@ namespace CPDT_LR2
             this.label12.TabIndex = 1;
             this.label12.Text = "Height";
             // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(9, 85);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(43, 15);
-            this.label13.TabIndex = 1;
-            this.label13.Text = "Width";
-            // 
-            // numCorWidth
-            // 
-            this.numCorWidth.Location = new System.Drawing.Point(61, 81);
-            this.numCorWidth.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numCorWidth.Name = "numCorWidth";
-            this.numCorWidth.Size = new System.Drawing.Size(63, 23);
-            this.numCorWidth.TabIndex = 4;
-            this.numCorWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numCorWidth.Value = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            // 
             // CPDT_LR2_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -492,6 +494,7 @@ namespace CPDT_LR2
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CPDT_LR2_Form";
             this.Text = "Application";
+            this.Load += new System.EventHandler(this.CPDT_LR2_Form_Load);
             ((System.ComponentModel.ISupportInitialize)(this.frameIsometric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.frameOverhead)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFOVHor)).EndInit();
@@ -507,18 +510,15 @@ namespace CPDT_LR2
             ((System.ComponentModel.ISupportInitialize)(this.numAllowedPoints)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.PictureBox frameIsometric;
-        private System.Windows.Forms.PictureBox frameOverhead;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnPp;
@@ -547,5 +547,8 @@ namespace CPDT_LR2
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.NumericUpDown numCorAngle;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Timer frameRate;
+        public System.Windows.Forms.PictureBox frameIsometric;
+        public System.Windows.Forms.PictureBox frameOverhead;
     }
 }

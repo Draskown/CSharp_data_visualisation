@@ -33,6 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SharpGL, Version=3.1.1.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpGL.3.1.1\lib\net472\SharpGL.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpGL.SceneGraph, Version=3.1.1.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpGL.SceneGraph.3.1.1\lib\net472\SharpGL.SceneGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpGL.WinForms, Version=3.1.1.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpGL.WinForms.3.1.1\lib\net472\SharpGL.WinForms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
@@ -51,12 +60,6 @@
   <ItemGroup>
     <Compile Include="DVT_3_Form.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DVT_3_Form.Designer.cs">
-      <DependentUpon>DVT_3_Form.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DVT_3_Form.Designer.cs">
-      <DependentUpon>DVT_3_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="DVT_3_Form.Designer.cs">
       <DependentUpon>DVT_3_Form.cs</DependentUpon>
