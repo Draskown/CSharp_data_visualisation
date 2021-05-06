@@ -69,9 +69,6 @@
     <EmbeddedResource Include="DVT_1_Form.resx">
       <DependentUpon>DVT_1_Form.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DVT_1_Form.resx">
-      <DependentUpon>DVT_1_Form.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

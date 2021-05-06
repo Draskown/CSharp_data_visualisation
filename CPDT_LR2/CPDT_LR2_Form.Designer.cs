@@ -169,7 +169,7 @@ namespace CPDT_LR2
             // 
             this.numFOVVer.Location = new System.Drawing.Point(79, 53);
             this.numFOVVer.Maximum = new decimal(new int[] {
-            360,
+            32,
             0,
             0,
             0});
@@ -178,7 +178,7 @@ namespace CPDT_LR2
             this.numFOVVer.TabIndex = 4;
             this.numFOVVer.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numFOVVer.Value = new decimal(new int[] {
-            360,
+            32,
             0,
             0,
             0});
@@ -250,9 +250,15 @@ namespace CPDT_LR2
             // 
             // numXYPlane
             // 
+            this.numXYPlane.DecimalPlaces = 2;
+            this.numXYPlane.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numXYPlane.Location = new System.Drawing.Point(33, 23);
             this.numXYPlane.Maximum = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -261,7 +267,7 @@ namespace CPDT_LR2
             this.numXYPlane.TabIndex = 4;
             this.numXYPlane.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numXYPlane.Value = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -277,9 +283,15 @@ namespace CPDT_LR2
             // 
             // numXZPlane
             // 
+            this.numXZPlane.DecimalPlaces = 2;
+            this.numXZPlane.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numXZPlane.Location = new System.Drawing.Point(131, 23);
             this.numXZPlane.Maximum = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -288,7 +300,7 @@ namespace CPDT_LR2
             this.numXZPlane.TabIndex = 4;
             this.numXZPlane.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numXZPlane.Value = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -304,9 +316,15 @@ namespace CPDT_LR2
             // 
             // numYZPlane
             // 
+            this.numYZPlane.DecimalPlaces = 2;
+            this.numYZPlane.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numYZPlane.Location = new System.Drawing.Point(228, 23);
             this.numYZPlane.Maximum = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -315,7 +333,7 @@ namespace CPDT_LR2
             this.numYZPlane.TabIndex = 4;
             this.numYZPlane.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numYZPlane.Value = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
