@@ -17,17 +17,15 @@ namespace CPDT_LR2
         private readonly FileStream stream;
         private readonly Angle[] horAngles;
 
-
         private PointF initialPoint;
 
         private readonly double[] shootingAngles, verAngles;
-        private readonly double[,] values;
         private readonly double angleDelta;
         private double distance, angleX, angleY;
 
+        private VerSector temp;
+
         private readonly int pointSize;
-        private readonly int messagesLimit;
-        private int messagesCount;
 
         private bool paused, started;
 
@@ -40,8 +38,6 @@ namespace CPDT_LR2
 
             started = paused = false;
             angleX = angleY = 0;
-            messagesLimit = 32;
-            messagesCount = 0;
             angleDelta = 0.01;
             distance = 150;
             pointSize = 2;
@@ -55,7 +51,6 @@ namespace CPDT_LR2
             };
 
             pointsCloud = new VerSector[361];
-            values = new double[361, 32];
             horAngles = new Angle[361];
             verAngles = new double[32];
 
@@ -75,7 +70,12 @@ namespace CPDT_LR2
         private void CPDT_LR2_Form_Load(object sender, System.EventArgs e)
         {
             this.frameRate.Interval = 16; //(int)this.numFramerate.Value;
-            this.frameRate.Tick += (ss, ee) => { ReadData(); FindObjects(); DrawData(); };
+            this.frameRate.Tick += (ss, ee) =>
+            {
+                ReadData();
+                FindObjects();
+                DrawData();
+            };
 
             this.Click += (ss, ee) => this.ActiveControl = null;
 
@@ -140,6 +140,8 @@ namespace CPDT_LR2
 
         private void ReadData()
         {
+            var count = 0;
+
             byte[] line = new byte[300];
             stream.Read(line, 0, 300);
             List<byte> st = new List<byte>();
@@ -165,11 +167,10 @@ namespace CPDT_LR2
                                 {
                                     double distance = (st[instance + 1] * 256 + st[instance]) * 0.002f;
 
-                                    values[(int)azimut, laserId] = distance;
-
-                                    pointsCloud[(int)azimut].Beam[laserId] = new Vector(distance * (float)horAngles[(int)azimut].Sin,
-                                                                                        distance * (float)verAngles[laserId],
-                                                                                        distance * (float)horAngles[(int)azimut].Cos);
+                                    pointsCloud[(int)azimut].Beams[laserId] = new Vector(distance * (float)horAngles[(int)azimut].Sin,
+                                                                                            distance * (float)verAngles[laserId],
+                                                                                            distance * (float)horAngles[(int)azimut].Cos,
+                                                                                            distance);
 
                                     laserId++;
                                 }
@@ -183,14 +184,16 @@ namespace CPDT_LR2
                     st.Add(line[i]);
             }
 
-            var message = DateTime.Now.ToString("HH:mm:ss") + $"> received {st.Count} points\r\n";
+            foundObjects.Clear();
 
-            if (this.boxLog.Lines.Length % messagesLimit == 0)
-                this.boxLog.Text = "";
-            else
-                this.boxLog.Text += message;
+            var message = DateTime.Now.ToString("HH:mm:ss") + $"> received {count} points\r\n";
 
-            messagesCount = messagesCount > messagesLimit ? 0 : messagesCount++;
+            this.boxLog.Text += message;
+
+            //var count = st.Count > 100 ? st.Count.ToString() : st.Count > 10 ? $"0{st.Count}" : $"00{st.Count}";
+
+            //if (this.boxLog.TextLength > 31*360)
+            //    this.boxLog.Text = "";
         }
 
         #endregion
@@ -230,12 +233,12 @@ namespace CPDT_LR2
                     if (row < 180 - this.numFOVHor.Value / 2 || row > 180 + this.numFOVHor.Value / 2)
                         continue;
 
-                    for (int column = 0; column < pointsCloud[row].Beam.Length; column++)
+                    for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                     {
                         if (column > this.numFOVVer.Value)
                             continue;
 
-                        var v = pointsCloud[row].Beam[column];
+                        var v = pointsCloud[row].Beams[column];
 
                         if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
                             continue;
@@ -259,7 +262,7 @@ namespace CPDT_LR2
                     }
                 }
 
-                foreach(var obj in foundObjects)
+                foreach (var obj in foundObjects)
                 {
                     foreach (var v in obj.Vectors)
                     {
@@ -314,9 +317,9 @@ namespace CPDT_LR2
                     if (row < 180 - this.numFOVHor.Value / 2 || row > 180 + this.numFOVHor.Value / 2)
                         continue;
 
-                    for (int column = 0; column < pointsCloud[row].Beam.Length; column++)
+                    for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                     {
-                        var v = pointsCloud[row].Beam[column];
+                        var v = pointsCloud[row].Beams[column];
 
                         if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
                             continue;
@@ -371,36 +374,77 @@ namespace CPDT_LR2
 
         private void FindObjects()
         {
-            for (int i = 1; i < values.GetLength(0); i++)
+            for (int pointI = 0; pointI < pointsCloud.Length; pointI++)
             {
-                FoundObject fo;
-
-                for (int j = 1; j < values.GetLength(1); j++)
+                for (int beamI = 0; beamI < pointsCloud[pointI].Beams.Length; beamI++)
                 {
-                    //if (Math.Abs(values[i, j] - values[i - 1, j]) >= 10 &&
-                    //    Math.Abs(values[i, j] - values[i, j - 1]) >= 10)
-                    //{
-                    //    fo = new FoundObject(pointsCloud[i].Beam[j]);
-                    //    foundObjects.Add(fo);
-                    //}
+                    var basePoint = pointsCloud[pointI].Beams[beamI];
 
-                    //if (foundObjects.Count > 0)
-                    //{
-                    //    if (foundObjects.Last().Vectors.Count < this.numAllowedPoints.Value)
-                    //        foundObjects.Last().Vectors.Add(pointsCloud[i].Beam[j]);
-                    //    else
-                    //    {
-                    //        fo = new FoundObject(pointsCloud[i].Beam[j]);
-                    //        foundObjects.Add(fo);
-                    //    }
-                    //}
+                    if (basePoint.Distance == 0 || basePoint.IsInObject)
+                        continue;
+
+                    var fo = new FoundObject(basePoint);
+
+                    for (int pointJ = 0; pointJ < pointsCloud.Length; pointJ++)
+                    {
+                        for (int beamJ = 0; beamJ < pointsCloud[pointJ].Beams.Length; beamJ++)
+                        {
+                            var comparablePoint = pointsCloud[pointJ].Beams[beamJ];
+
+                            if (comparablePoint.Distance == 0 || comparablePoint.IsInObject)
+                                continue;
+
+                            if (Math.Abs(basePoint.Distance - comparablePoint.Distance) <= (int)this.numObjectRadius.Value)
+                            {
+                                comparablePoint.IsInObject = true;
+                                fo.Vectors.Add(comparablePoint);
+                            }
+                        }
+                    }
+
+                    foundObjects.Add(fo);
                 }
             }
 
-            foundObjects.RemoveAll(o => o.Vectors.Count < 10 || 
-                                        o.Vectors.All(v => (Math.Abs(v.X - o.Vectors[0].X) < 0.5) ||
-                                                           (Math.Abs(v.Y - o.Vectors[0].Y) < 0.5) || 
-                                                           (Math.Abs(v.Z - o.Vectors[0].Z) < 0.5)));
+            if (foundObjects.Count > 0)
+                foundObjects.RemoveAll(o => o.Vectors.Count < 10 ||
+                                            o.Vectors.Count > (int)this.numAllowedPoints.Value);
+
+            //foundObjects.RemoveAll(o => o.Vectors.Count < 10 || 
+            //                            o.Vectors.All(v => (Math.Abs(v.X - o.Vectors[0].X) < 0.5) ||
+            //                                               (Math.Abs(v.Y - o.Vectors[0].Y) < 0.5) || 
+            //                                               (Math.Abs(v.Z - o.Vectors[0].Z) < 0.5)));
+
+            //for (int i = 1; i < values.GetLength(0); i++)
+            //{
+            //    FoundObject fo;
+
+            //    for (int j = 1; j < values.GetLength(1); j++)
+            //    {
+            //        if (Math.Abs(values[i, j] - values[i - 1, j]) >= 10 ||
+            //            Math.Abs(values[i, j] - values[i, j - 1]) >= 10)
+            //        {
+            //            fo = new FoundObject(pointsCloud[i].Beams[j]);
+            //            foundObjects.Add(fo);
+            //        }
+
+            //        if (foundObjects.Count > 0)
+            //        {
+            //            if (foundObjects.Last().Vectors.Count < this.numAllowedPoints.Value)
+            //                foundObjects.Last().Vectors.Add(pointsCloud[i].Beams[j]);
+            //            else
+            //            {
+            //                fo = new FoundObject(pointsCloud[i].Beams[j]);
+            //                foundObjects.Add(fo);
+            //            }
+            //        }
+            //    }
+            //}
+
+            //foundObjects.RemoveAll(o => o.Vectors.Count < 10 || 
+            //                            o.Vectors.All(v => (Math.Abs(v.X - o.Vectors[0].X) < 0.5) ||
+            //                                               (Math.Abs(v.Y - o.Vectors[0].Y) < 0.5) || 
+            //                                               (Math.Abs(v.Z - o.Vectors[0].Z) < 0.5)));
         }
 
         #endregion
@@ -527,14 +571,14 @@ namespace CPDT_LR2
 
     public partial class VerSector
     {
-        public Vector[] Beam { get; set; }
+        public Vector[] Beams { get; set; }
 
         public VerSector()
         {
-            this.Beam = new Vector[32];
+            this.Beams = new Vector[32];
 
-            for (int i = 0; i < this.Beam.Length; i++)
-                this.Beam[i] = new Vector();
+            for (int i = 0; i < this.Beams.Length; i++)
+                this.Beams[i] = new Vector();
         }
     }
 
@@ -544,17 +588,22 @@ namespace CPDT_LR2
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
+        public double Distance { get; set; }
+        public bool IsInObject { get; set; }
 
 
         public Vector()
         {
             this.X = 0; this.Y = 0; this.Z = 0;
+            this.IsInObject = false;
+            this.Distance = 0;
         }
 
 
-        public Vector(double x, double y, double z)
+        public Vector(double x, double y, double z, double d)
         {
             this.X = x; this.Y = y; this.Z = z;
+            this.Distance = d;
         }
 
 
@@ -575,10 +624,10 @@ namespace CPDT_LR2
     {
         public List<Vector> Vectors { get; set; }
 
-
         public FoundObject(Vector p)
         {
             this.Vectors = new List<Vector> { p };
+            this.Vectors.Last().IsInObject = true;
         }
     }
 

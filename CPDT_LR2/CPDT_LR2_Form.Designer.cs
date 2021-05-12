@@ -62,6 +62,9 @@ namespace CPDT_LR2
             this.numCorAngle = new System.Windows.Forms.NumericUpDown();
             this.label12 = new System.Windows.Forms.Label();
             this.frameRate = new System.Windows.Forms.Timer(this.components);
+            this.numObjectRadius = new System.Windows.Forms.NumericUpDown();
+            this.label14 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.frameIsometric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frameOverhead)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFOVHor)).BeginInit();
@@ -77,6 +80,8 @@ namespace CPDT_LR2
             ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numObjectRadius)).BeginInit();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // frameIsometric
@@ -365,7 +370,7 @@ namespace CPDT_LR2
             // 
             // numAllowedPoints
             // 
-            this.numAllowedPoints.Location = new System.Drawing.Point(225, 29);
+            this.numAllowedPoints.Location = new System.Drawing.Point(279, 22);
             this.numAllowedPoints.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -384,11 +389,11 @@ namespace CPDT_LR2
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(198, 9);
+            this.label10.Location = new System.Drawing.Point(165, 26);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(116, 15);
+            this.label10.Size = new System.Drawing.Size(108, 15);
             this.label10.TabIndex = 1;
-            this.label10.Text = "Points in an object";
+            this.label10.Text = "Amount of points";
             // 
             // groupBox3
             // 
@@ -488,18 +493,64 @@ namespace CPDT_LR2
             this.label12.TabIndex = 1;
             this.label12.Text = "Height";
             // 
+            // numObjectRadius
+            // 
+            this.numObjectRadius.DecimalPlaces = 2;
+            this.numObjectRadius.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.numObjectRadius.Location = new System.Drawing.Point(87, 22);
+            this.numObjectRadius.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numObjectRadius.Name = "numObjectRadius";
+            this.numObjectRadius.Size = new System.Drawing.Size(63, 23);
+            this.numObjectRadius.TabIndex = 4;
+            this.numObjectRadius.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numObjectRadius.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            65536});
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(34, 26);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(47, 15);
+            this.label14.TabIndex = 1;
+            this.label14.Text = "Radius";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.numAllowedPoints);
+            this.groupBox4.Controls.Add(this.numObjectRadius);
+            this.groupBox4.Controls.Add(this.label10);
+            this.groupBox4.Controls.Add(this.label14);
+            this.groupBox4.ForeColor = System.Drawing.Color.White;
+            this.groupBox4.Location = new System.Drawing.Point(208, 9);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(352, 56);
+            this.groupBox4.TabIndex = 7;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Object parameters";
+            // 
             // CPDT_LR2_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1092, 608);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label10);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.boxLog);
-            this.Controls.Add(this.numAllowedPoints);
             this.Controls.Add(this.numFramerate);
             this.Controls.Add(this.btnPp);
             this.Controls.Add(this.label3);
@@ -531,6 +582,9 @@ namespace CPDT_LR2
             ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numObjectRadius)).EndInit();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -568,5 +622,8 @@ namespace CPDT_LR2
         private System.Windows.Forms.Timer frameRate;
         public System.Windows.Forms.PictureBox frameIsometric;
         public System.Windows.Forms.PictureBox frameOverhead;
+        private System.Windows.Forms.NumericUpDown numObjectRadius;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.GroupBox groupBox4;
     }
 }
