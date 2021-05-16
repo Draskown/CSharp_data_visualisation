@@ -21,7 +21,7 @@ namespace CPDT_LR2
 
         private readonly double[] shootingAngles, verAngles;
         private readonly double angleDelta;
-        private double distance, angleX, angleY;
+        private double distance, angleX, angleY, allowedDistance;
 
         private readonly int pointSize;
         private string count;
@@ -36,6 +36,7 @@ namespace CPDT_LR2
             foundObjects = new List<FoundObject>();
 
             started = paused = false;
+            allowedDistance = 0.2;
             angleX = angleY = 0;
             angleDelta = 0.01;
             distance = 150;
@@ -174,7 +175,7 @@ namespace CPDT_LR2
                                     pointsCloud[(int)azimut].Beams[laserId] = new Vector(distance * (float)horAngles[(int)azimut].Sin,
                                                                                             distance * (float)verAngles[laserId],
                                                                                             distance * (float)horAngles[(int)azimut].Cos,
-                                                                                            distance);
+                                                                                            distance, (int)azimut, laserId);
 
                                     laserId++;
                                     pointsCount++;
@@ -221,8 +222,6 @@ namespace CPDT_LR2
             Bitmap bmpIsometric = new Bitmap(this.frameIsometric.Width, this.frameIsometric.Height);
             Bitmap bmpOverhead = new Bitmap(this.frameOverhead.Width, this.frameOverhead.Height);
 
-            double allowedDistance = 0.2;
-
             double[][] rotationX = {
                         new double[] { 1, 0, 0},
                         new double[] { 0, Math.Cos(angleY), -Math.Sin(angleY)},
@@ -244,20 +243,12 @@ namespace CPDT_LR2
             {
                 for (int row = 0; row < pointsCloud.Length; row++)
                 {
-                    if (row < 180 - this.numFOVHor.Value / 2 || row > 180 + this.numFOVHor.Value / 2)
-                        continue;
-
                     for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                     {
-                        if (column > this.numFOVVer.Value)
-                            continue;
-
                         var v = pointsCloud[row].Beams[column];
 
-                        if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
+                        if (!CheckDrawability(v))
                             continue;
-
-                        bool conclusion = CheckPlanes(v);
 
                         Vector rotated = MatMul(rotationX, v);
                         rotated = MatMul(rotationY, rotated);
@@ -271,24 +262,24 @@ namespace CPDT_LR2
                         int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
                         alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                        if (conclusion)
-                            g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
+                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
                     }
                 }
 
                 foreach (var obj in foundObjects)
                 {
+                    if (!CheckDrawability(obj.Centroid))
+                        continue;
+
                     foreach (var v in obj.Vectors)
                     {
+                        if (!CheckDrawability(v))
+                            continue;
+
                         Vector rotated = MatMul(rotationX, v);
                         rotated = MatMul(rotationY, rotated);
 
                         Vector projected2d = MatMul(projection, rotated);
-
-                        if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
-                            continue;
-
-                        bool conclusion = CheckPlanes(v);
 
                         projected2d.Mult(distance);
 
@@ -297,9 +288,55 @@ namespace CPDT_LR2
                         int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
                         alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                        if (conclusion)
-                            g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
+                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
+                    }
 
+                    var minX = obj.Vectors.Min(v => v.X);
+                    var maxX = obj.Vectors.Max(v => v.X);
+                    var minY = obj.Vectors.Min(v => v.Y);
+                    var maxY = obj.Vectors.Max(v => v.Y);
+                    var minZ = obj.Vectors.Min(v => v.Z);
+                    var maxZ = obj.Vectors.Max(v => v.Z);
+
+                    var minMaxXYZ = new Vector[] {
+                        new Vector(obj.Centroid, minX, minY, minZ),
+                        new Vector(obj.Centroid, maxX, minY, minZ),
+                        new Vector(obj.Centroid, maxX, maxY, minZ),
+                        new Vector(obj.Centroid, minX, maxY, minZ),
+                        new Vector(obj.Centroid, minX, minY, maxZ),
+                        new Vector(obj.Centroid, maxX, minY, maxZ),
+                        new Vector(obj.Centroid, maxX, maxY, maxZ),
+                        new Vector(obj.Centroid, minX, maxY, maxZ)
+                    };
+
+                    for (int i = 0; i < minMaxXYZ.Length; i++)
+                    {
+                        Vector rotated = MatMul(rotationX, minMaxXYZ[i]);
+                        rotated = MatMul(rotationY, rotated);
+
+                        Vector projected2d = MatMul(projection, rotated);
+
+                        projected2d.Mult(distance);
+
+                        projected2d.Move(new PointF(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2));
+
+                        minMaxXYZ[i].X = projected2d.X;
+                        minMaxXYZ[i].Y = projected2d.Y;
+                    }
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                                  (float)minMaxXYZ[i].X, (float)minMaxXYZ[i].Y,
+                                  (float)minMaxXYZ[(i + 1) % 4].X, (float)minMaxXYZ[(i + 1) % 4].Y);
+
+                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                                  (float)minMaxXYZ[i + 4].X, (float)minMaxXYZ[i + 4].Y,
+                                  (float)minMaxXYZ[((i + 1) % 4) + 4].X, (float)minMaxXYZ[((i + 1) % 4) + 4].Y);
+
+                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                                  (float)minMaxXYZ[i].X, (float)minMaxXYZ[i].Y,
+                                  (float)minMaxXYZ[i + 4].X, (float)minMaxXYZ[i + 4].Y);
                     }
                 }
             }
@@ -328,17 +365,12 @@ namespace CPDT_LR2
             {
                 for (int row = 0; row < pointsCloud.Length; row++)
                 {
-                    if (row < 180 - this.numFOVHor.Value / 2 || row > 180 + this.numFOVHor.Value / 2)
-                        continue;
-
                     for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                     {
                         var v = pointsCloud[row].Beams[column];
 
-                        if (v.X <= allowedDistance && v.Y <= allowedDistance && v.Z <= allowedDistance)
+                        if (!CheckDrawability(v))
                             continue;
-
-                        bool conclusion = CheckPlanes(v);
 
                         Vector rotated = MatMul(rotationY, v);
                         rotated = MatMul(rotationZ, rotated);
@@ -350,8 +382,7 @@ namespace CPDT_LR2
                         int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
                         alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                        if (conclusion)
-                            g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X + 175, (float)projected2d.Z + 200, pointSize, pointSize);
+                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X + 175, (float)projected2d.Z + 200, pointSize, pointSize);
                     }
                 }
             }
@@ -359,22 +390,22 @@ namespace CPDT_LR2
             this.frameOverhead.Image = bmpOverhead;
         }
 
-        private bool CheckPlanes(Vector _v)
+        private bool CheckDrawability(Vector _v)
         {
-            bool[] c = new bool[] { false, false, false };
-
             double xyPlane = (double)this.numXYPlane.Value,
                    xzPlane = (double)this.numXZPlane.Value,
                    yzPlane = (double)this.numYZPlane.Value;
 
-            if (_v.X > yzPlane || _v.X < -yzPlane)
-                c[0] = true;
-            if (_v.Y > xzPlane || _v.Y < -xzPlane)
-                c[1] = true;
-            if (_v.Z > xyPlane || _v.Z < -xyPlane)
-                c[2] = true;
+            int row = _v.Azimut,
+                column = _v.Beam;
 
-            if (c[0] || c[1] || c[2])
+            if ((_v.X > yzPlane || _v.X < -yzPlane) ||
+                (_v.Y > xzPlane || _v.Y < -xzPlane) ||
+                (_v.Z > xyPlane || _v.Z < -xyPlane) ||
+                row < 180 - (int)this.numFOVHor.Value / 2 ||
+                row > 180 + (int)this.numFOVHor.Value / 2 ||
+                column > (int)this.numFOVVer.Value ||
+                (_v.X <= allowedDistance && _v.Y <= allowedDistance && _v.Z <= allowedDistance))
                 return false;
             else
                 return true;
@@ -389,19 +420,25 @@ namespace CPDT_LR2
         private void FindObjects()
         {
             Random r = new Random();
-            var randomVectors = new List<Vector>();
 
             for (int k = 0; k < (int)numK.Value; k++)
                 foundObjects.Add(new FoundObject(pointsCloud[r.Next(0, pointsCloud.Length)].Beams[r.Next(0, 32)]));
+
+            var temp = foundObjects;
 
             for (int sector = 0; sector < pointsCloud.Length; sector++)
             {
                 for (int beam = 0; beam < 32; beam++)
                 {
                     var comparablePoint = pointsCloud[sector].Beams[beam];
+
+                    if (!CheckDrawability(comparablePoint) ||
+                        comparablePoint.IsInObject)
+                        continue;
+
                     var minDistance = double.MaxValue;
 
-                    for (int k = 0; k < randomVectors.Count; k++)
+                    for (int k = 0; k < (int)numK.Value; k++)
                     {
                         var fo = foundObjects[k];
 
@@ -411,53 +448,38 @@ namespace CPDT_LR2
 
                         if (distance < minDistance)
                         {
+                            minDistance = distance;
+
                             fo.Vectors.Add(comparablePoint);
+                            comparablePoint.IsInObject = true;
                             fo.RecomputeCentroid();
                         }
                     }
                 }
             }
 
-            //for (int pointI = 0; pointI < pointsCloud.Length; pointI++)
-            //{
-            //    for (int beamI = 0; beamI < pointsCloud[pointI].Beams.Length; beamI++)
-            //    {
-            //        var basePoint = pointsCloud[pointI].Beams[beamI];
-
-            //        if (basePoint.Distance == 0 || basePoint.IsInObject)
-            //            continue;
-
-            //        var fo = new FoundObject(basePoint);
-
-            //        for (int pointJ = 0; pointJ < pointsCloud.Length; pointJ++)
-            //        {
-            //            for (int beamJ = 0; beamJ < pointsCloud[pointJ].Beams.Length; beamJ++)
-            //            {
-            //                var comparablePoint = pointsCloud[pointJ].Beams[beamJ];
-
-            //                if (comparablePoint.Distance == 0 || comparablePoint.IsInObject)
-            //                    continue;
-
-            //                var distance = Math.Sqrt(Math.Pow(Math.Abs(fo.Centroid.X - comparablePoint.X), 2) +
-            //                                         Math.Pow(Math.Abs(fo.Centroid.Y - comparablePoint.Y), 2) +
-            //                                         Math.Pow(Math.Abs(fo.Centroid.Z - comparablePoint.Z), 2));
-
-            //                if (distance <= (int)numObjectRadius.Value)
-            //                {
-            //                    comparablePoint.IsInObject = true;
-            //                    fo.Vectors.Add(comparablePoint);
-            //                    fo.RecomputeCentroid();
-            //                }
-            //            }
-            //        }
-
-            //        foundObjects.Add(fo);
-            //    }
-            //}
-
             if (foundObjects.Count > 0)
-                foundObjects.RemoveAll(o => o.Vectors.Count < (int)this.numMinDense.Value ||
-                                            o.Vectors.Count > (int)this.numMaxDense.Value);
+                foundObjects.RemoveAll(o =>
+                {
+                    var maxX = o.Vectors.Max(v => v.X);
+                    var minY = o.Vectors.Min(v => v.Y);
+                    var maxY = o.Vectors.Max(v => v.Y);
+                    var minZ = o.Vectors.Min(v => v.Z);
+                    var maxZ = o.Vectors.Max(v => v.Z);
+                    var minX = o.Vectors.Min(v => v.X);
+
+                    if (o.Vectors.Count < (int)this.numMinDensote.Value ||
+                        o.Vectors.Count > (int)this.numMaxDensote.Value ||
+                        maxX - minX > (double)numMaxRadius.Value ||
+                        maxX - minX < (double)numMinRadius.Value ||
+                        maxY - minY > (double)numMaxRadius.Value ||
+                        maxY - minY < (double)numMinRadius.Value ||
+                        maxZ - minZ > (double)numMaxRadius.Value ||
+                        maxZ - minZ < (double)numMinRadius.Value)
+                        return true;
+                    else
+                        return false;
+                });
         }
 
         #endregion
@@ -602,6 +624,8 @@ namespace CPDT_LR2
         public double Y { get; set; }
         public double Z { get; set; }
         public double Distance { get; set; }
+        public int Azimut { get; set; }
+        public int Beam { get; set; }
         public bool IsInObject { get; set; }
 
 
@@ -610,13 +634,26 @@ namespace CPDT_LR2
             this.X = 0; this.Y = 0; this.Z = 0;
             this.IsInObject = false;
             this.Distance = 0;
+            this.Azimut = 0;
+            this.Beam = 0;
         }
 
-
-        public Vector(double x, double y, double z, double d)
+        public Vector(Vector c, double x, double y, double z)
         {
             this.X = x; this.Y = y; this.Z = z;
+            this.IsInObject = c.IsInObject;
+            this.Distance = c.Distance;
+            this.Azimut = c.Azimut;
+            this.Beam = c.Beam;
+        }
+
+        public Vector(double x, double y, double z, double d, int a, int b)
+        {
+            this.X = x; this.Y = y; this.Z = z;
+            this.IsInObject = false;
             this.Distance = d;
+            this.Azimut = a;
+            this.Beam = b;
         }
 
 
@@ -638,7 +675,6 @@ namespace CPDT_LR2
         public List<Vector> Vectors { get; set; }
         public Vector Centroid { get; set; }
 
-
         public FoundObject(Vector p)
         {
             this.Vectors = new List<Vector> { p };
@@ -646,15 +682,16 @@ namespace CPDT_LR2
             this.Centroid = p;
         }
 
-
         public void RecomputeCentroid()
         {
             var x = this.Vectors.Sum(vs => vs.X) / this.Vectors.Count;
             var y = this.Vectors.Sum(vs => vs.Y) / this.Vectors.Count;
             var z = this.Vectors.Sum(vs => vs.Z) / this.Vectors.Count;
             var d = this.Vectors.Sum(vs => vs.Distance) / this.Vectors.Count;
+            int a = (int)(this.Vectors.Sum(vs => vs.Azimut) / this.Vectors.Count);
+            int b = (int)(this.Vectors.Sum(vs => vs.Beam) / this.Vectors.Count);
 
-            this.Centroid = new Vector(x, y, z, d);
+            this.Centroid = new Vector(x, y, z, d, a, b);
         }
     }
 

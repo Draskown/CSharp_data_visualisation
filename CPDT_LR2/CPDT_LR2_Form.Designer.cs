@@ -52,8 +52,6 @@ namespace CPDT_LR2
             this.numYZPlane = new System.Windows.Forms.NumericUpDown();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.numMinDense = new System.Windows.Forms.NumericUpDown();
-            this.label10 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.numCorWidth = new System.Windows.Forms.NumericUpDown();
             this.numCorHeight = new System.Windows.Forms.NumericUpDown();
@@ -62,22 +60,17 @@ namespace CPDT_LR2
             this.numCorAngle = new System.Windows.Forms.NumericUpDown();
             this.label12 = new System.Windows.Forms.Label();
             this.frameRate = new System.Windows.Forms.Timer(this.components);
-            this.numObjectRadius = new System.Windows.Forms.NumericUpDown();
-            this.label14 = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.numMaxDense = new System.Windows.Forms.NumericUpDown();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.numMaxDensote = new System.Windows.Forms.NumericUpDown();
+            this.numK = new System.Windows.Forms.NumericUpDown();
             this.numMinDensote = new System.Windows.Forms.NumericUpDown();
             this.label16 = new System.Windows.Forms.Label();
+            this.numMaxRadius = new System.Windows.Forms.NumericUpDown();
             this.numMinRadius = new System.Windows.Forms.NumericUpDown();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
-            this.numMaxRadius = new System.Windows.Forms.NumericUpDown();
-            this.label20 = new System.Windows.Forms.Label();
-            this.numK = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.frameIsometric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.frameOverhead)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFOVHor)).BeginInit();
@@ -88,26 +81,22 @@ namespace CPDT_LR2
             ((System.ComponentModel.ISupportInitialize)(this.numXZPlane)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numYZPlane)).BeginInit();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinDense)).BeginInit();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numObjectRadius)).BeginInit();
-            this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxDense)).BeginInit();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMaxDensote)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinDensote)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxRadius)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numK)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinDensote)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinRadius)).BeginInit();
             this.SuspendLayout();
             // 
             // frameIsometric
             // 
             this.frameIsometric.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.frameIsometric.Location = new System.Drawing.Point(14, 93);
+            this.frameIsometric.Location = new System.Drawing.Point(14, 144);
             this.frameIsometric.Name = "frameIsometric";
             this.frameIsometric.Size = new System.Drawing.Size(500, 500);
             this.frameIsometric.TabIndex = 0;
@@ -116,7 +105,7 @@ namespace CPDT_LR2
             // frameOverhead
             // 
             this.frameOverhead.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.frameOverhead.Location = new System.Drawing.Point(533, 93);
+            this.frameOverhead.Location = new System.Drawing.Point(533, 144);
             this.frameOverhead.Name = "frameOverhead";
             this.frameOverhead.Size = new System.Drawing.Size(300, 300);
             this.frameOverhead.TabIndex = 0;
@@ -125,7 +114,7 @@ namespace CPDT_LR2
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(217, 71);
+            this.label1.Location = new System.Drawing.Point(217, 122);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(94, 15);
             this.label1.TabIndex = 1;
@@ -134,7 +123,7 @@ namespace CPDT_LR2
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(634, 71);
+            this.label2.Location = new System.Drawing.Point(634, 122);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(99, 15);
             this.label2.TabIndex = 1;
@@ -142,7 +131,7 @@ namespace CPDT_LR2
             // 
             // btnPp
             // 
-            this.btnPp.Location = new System.Drawing.Point(14, 29);
+            this.btnPp.Location = new System.Drawing.Point(253, 48);
             this.btnPp.Name = "btnPp";
             this.btnPp.Size = new System.Drawing.Size(75, 23);
             this.btnPp.TabIndex = 2;
@@ -153,7 +142,7 @@ namespace CPDT_LR2
             // 
             this.boxLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.boxLog.ForeColor = System.Drawing.Color.White;
-            this.boxLog.Location = new System.Drawing.Point(852, 93);
+            this.boxLog.Location = new System.Drawing.Point(852, 144);
             this.boxLog.Multiline = true;
             this.boxLog.Name = "boxLog";
             this.boxLog.ReadOnly = true;
@@ -166,7 +155,7 @@ namespace CPDT_LR2
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(936, 71);
+            this.label3.Location = new System.Drawing.Point(936, 122);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(29, 15);
             this.label3.TabIndex = 1;
@@ -234,7 +223,7 @@ namespace CPDT_LR2
             this.groupBox1.Controls.Add(this.numFOVHor);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.ForeColor = System.Drawing.Color.White;
-            this.groupBox1.Location = new System.Drawing.Point(533, 420);
+            this.groupBox1.Location = new System.Drawing.Point(533, 471);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(156, 92);
             this.groupBox1.TabIndex = 5;
@@ -243,7 +232,7 @@ namespace CPDT_LR2
             // 
             // numFramerate
             // 
-            this.numFramerate.Location = new System.Drawing.Point(117, 29);
+            this.numFramerate.Location = new System.Drawing.Point(166, 52);
             this.numFramerate.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -267,7 +256,7 @@ namespace CPDT_LR2
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(111, 9);
+            this.label6.Location = new System.Drawing.Point(160, 32);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(74, 15);
             this.label6.TabIndex = 1;
@@ -381,39 +370,12 @@ namespace CPDT_LR2
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.ForeColor = System.Drawing.Color.White;
-            this.groupBox2.Location = new System.Drawing.Point(533, 533);
+            this.groupBox2.Location = new System.Drawing.Point(533, 584);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(300, 60);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Planes";
-            // 
-            // numMinDense
-            // 
-            this.numMinDense.Location = new System.Drawing.Point(302, 22);
-            this.numMinDense.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numMinDense.Name = "numMinDense";
-            this.numMinDense.Size = new System.Drawing.Size(63, 23);
-            this.numMinDense.TabIndex = 4;
-            this.numMinDense.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numMinDense.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(165, 26);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(131, 15);
-            this.label10.TabIndex = 1;
-            this.label10.Text = "Min amount of points";
             // 
             // groupBox3
             // 
@@ -425,7 +387,7 @@ namespace CPDT_LR2
             this.groupBox3.Controls.Add(this.numCorAngle);
             this.groupBox3.Controls.Add(this.label12);
             this.groupBox3.ForeColor = System.Drawing.Color.White;
-            this.groupBox3.Location = new System.Drawing.Point(699, 408);
+            this.groupBox3.Location = new System.Drawing.Point(699, 459);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(134, 114);
             this.groupBox3.TabIndex = 5;
@@ -513,82 +475,6 @@ namespace CPDT_LR2
             this.label12.TabIndex = 1;
             this.label12.Text = "Height";
             // 
-            // numObjectRadius
-            // 
-            this.numObjectRadius.DecimalPlaces = 2;
-            this.numObjectRadius.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.numObjectRadius.Location = new System.Drawing.Point(87, 22);
-            this.numObjectRadius.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.numObjectRadius.Name = "numObjectRadius";
-            this.numObjectRadius.Size = new System.Drawing.Size(63, 23);
-            this.numObjectRadius.TabIndex = 4;
-            this.numObjectRadius.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numObjectRadius.Value = new decimal(new int[] {
-            100,
-            0,
-            0,
-            65536});
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(34, 26);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(47, 15);
-            this.label14.TabIndex = 1;
-            this.label14.Text = "Radius";
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.numMaxDense);
-            this.groupBox4.Controls.Add(this.numMinDense);
-            this.groupBox4.Controls.Add(this.label15);
-            this.groupBox4.Controls.Add(this.numObjectRadius);
-            this.groupBox4.Controls.Add(this.label10);
-            this.groupBox4.Controls.Add(this.label14);
-            this.groupBox4.ForeColor = System.Drawing.Color.White;
-            this.groupBox4.Location = new System.Drawing.Point(208, 9);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(863, 56);
-            this.groupBox4.TabIndex = 7;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Object parameters";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(383, 26);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(136, 15);
-            this.label15.TabIndex = 1;
-            this.label15.Text = "Max amount of points";
-            // 
-            // numMaxDense
-            // 
-            this.numMaxDense.Location = new System.Drawing.Point(520, 22);
-            this.numMaxDense.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numMaxDense.Name = "numMaxDense";
-            this.numMaxDense.Size = new System.Drawing.Size(63, 23);
-            this.numMaxDense.TabIndex = 4;
-            this.numMaxDense.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numMaxDense.Value = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            // 
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.numMaxDensote);
@@ -602,16 +488,16 @@ namespace CPDT_LR2
             this.groupBox5.Controls.Add(this.label17);
             this.groupBox5.Controls.Add(this.label18);
             this.groupBox5.ForeColor = System.Drawing.Color.White;
-            this.groupBox5.Location = new System.Drawing.Point(1109, 152);
+            this.groupBox5.Location = new System.Drawing.Point(343, 12);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(235, 197);
+            this.groupBox5.Size = new System.Drawing.Size(545, 87);
             this.groupBox5.TabIndex = 7;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "KMeans bshit";
+            this.groupBox5.Text = "KMeans parameters";
             // 
             // numMaxDensote
             // 
-            this.numMaxDensote.Location = new System.Drawing.Point(148, 124);
+            this.numMaxDensote.Location = new System.Drawing.Point(342, 52);
             this.numMaxDensote.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -627,9 +513,22 @@ namespace CPDT_LR2
             0,
             0});
             // 
+            // numK
+            // 
+            this.numK.Location = new System.Drawing.Point(468, 40);
+            this.numK.Name = "numK";
+            this.numK.Size = new System.Drawing.Size(63, 23);
+            this.numK.TabIndex = 4;
+            this.numK.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numK.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
             // numMinDensote
             // 
-            this.numMinDensote.Location = new System.Drawing.Point(148, 87);
+            this.numMinDensote.Location = new System.Drawing.Point(342, 23);
             this.numMinDensote.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -648,62 +547,11 @@ namespace CPDT_LR2
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(11, 128);
+            this.label16.Location = new System.Drawing.Point(205, 56);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(136, 15);
             this.label16.TabIndex = 1;
             this.label16.Text = "Max amount of points";
-            // 
-            // numMinRadius
-            // 
-            this.numMinRadius.DecimalPlaces = 2;
-            this.numMinRadius.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.numMinRadius.Location = new System.Drawing.Point(127, 23);
-            this.numMinRadius.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.numMinRadius.Name = "numMinRadius";
-            this.numMinRadius.Size = new System.Drawing.Size(63, 23);
-            this.numMinRadius.TabIndex = 4;
-            this.numMinRadius.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numMinRadius.Value = new decimal(new int[] {
-            100,
-            0,
-            0,
-            65536});
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(11, 91);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(131, 15);
-            this.label17.TabIndex = 1;
-            this.label17.Text = "Min amount of points";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(51, 25);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(70, 15);
-            this.label18.TabIndex = 1;
-            this.label18.Text = "Min Radius";
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(46, 54);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(75, 15);
-            this.label19.TabIndex = 1;
-            this.label19.Text = "Max Radius";
             // 
             // numMaxRadius
             // 
@@ -729,35 +577,72 @@ namespace CPDT_LR2
             0,
             65536});
             // 
+            // numMinRadius
+            // 
+            this.numMinRadius.DecimalPlaces = 2;
+            this.numMinRadius.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.numMinRadius.Location = new System.Drawing.Point(127, 23);
+            this.numMinRadius.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numMinRadius.Name = "numMinRadius";
+            this.numMinRadius.Size = new System.Drawing.Size(63, 23);
+            this.numMinRadius.TabIndex = 4;
+            this.numMinRadius.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numMinRadius.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            65536});
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(46, 54);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(75, 15);
+            this.label19.TabIndex = 1;
+            this.label19.Text = "Max Radius";
+            // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(56, 162);
+            this.label20.Location = new System.Drawing.Point(416, 44);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(46, 15);
             this.label20.TabIndex = 1;
             this.label20.Text = "Means";
             // 
-            // numK
+            // label17
             // 
-            this.numK.Location = new System.Drawing.Point(108, 158);
-            this.numK.Name = "numK";
-            this.numK.Size = new System.Drawing.Size(63, 23);
-            this.numK.TabIndex = 4;
-            this.numK.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numK.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(205, 27);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(131, 15);
+            this.label17.TabIndex = 1;
+            this.label17.Text = "Min amount of points";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(51, 25);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(70, 15);
+            this.label18.TabIndex = 1;
+            this.label18.Text = "Min Radius";
             // 
             // CPDT_LR2_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1388, 608);
+            this.ClientSize = new System.Drawing.Size(1089, 663);
             this.Controls.Add(this.groupBox5);
-            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
@@ -788,23 +673,18 @@ namespace CPDT_LR2
             ((System.ComponentModel.ISupportInitialize)(this.numYZPlane)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinDense)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCorWidth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorHeight)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCorAngle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numObjectRadius)).EndInit();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxDense)).EndInit();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMaxDensote)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinDensote)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMinRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxRadius)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numK)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinDensote)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMaxRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinRadius)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -830,8 +710,6 @@ namespace CPDT_LR2
         private System.Windows.Forms.NumericUpDown numYZPlane;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.NumericUpDown numMinDense;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.NumericUpDown numCorWidth;
         private System.Windows.Forms.NumericUpDown numCorHeight;
@@ -842,11 +720,6 @@ namespace CPDT_LR2
         private System.Windows.Forms.Timer frameRate;
         public System.Windows.Forms.PictureBox frameIsometric;
         public System.Windows.Forms.PictureBox frameOverhead;
-        private System.Windows.Forms.NumericUpDown numObjectRadius;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.NumericUpDown numMaxDense;
-        private System.Windows.Forms.Label label15;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.NumericUpDown numMaxDensote;
         private System.Windows.Forms.NumericUpDown numK;
