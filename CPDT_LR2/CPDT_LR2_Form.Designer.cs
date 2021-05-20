@@ -396,9 +396,10 @@ namespace CPDT_LR2
             // 
             // numCorWidth
             // 
+            this.numCorWidth.DecimalPlaces = 2;
             this.numCorWidth.Location = new System.Drawing.Point(61, 81);
             this.numCorWidth.Maximum = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -407,16 +408,22 @@ namespace CPDT_LR2
             this.numCorWidth.TabIndex = 4;
             this.numCorWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numCorWidth.Value = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
             // 
             // numCorHeight
             // 
+            this.numCorHeight.DecimalPlaces = 2;
+            this.numCorHeight.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numCorHeight.Location = new System.Drawing.Point(61, 52);
             this.numCorHeight.Maximum = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -425,7 +432,7 @@ namespace CPDT_LR2
             this.numCorHeight.TabIndex = 4;
             this.numCorHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numCorHeight.Value = new decimal(new int[] {
-            1000,
+            10,
             0,
             0,
             0});
@@ -641,7 +648,7 @@ namespace CPDT_LR2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1089, 663);
+            this.ClientSize = new System.Drawing.Size(1090, 663);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);

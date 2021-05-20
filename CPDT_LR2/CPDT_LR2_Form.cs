@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using MathNet.Numerics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace CPDT_LR2
 {
@@ -11,19 +13,28 @@ namespace CPDT_LR2
     {
         #region Initialization and events
 
-        private readonly List<FoundObject> foundObjects;
-
         private readonly Angle[] horAngles;
+
         private readonly VerSector[] pointsCloud;
+
+        private readonly Vector[] arrayOfPlane;
+
         private readonly FileStream stream;
+
+        private readonly List<FoundObject> foundObjects;
 
         private PointF initialPoint;
 
-        private readonly double[] shootingAngles, verAngles;
-        private readonly double angleDelta;
-        private double distance, angleX, angleY, allowedDistance;
+        private readonly double[][] overheadRotationY, overheadRotationZ,
+                                    overheadProjection, isometricProjection;
 
-        private readonly int pointSize;
+        private readonly double[] shootingAngles, verAngles;
+
+        private readonly double angleDelta, allowedDistance;
+        private double isometricDistance, angleX, angleY;
+
+        private readonly int pointSize, overheadDistance;
+
         private string count;
 
         private bool paused, started;
@@ -36,10 +47,11 @@ namespace CPDT_LR2
             foundObjects = new List<FoundObject>();
 
             started = paused = false;
+            isometricDistance = 150;
             allowedDistance = 0.2;
+            overheadDistance = 25;
             angleX = angleY = 0;
             angleDelta = 0.01;
-            distance = 150;
             pointSize = 2;
 
             stream = new FileStream("UDPFromVelodyneTest_lidardata.pcap", FileMode.Open);
@@ -64,6 +76,34 @@ namespace CPDT_LR2
 
                 pointsCloud[i] = new VerSector();
             }
+
+            overheadRotationY = new double[][] {
+                        new double[] { Math.Cos(Math.PI), 0, Math.Sin(Math.PI) },
+                        new double[] { 0, 1, 0 },
+                        new double[] { Math.Sin(Math.PI), 0, Math.Cos(Math.PI) }
+            };
+
+            overheadRotationZ = new double[][] {
+                        new double[] { Math.Cos(Math.PI), -Math.Sin(Math.PI), 0},
+                        new double[] { Math.Sin(Math.PI), Math.Cos(Math.PI), 0},
+                        new double[] { 0, 0, 1}
+            };
+
+            overheadProjection = new double[][] {
+                new double[] { 1, 0, 0 },
+                new double[] { 0, 0, 0 },
+                new double[] { 0, 0, 1 }
+            };
+
+            isometricProjection = new double[][] {
+                    new double[] { 1, 0, 0 },
+                    new double[] { 0, 1, 0 }
+            };
+
+            arrayOfPlane = new Vector[8];
+
+            for (int i = 0; i < arrayOfPlane.Length; i++)
+                arrayOfPlane[i] = new Vector();
         }
 
 
@@ -74,6 +114,7 @@ namespace CPDT_LR2
             {
                 ReadData();
                 FindObjects();
+                ComputeDepth();
                 DrawData();
             };
 
@@ -126,8 +167,8 @@ namespace CPDT_LR2
             if (this.frameIsometric.Image == null)
                 return;
 
-            distance += e.Delta / 10;
-            distance = distance < 0 ? 0 : distance;
+            isometricDistance += e.Delta / 10;
+            isometricDistance = isometricDistance < 0 ? 0 : isometricDistance;
 
             DrawData();
         }
@@ -222,83 +263,107 @@ namespace CPDT_LR2
             Bitmap bmpIsometric = new Bitmap(this.frameIsometric.Width, this.frameIsometric.Height);
             Bitmap bmpOverhead = new Bitmap(this.frameOverhead.Width, this.frameOverhead.Height);
 
-            double[][] rotationX = {
+            Graphics iG = Graphics.FromImage(bmpIsometric);
+            Graphics oG = Graphics.FromImage(bmpOverhead);
+
+            double[][] isometricRotationX = {
                         new double[] { 1, 0, 0},
                         new double[] { 0, Math.Cos(angleY), -Math.Sin(angleY)},
                         new double[] { 0, Math.Sin(angleY), Math.Cos(angleY)}
             };
 
-            double[][] rotationY = {
+            double[][] isometricRotationY = {
                         new double[] { Math.Cos(angleX), 0, Math.Sin(angleX)},
                         new double[] { 0, 1, 0 },
                         new double[] { Math.Sin(angleX), 0, Math.Cos(angleX)}
             };
 
-            double[][] projection = {
-                    new double[] { 1, 0, 0 },
-                    new double[] { 0, 1, 0 }
-            };
-
-            using (Graphics g = Graphics.FromImage(bmpIsometric))
+            for (int row = 0; row < pointsCloud.Length; row++)
             {
-                for (int row = 0; row < pointsCloud.Length; row++)
+                for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                 {
-                    for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
-                    {
-                        var v = pointsCloud[row].Beams[column];
+                    var v = pointsCloud[row].Beams[column];
 
-                        if (!CheckDrawability(v))
-                            continue;
-
-                        Vector rotated = MatMul(rotationX, v);
-                        rotated = MatMul(rotationY, rotated);
-
-                        Vector projected2d = MatMul(projection, rotated);
-
-                        projected2d.Mult(distance);
-
-                        projected2d.Move(new PointF(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2));
-
-                        int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
-                        alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
-
-                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
-                    }
-                }
-
-                foreach (var obj in foundObjects)
-                {
-                    if (!CheckDrawability(obj.Centroid))
+                    if (!CheckDrawability(v))
                         continue;
 
-                    foreach (var v in obj.Vectors)
-                    {
-                        if (!CheckDrawability(v))
-                            continue;
+                    Vector rotated = MatMul(isometricRotationX, v);
+                    rotated = MatMul(isometricRotationY, rotated);
 
-                        Vector rotated = MatMul(rotationX, v);
-                        rotated = MatMul(rotationY, rotated);
+                    Vector projected2d = MatMul(isometricProjection, rotated);
 
-                        Vector projected2d = MatMul(projection, rotated);
+                    projected2d.Mult(isometricDistance);
 
-                        projected2d.Mult(distance);
+                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
 
-                        projected2d.Move(new PointF(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2));
+                    int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
+                    alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                        int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
-                        alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+                    iG.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
 
-                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
-                    }
+                    rotated = MatMul(overheadRotationY, v);
+                    rotated = MatMul(overheadRotationZ, rotated);
 
-                    var minX = obj.Vectors.Min(v => v.X);
-                    var maxX = obj.Vectors.Max(v => v.X);
-                    var minY = obj.Vectors.Min(v => v.Y);
-                    var maxY = obj.Vectors.Max(v => v.Y);
-                    var minZ = obj.Vectors.Min(v => v.Z);
-                    var maxZ = obj.Vectors.Max(v => v.Z);
+                    projected2d = MatMul(overheadProjection, rotated);
 
-                    var minMaxXYZ = new Vector[] {
+                    projected2d.Mult(overheadDistance);
+
+                    projected2d.Move(175, 0, 200);
+
+                    alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
+                    alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                    oG.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Z, pointSize, pointSize);
+                }
+            }
+
+            foreach (var obj in foundObjects)
+            {
+                if (!CheckDrawability(obj.Centroid))
+                    continue;
+
+                foreach (var v in obj.Vectors)
+                {
+                    if (!CheckDrawability(v))
+                        continue;
+
+                    Vector rotated = MatMul(isometricRotationX, v);
+                    rotated = MatMul(isometricRotationY, rotated);
+
+                    Vector projected2d = MatMul(isometricProjection, rotated);
+
+                    projected2d.Mult(isometricDistance);
+
+                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
+
+                    int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
+                    alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                    iG.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
+
+                    rotated = MatMul(overheadRotationY, v);
+                    rotated = MatMul(overheadRotationZ, rotated);
+
+                    projected2d = MatMul(overheadProjection, rotated);
+
+                    projected2d.Mult(overheadDistance);
+
+                    projected2d.Move(175, 0, 200);
+
+                    alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
+                    alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
+
+                    oG.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Z, pointSize, pointSize);
+                }
+
+                var minX = obj.Vectors.Min(v => v.X);
+                var maxX = obj.Vectors.Max(v => v.X);
+                var minY = obj.Vectors.Min(v => v.Y);
+                var maxY = obj.Vectors.Max(v => v.Y);
+                var minZ = obj.Vectors.Min(v => v.Z);
+                var maxZ = obj.Vectors.Max(v => v.Z);
+
+                var minMaxXYZ = new Vector[] {
                         new Vector(obj.Centroid, minX, minY, minZ),
                         new Vector(obj.Centroid, maxX, minY, minZ),
                         new Vector(obj.Centroid, maxX, maxY, minZ),
@@ -309,84 +374,111 @@ namespace CPDT_LR2
                         new Vector(obj.Centroid, minX, maxY, maxZ)
                     };
 
-                    for (int i = 0; i < minMaxXYZ.Length; i++)
-                    {
-                        Vector rotated = MatMul(rotationX, minMaxXYZ[i]);
-                        rotated = MatMul(rotationY, rotated);
+                var isometricMinMaxXYZ = minMaxXYZ;
 
-                        Vector projected2d = MatMul(projection, rotated);
+                var overheadMinMaxXYZ = new Vector[]
+                {
+                    new Vector(minMaxXYZ[2]),
+                    new Vector(minMaxXYZ[3]),
+                    new Vector(minMaxXYZ[6]),
+                    new Vector(minMaxXYZ[7])
+                };
 
-                        projected2d.Mult(distance);
+                for (int i = 0; i < isometricMinMaxXYZ.Length; i++)
+                {
+                    Vector rotated = MatMul(isometricRotationX, isometricMinMaxXYZ[i]);
+                    rotated = MatMul(isometricRotationY, rotated);
 
-                        projected2d.Move(new PointF(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2));
+                    Vector projected2d = MatMul(isometricProjection, rotated);
 
-                        minMaxXYZ[i].X = projected2d.X;
-                        minMaxXYZ[i].Y = projected2d.Y;
-                    }
+                    projected2d.Mult(isometricDistance);
 
-                    for (int i = 0; i < 4; i++)
-                    {
-                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
-                                  (float)minMaxXYZ[i].X, (float)minMaxXYZ[i].Y,
-                                  (float)minMaxXYZ[(i + 1) % 4].X, (float)minMaxXYZ[(i + 1) % 4].Y);
+                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
 
-                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
-                                  (float)minMaxXYZ[i + 4].X, (float)minMaxXYZ[i + 4].Y,
-                                  (float)minMaxXYZ[((i + 1) % 4) + 4].X, (float)minMaxXYZ[((i + 1) % 4) + 4].Y);
-
-                        g.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
-                                  (float)minMaxXYZ[i].X, (float)minMaxXYZ[i].Y,
-                                  (float)minMaxXYZ[i + 4].X, (float)minMaxXYZ[i + 4].Y);
-                    }
+                    isometricMinMaxXYZ[i].X = projected2d.X;
+                    isometricMinMaxXYZ[i].Y = projected2d.Y;
                 }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    iG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                             (float)isometricMinMaxXYZ[i].X, (float)isometricMinMaxXYZ[i].Y,
+                             (float)isometricMinMaxXYZ[(i + 1) % 4].X, (float)isometricMinMaxXYZ[(i + 1) % 4].Y);
+
+                    iG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)isometricMinMaxXYZ[i + 4].X, (float)isometricMinMaxXYZ[i + 4].Y,
+                              (float)isometricMinMaxXYZ[((i + 1) % 4) + 4].X, (float)isometricMinMaxXYZ[((i + 1) % 4) + 4].Y);
+
+                    iG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)isometricMinMaxXYZ[i].X, (float)isometricMinMaxXYZ[i].Y,
+                              (float)isometricMinMaxXYZ[i + 4].X, (float)isometricMinMaxXYZ[i + 4].Y);
+                }
+
+                for (int i = 0; i < overheadMinMaxXYZ.Length; i++)
+                {
+                    Vector rotated = MatMul(overheadRotationY, overheadMinMaxXYZ[i]);
+                    rotated = MatMul(overheadRotationZ, rotated);
+
+                    Vector projected2d = MatMul(overheadProjection, rotated);
+
+                    projected2d.Mult(overheadDistance);
+
+                    projected2d.Move(175, 0, 200);
+
+                    overheadMinMaxXYZ[i].X = projected2d.X;
+                    overheadMinMaxXYZ[i].Z = projected2d.Z;
+                }
+
+                oG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)overheadMinMaxXYZ[0].X, (float)overheadMinMaxXYZ[0].Z,
+                              (float)overheadMinMaxXYZ[1].X, (float)overheadMinMaxXYZ[1].Z);
+                oG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)overheadMinMaxXYZ[3].X, (float)overheadMinMaxXYZ[3].Z,
+                              (float)overheadMinMaxXYZ[1].X, (float)overheadMinMaxXYZ[1].Z);
+                oG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)overheadMinMaxXYZ[3].X, (float)overheadMinMaxXYZ[3].Z,
+                              (float)overheadMinMaxXYZ[2].X, (float)overheadMinMaxXYZ[2].Z);
+                oG.DrawLine(new Pen(Color.FromArgb(0, 0, 255)),
+                              (float)overheadMinMaxXYZ[0].X, (float)overheadMinMaxXYZ[0].Z,
+                              (float)overheadMinMaxXYZ[2].X, (float)overheadMinMaxXYZ[2].Z);
             }
+
+            Vector[] drawableArrayOfPlane = new Vector[4];
+
+            if (!arrayOfPlane.All(v => v.X == 0 && v.Y == 0 && v.Z == 0) &&
+                CheckDrawability(arrayOfPlane[4]) && CheckDrawability(arrayOfPlane[5]) &&
+                CheckDrawability(arrayOfPlane[6]) && CheckDrawability(arrayOfPlane[7]))
+            {
+                for (int i = 4; i < arrayOfPlane.Length; i++)
+                {
+                    drawableArrayOfPlane[i - 4] = arrayOfPlane[i];
+
+                    var v = drawableArrayOfPlane[i - 4];
+
+                    Vector rotated = MatMul(isometricRotationX, v);
+                    rotated = MatMul(isometricRotationY, rotated);
+
+                    Vector projected2d = MatMul(isometricProjection, rotated);
+
+                    projected2d.Mult(isometricDistance);
+
+                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
+
+                    drawableArrayOfPlane[i - 4] = projected2d;
+                }
+
+                var arrayOfPlanePoints = new PointF[4];
+
+                for (int i = 0; i < drawableArrayOfPlane.Length; i++)
+                    arrayOfPlanePoints[i] = new PointF((float)drawableArrayOfPlane[i].X,
+                                                       (float)drawableArrayOfPlane[i].Y);
+
+                iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+            }
+
+            iG.Dispose(); oG.Dispose();
 
             this.frameIsometric.Image = bmpIsometric;
-
-            rotationY = new double[][] {
-                        new double[] { Math.Cos(Math.PI), 0, Math.Sin(Math.PI) },
-                        new double[] { 0, 1, 0 },
-                        new double[] { Math.Sin(Math.PI), 0, Math.Cos(Math.PI) }
-            };
-
-            double[][] rotationZ = {
-                        new double[] { Math.Cos(Math.PI), -Math.Sin(Math.PI), 0},
-                        new double[] { Math.Sin(Math.PI), Math.Cos(Math.PI), 0},
-                        new double[] { 0, 0, 1}
-            };
-
-            projection = new double[][] {
-                new double[] { 1, 0, 0 },
-                new double[] { 0, 0, 0 },
-                new double[] { 0, 0, 1 }
-            };
-
-            using (Graphics g = Graphics.FromImage(bmpOverhead))
-            {
-                for (int row = 0; row < pointsCloud.Length; row++)
-                {
-                    for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
-                    {
-                        var v = pointsCloud[row].Beams[column];
-
-                        if (!CheckDrawability(v))
-                            continue;
-
-                        Vector rotated = MatMul(rotationY, v);
-                        rotated = MatMul(rotationZ, rotated);
-
-                        Vector projected2d = MatMul(projection, rotated);
-
-                        projected2d.Mult(25);
-
-                        int alpha = (int)((rotated.Z + 8.6) * 255 / 8.5 / 2);
-                        alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
-
-                        g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X + 175, (float)projected2d.Z + 200, pointSize, pointSize);
-                    }
-                }
-            }
-
             this.frameOverhead.Image = bmpOverhead;
         }
 
@@ -450,8 +542,10 @@ namespace CPDT_LR2
                         {
                             minDistance = distance;
 
-                            fo.Vectors.Add(comparablePoint);
+                            fo.Vectors.Add(new Vector(comparablePoint));
+
                             comparablePoint.IsInObject = true;
+
                             fo.RecomputeCentroid();
                         }
                     }
@@ -480,6 +574,140 @@ namespace CPDT_LR2
                     else
                         return false;
                 });
+        }
+
+        #endregion
+
+
+
+        #region Computing Corridor's Depth
+
+        private void ComputeDepth()
+        {
+            var angle = (int)numCorAngle.Value;
+            var width = (double)numCorWidth.Value;
+            var height = (double)numCorHeight.Value;
+            var totalDepth = (double)numCorWidth.Maximum;
+
+            Vector v1, v2, v3, v4, v1End, v2End, v3End, v4End;
+
+            Vector startingPoint = new Vector();
+            v1 = new Vector(startingPoint,
+                            (double)startingPoint.X + width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.Y - height,
+                            (double)startingPoint.Z + width * Math.Sin(-angle * Math.PI / 180));
+            v2 = new Vector(startingPoint,
+                            (double)startingPoint.X - width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.Y - height,
+                            (double)startingPoint.Z - width * Math.Sin(-angle * Math.PI / 180));
+            v3 = new Vector(startingPoint,
+                            (double)startingPoint.X + width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.Y + height,
+                            (double)startingPoint.Z + width * Math.Sin(-angle * Math.PI / 180));
+            v4 = new Vector(startingPoint,
+                            (double)startingPoint.X - width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.Y + height,
+                            (double)startingPoint.Z - width * Math.Sin(-angle * Math.PI / 180));
+
+            var threshForCountingAsAnObstacle = 0;
+
+            var depth = 6.0;
+
+            v1End = new Vector(v1.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
+                               v1.Y,
+                               v1.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
+                               depth, (int)(Math.Atan(width / depth) * 180 / Math.PI), 0);
+
+            v2End = new Vector(v2.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
+                               v2.Y,
+                               v2.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
+                               depth, (int)(360 - Math.Atan(width / depth) * 180 / Math.PI), 0);
+
+            v3End = new Vector(v3.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
+                               v3.Y,
+                               v3.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
+                               depth, (int)(360 - Math.Atan(width / depth) * 180 / Math.PI),
+                               (int)(height / 0.3125));
+
+            v4End = new Vector(v4.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
+                               v4.Y,
+                               v4.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
+                               depth, (int)(Math.Atan(width / depth) * 180 / Math.PI),
+                               (int)(height / 0.3125));
+
+            //foreach (var obj in foundObjects)
+            //{
+            //    foreach (var v in obj.Vectors)
+            //    {
+            //        var depth = 0.0;
+
+            //        while (depth < (double)numCorWidth.Maximum)
+            //        {
+            //            v1End.X = v1.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
+            //            v1End.Z = v1.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+
+            //            v2End.X = v2.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
+            //            v2End.Z = v2.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+
+            //            v3End.X = v3.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
+            //            v3End.Z = v3.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+
+            //            v4End.X = v4.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
+            //            v4End.Z = v4.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+
+            //            var minX = v1.X < v2.X ? v1.X < v1End.X ? v1.X < v2End.X ? v1.X : v2.X : v1End.X : v2End.X;
+            //            var maxX = v1.X > v2.X ? v1.X > v1End.X ? v1.X > v2End.X ? v1.X : v2.X : v1End.X : v2End.X;
+            //            var minZ = v1.Z < v2.Z ? v1.Z < v1End.Z ? v1.Z < v2End.Z ? v1.Z : v2.Z : v1End.Z : v2End.Z;
+            //            var maxZ = v1.Z > v2.Z ? v1.Z > v1End.Z ? v1.Z > v2End.Z ? v1.Z : v2.Z : v1End.Z : v2End.Z;
+
+            //            if (!(v.X > minX && v.X < maxX &&
+            //                  v.Y > minZ && v.Z < maxZ))
+            //            {
+            //                depth++;
+            //                continue;
+            //            }
+
+            //            if ((Math.Abs(v1End.X - v2End.X) < 5) && (Math.Abs(v1End.X - v.X) < 5) ||
+            //                (Math.Abs(v1End.Z - v2End.Z) < 5) && (Math.Abs(v1End.Z - v.Z) < 5))
+            //            {
+            //                threshForCountingAsAnObstacle++;
+            //                if (threshForCountingAsAnObstacle > 10)
+            //                {
+            //                    totalDepth = depth < totalDepth ? depth : totalDepth;
+            //                    break;
+            //                }
+            //            }
+
+            //            double[,] planeArray = {{ v1End.X, v2End.X, v3End.X, v.X },
+            //                                    { v1End.Y, v2End.Y, v3End.Y, v.Y },
+            //                                    { v1End.Z, v2End.Z, v3End.Z, v.Z },
+            //                                    { 1, 1, 1, 1 }};
+
+            //            var planeMatrix = Matrix<double>.Build.DenseOfArray(planeArray);
+
+            //            if (planeMatrix.Determinant() == 0)
+            //            {
+            //                threshForCountingAsAnObstacle++;
+            //                if (threshForCountingAsAnObstacle > 10)
+            //                {
+            //                    totalDepth = depth < totalDepth ? depth : totalDepth;
+            //                    break;
+            //                }
+            //            }
+
+            //            depth += 0.01;
+            //        }
+            //    }
+            //}
+
+            arrayOfPlane[0] = v1;
+            arrayOfPlane[1] = v2;
+            arrayOfPlane[2] = v3;
+            arrayOfPlane[3] = v4;
+            arrayOfPlane[4] = v1End;
+            arrayOfPlane[5] = v2End;
+            arrayOfPlane[6] = v4End;
+            arrayOfPlane[7] = v3End;
         }
 
         #endregion
@@ -638,6 +866,16 @@ namespace CPDT_LR2
             this.Beam = 0;
         }
 
+        public Vector(Vector _v)
+        {
+            this.X = _v.X; this.Y = _v.Y; this.Z = _v.Z;
+            this.IsInObject = _v.IsInObject;
+            this.Distance = _v.Distance;
+            this.Azimut = _v.Azimut;
+            this.Beam = _v.Beam;
+        }
+
+
         public Vector(Vector c, double x, double y, double z)
         {
             this.X = x; this.Y = y; this.Z = z;
@@ -656,16 +894,19 @@ namespace CPDT_LR2
             this.Beam = b;
         }
 
-
         public void Mult(double d)
         {
             this.X *= d; this.Y *= d; this.Z *= d;
         }
 
-
         public void Move(PointF p)
         {
             this.X += p.X; this.Y += p.Y;
+        }
+
+        public void Move(int deltaX, int deltaY, int deltaZ)
+        {
+            this.X += deltaX; this.Y += deltaY; this.Z += deltaZ;
         }
     }
 
