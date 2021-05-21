@@ -248,7 +248,7 @@ namespace CPDT_LR2
             this.numFramerate.TabIndex = 4;
             this.numFramerate.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numFramerate.Value = new decimal(new int[] {
-            2000,
+            200,
             0,
             0,
             0});
@@ -408,7 +408,7 @@ namespace CPDT_LR2
             this.numCorWidth.TabIndex = 4;
             this.numCorWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numCorWidth.Value = new decimal(new int[] {
-            10,
+            1,
             0,
             0,
             0});
@@ -432,7 +432,7 @@ namespace CPDT_LR2
             this.numCorHeight.TabIndex = 4;
             this.numCorHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numCorHeight.Value = new decimal(new int[] {
-            10,
+            1,
             0,
             0,
             0});
@@ -603,10 +603,10 @@ namespace CPDT_LR2
             this.numMinRadius.TabIndex = 4;
             this.numMinRadius.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numMinRadius.Value = new decimal(new int[] {
-            100,
+            2,
             0,
             0,
-            65536});
+            0});
             // 
             // label19
             // 

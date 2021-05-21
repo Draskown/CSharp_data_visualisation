@@ -17,7 +17,8 @@ namespace CPDT_LR2
 
         private readonly VerSector[] pointsCloud;
 
-        private readonly Vector[] arrayOfPlane;
+        private readonly Vector[] arrayOfPlaneFront, drawablePlaneFront,
+                                  arrayOfPlaneBack, drawablePlaneBack;
 
         private readonly FileStream stream;
 
@@ -100,10 +101,17 @@ namespace CPDT_LR2
                     new double[] { 0, 1, 0 }
             };
 
-            arrayOfPlane = new Vector[8];
+            arrayOfPlaneFront = new Vector[4];
+            arrayOfPlaneBack = new Vector[4];
 
-            for (int i = 0; i < arrayOfPlane.Length; i++)
-                arrayOfPlane[i] = new Vector();
+            for (int i = 0; i < arrayOfPlaneFront.Length; i++)
+            {
+                arrayOfPlaneFront[i] = new Vector();
+                arrayOfPlaneBack[i] = new Vector();
+            }
+
+            drawablePlaneFront = new Vector[4];
+            drawablePlaneBack = new Vector[4];
         }
 
 
@@ -443,17 +451,14 @@ namespace CPDT_LR2
                               (float)overheadMinMaxXYZ[2].X, (float)overheadMinMaxXYZ[2].Z);
             }
 
-            Vector[] drawableArrayOfPlane = new Vector[4];
-
-            if (!arrayOfPlane.All(v => v.X == 0 && v.Y == 0 && v.Z == 0) &&
-                CheckDrawability(arrayOfPlane[4]) && CheckDrawability(arrayOfPlane[5]) &&
-                CheckDrawability(arrayOfPlane[6]) && CheckDrawability(arrayOfPlane[7]))
+            if (!arrayOfPlaneFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
+                arrayOfPlaneFront.All(v => CheckDrawability(v)))
             {
-                for (int i = 4; i < arrayOfPlane.Length; i++)
+                for (int i = 0; i < arrayOfPlaneFront.Length; i++)
                 {
-                    drawableArrayOfPlane[i - 4] = arrayOfPlane[i];
+                    drawablePlaneFront[i] = arrayOfPlaneFront[i];
 
-                    var v = drawableArrayOfPlane[i - 4];
+                    var v = drawablePlaneFront[i];
 
                     Vector rotated = MatMul(isometricRotationX, v);
                     rotated = MatMul(isometricRotationY, rotated);
@@ -464,14 +469,43 @@ namespace CPDT_LR2
 
                     projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
 
-                    drawableArrayOfPlane[i - 4] = projected2d;
+                    drawablePlaneFront[i] = projected2d;
                 }
 
                 var arrayOfPlanePoints = new PointF[4];
 
-                for (int i = 0; i < drawableArrayOfPlane.Length; i++)
-                    arrayOfPlanePoints[i] = new PointF((float)drawableArrayOfPlane[i].X,
-                                                       (float)drawableArrayOfPlane[i].Y);
+                for (int i = 0; i < drawablePlaneFront.Length; i++)
+                    arrayOfPlanePoints[i] = new PointF((float)drawablePlaneFront[i].X,
+                                                       (float)drawablePlaneFront[i].Y);
+                iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+            }
+
+            if (!arrayOfPlaneBack.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
+            arrayOfPlaneBack.All(v => CheckDrawability(v)))
+            {
+                for (int i = 0; i < arrayOfPlaneBack.Length; i++)
+                {
+                    drawablePlaneBack[i] = arrayOfPlaneBack[i];
+
+                    var v = drawablePlaneBack[i];
+
+                    Vector rotated = MatMul(isometricRotationX, v);
+                    rotated = MatMul(isometricRotationY, rotated);
+
+                    Vector projected2d = MatMul(isometricProjection, rotated);
+
+                    projected2d.Mult(isometricDistance);
+
+                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
+
+                    drawablePlaneBack[i] = projected2d;
+                }
+
+                var arrayOfPlanePoints = new PointF[4];
+
+                for (int i = 0; i < drawablePlaneBack.Length; i++)
+                    arrayOfPlanePoints[i] = new PointF((float)drawablePlaneBack[i].X,
+                                                       (float)drawablePlaneBack[i].Y);
 
                 iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
             }
@@ -497,7 +531,7 @@ namespace CPDT_LR2
                 row < 180 - (int)this.numFOVHor.Value / 2 ||
                 row > 180 + (int)this.numFOVHor.Value / 2 ||
                 column > (int)this.numFOVVer.Value ||
-                (_v.X <= allowedDistance && _v.Y <= allowedDistance && _v.Z <= allowedDistance))
+                (_v.Distance <= allowedDistance))
                 return false;
             else
                 return true;
@@ -587,11 +621,14 @@ namespace CPDT_LR2
             var angle = (int)numCorAngle.Value;
             var width = (double)numCorWidth.Value;
             var height = (double)numCorHeight.Value;
-            var totalDepth = (double)numCorWidth.Maximum;
+            var totalDepthFront = (double)numCorWidth.Maximum;
+            var totalDepthBack = (double)numCorWidth.Maximum;
 
-            Vector v1, v2, v3, v4, v1End, v2End, v3End, v4End;
+            Vector v1, v2, v3, v4, v1EndFront, v2EndFront, v3EndFront, v4EndFront,
+                   v1EndBack, v2EndBack, v3EndBack, v4EndBack;
 
             Vector startingPoint = new Vector();
+
             v1 = new Vector(startingPoint,
                             (double)startingPoint.X + width * Math.Cos(-angle * Math.PI / 180),
                             (double)startingPoint.Y - height,
@@ -609,105 +646,155 @@ namespace CPDT_LR2
                             (double)startingPoint.Y + height,
                             (double)startingPoint.Z - width * Math.Sin(-angle * Math.PI / 180));
 
-            var threshForCountingAsAnObstacle = 0;
+            v1EndFront = new Vector(v1); v2EndFront = new Vector(v2);
+            v3EndFront = new Vector(v3); v4EndFront = new Vector(v4);
+            v1EndBack = new Vector(v1); v2EndBack = new Vector(v2);
+            v3EndBack = new Vector(v3); v4EndBack = new Vector(v4);
 
-            var depth = 6.0;
+            if (foundObjects.Count > 0)
+            {
+                foreach (var obj in foundObjects)
+                {
+                    var depthFront = 0.0;
+                    var depthBack = 0.0;
+                    var threshForCountingAsAnObstacleFront = 0;
+                    var threshForCountingAsAnObstacleBack = 0;
 
-            v1End = new Vector(v1.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
-                               v1.Y,
-                               v1.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
-                               depth, (int)(Math.Atan(width / depth) * 180 / Math.PI), 0);
+                    foreach (var v in obj.Vectors)
+                    {
+                        if (v.X == v.Y && v.X == v.Z && v.X == v.Distance)
+                            continue;
 
-            v2End = new Vector(v2.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
-                               v2.Y,
-                               v2.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
-                               depth, (int)(360 - Math.Atan(width / depth) * 180 / Math.PI), 0);
+                        while (depthFront < (double)numCorWidth.Maximum)
+                        {
+                            v1EndFront.X = v1.X + depthFront * Math.Sin(angle * Math.PI / 180);
+                            v1EndFront.Z = v1.Z + depthFront * Math.Cos(angle * Math.PI / 180);
+                            v2EndFront.X = v2.X + depthFront * Math.Sin(angle * Math.PI / 180);
+                            v2EndFront.Z = v2.Z + depthFront * Math.Cos(angle * Math.PI / 180);
+                            v3EndFront.X = v3.X + depthFront * Math.Sin(angle * Math.PI / 180);
+                            v3EndFront.Z = v3.Z + depthFront * Math.Cos(angle * Math.PI / 180);
+                            v4EndFront.X = v4.X + depthFront * Math.Sin(angle * Math.PI / 180);
+                            v4EndFront.Z = v4.Z + depthFront * Math.Cos(angle * Math.PI / 180);
 
-            v3End = new Vector(v3.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
-                               v3.Y,
-                               v3.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
-                               depth, (int)(360 - Math.Atan(width / depth) * 180 / Math.PI),
-                               (int)(height / 0.3125));
+                            var minXFront = v1.X < v2.X ? v1.X < v1EndFront.X ? v1.X < v2EndFront.X ? v1.X : v2EndFront.X : v1EndFront.X : v2.X;
+                            var maxXFront = v1.X > v2.X ? v1.X > v1EndFront.X ? v1.X > v2EndFront.X ? v1.X : v2EndFront.X : v1EndFront.X : v2.X;
+                            var minZFront = v1.Z < v2.Z ? v1.Z < v1EndFront.Z ? v1.Z < v2EndFront.Z ? v1.Z : v2EndFront.Z : v1EndFront.Z : v2.Z;
+                            var maxZFront = v1.Z > v2.Z ? v1.Z > v1EndFront.Z ? v1.Z > v2EndFront.Z ? v1.Z : v2EndFront.Z : v1EndFront.Z : v2.Z;
 
-            v4End = new Vector(v4.X + (int)(depth * Math.Sin(angle * Math.PI / 180)),
-                               v4.Y,
-                               v4.Z + (int)(depth * Math.Cos(angle * Math.PI / 180)),
-                               depth, (int)(Math.Atan(width / depth) * 180 / Math.PI),
-                               (int)(height / 0.3125));
+                            if (v.X > minXFront && v.X < maxXFront)
+                                if (v.Y > -height && v.Y < height)
+                                    if (v.Z > minZFront && v.Z < maxZFront)
+                                        if ((int)(v.Distance - depthFront) == 0)
+                                        {
+                                            threshForCountingAsAnObstacleFront++;
+                                            if (threshForCountingAsAnObstacleFront >= 10)
+                                            {
+                                                totalDepthFront = depthFront < totalDepthFront ? depthFront : totalDepthFront;
+                                                break;
+                                            }
+                                        }
 
-            //foreach (var obj in foundObjects)
-            //{
-            //    foreach (var v in obj.Vectors)
-            //    {
-            //        var depth = 0.0;
+                            depthFront += 0.01;
+                        }
 
-            //        while (depth < (double)numCorWidth.Maximum)
-            //        {
-            //            v1End.X = v1.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
-            //            v1End.Z = v1.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+                        while (depthBack < (double)numCorWidth.Maximum)
+                        {
+                            v1EndBack.X = v1.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
+                            v1EndBack.Z = v1.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
+                            v2EndBack.X = v2.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
+                            v2EndBack.Z = v2.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
+                            v3EndBack.X = v3.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
+                            v3EndBack.Z = v3.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
+                            v4EndBack.X = v4.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
+                            v4EndBack.Z = v4.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
 
-            //            v2End.X = v2.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
-            //            v2End.Z = v2.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+                            var minXBack = v1.X < v2.X ? v1.X < v1EndBack.X ? v1.X < v2EndBack.X ? v1.X : v2EndBack.X : v1EndBack.X : v2.X;
+                            var maxXBack = v1.X > v2.X ? v1.X > v1EndBack.X ? v1.X > v2EndBack.X ? v1.X : v2EndBack.X : v1EndBack.X : v2.X;
+                            var minZBack = v1.Z < v2.Z ? v1.Z < v1EndBack.Z ? v1.Z < v2EndBack.Z ? v1.Z : v2EndBack.Z : v1EndBack.Z : v2.Z;
+                            var maxZBack = v1.Z > v2.Z ? v1.Z > v1EndBack.Z ? v1.Z > v2EndBack.Z ? v1.Z : v2EndBack.Z : v1EndBack.Z : v2.Z;
 
-            //            v3End.X = v3.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
-            //            v3End.Z = v3.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+                            var minXBack = Math.Min(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
 
-            //            v4End.X = v4.X + (int)(depth * Math.Sin(angle * Math.PI / 180));
-            //            v4End.Z = v4.Z + (int)(depth * Math.Cos(angle * Math.PI / 180));
+                            if (depthBack >= 1.52)
+                                Console.WriteLine();
 
-            //            var minX = v1.X < v2.X ? v1.X < v1End.X ? v1.X < v2End.X ? v1.X : v2.X : v1End.X : v2End.X;
-            //            var maxX = v1.X > v2.X ? v1.X > v1End.X ? v1.X > v2End.X ? v1.X : v2.X : v1End.X : v2End.X;
-            //            var minZ = v1.Z < v2.Z ? v1.Z < v1End.Z ? v1.Z < v2End.Z ? v1.Z : v2.Z : v1End.Z : v2End.Z;
-            //            var maxZ = v1.Z > v2.Z ? v1.Z > v1End.Z ? v1.Z > v2End.Z ? v1.Z : v2.Z : v1End.Z : v2End.Z;
+                            if (v.X > minXBack && v.X < maxXBack)
+                                if (v.Y > -height && v.Y < height)
+                                    if (v.Z > minZBack && v.Z < maxZBack)
+                                        if ((int)(v.Distance - depthBack) == 0)
+                                        {
+                                            threshForCountingAsAnObstacleBack++;
+                                            if (threshForCountingAsAnObstacleBack >= 10)
+                                            {
+                                                totalDepthBack = depthBack < totalDepthBack ? depthBack : totalDepthBack;
+                                                break;
+                                            }
+                                        }
 
-            //            if (!(v.X > minX && v.X < maxX &&
-            //                  v.Y > minZ && v.Z < maxZ))
-            //            {
-            //                depth++;
-            //                continue;
-            //            }
+                            depthBack += 0.01;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                totalDepthFront = (double)numCorWidth.Maximum;
+                totalDepthBack = (double)numCorWidth.Maximum;
+            }
 
-            //            if ((Math.Abs(v1End.X - v2End.X) < 5) && (Math.Abs(v1End.X - v.X) < 5) ||
-            //                (Math.Abs(v1End.Z - v2End.Z) < 5) && (Math.Abs(v1End.Z - v.Z) < 5))
-            //            {
-            //                threshForCountingAsAnObstacle++;
-            //                if (threshForCountingAsAnObstacle > 10)
-            //                {
-            //                    totalDepth = depth < totalDepth ? depth : totalDepth;
-            //                    break;
-            //                }
-            //            }
+            v1EndFront.X = v1.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
+            v1EndFront.Z = v1.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v1EndFront.Distance = totalDepthFront;
+            v1EndFront.Azimut = (int)(Math.Atan(width / totalDepthFront) * 180 / Math.PI);
 
-            //            double[,] planeArray = {{ v1End.X, v2End.X, v3End.X, v.X },
-            //                                    { v1End.Y, v2End.Y, v3End.Y, v.Y },
-            //                                    { v1End.Z, v2End.Z, v3End.Z, v.Z },
-            //                                    { 1, 1, 1, 1 }};
+            v2EndFront.X = v2.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
+            v2EndFront.Z = v2.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v2EndFront.Distance = totalDepthFront;
+            v2EndFront.Azimut = (int)(360 - Math.Atan(width / totalDepthFront) * 180 / Math.PI);
 
-            //            var planeMatrix = Matrix<double>.Build.DenseOfArray(planeArray);
+            v3EndFront.X = v3.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
+            v3EndFront.Z = v3.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v3EndFront.Distance = totalDepthFront;
+            v3EndFront.Azimut = (int)(360 - Math.Atan(width / totalDepthFront) * 180 / Math.PI);
+            v3EndFront.Beam = (int)(height / 0.3125);
 
-            //            if (planeMatrix.Determinant() == 0)
-            //            {
-            //                threshForCountingAsAnObstacle++;
-            //                if (threshForCountingAsAnObstacle > 10)
-            //                {
-            //                    totalDepth = depth < totalDepth ? depth : totalDepth;
-            //                    break;
-            //                }
-            //            }
+            v4EndFront.X = v4.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
+            v4EndFront.Z = v4.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v4EndFront.Distance = totalDepthFront;
+            v4EndFront.Azimut = (int)(Math.Atan(width / totalDepthFront) * 180 / Math.PI);
+            v4EndFront.Beam = (int)(height / 0.3125);
 
-            //            depth += 0.01;
-            //        }
-            //    }
-            //}
+            v1EndBack.X = v1.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
+            v1EndBack.Z = v1.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v1EndBack.Distance = totalDepthBack;
+            v1EndBack.Azimut = (int)(180 + Math.Atan(width / totalDepthBack) * 180 / Math.PI);
 
-            arrayOfPlane[0] = v1;
-            arrayOfPlane[1] = v2;
-            arrayOfPlane[2] = v3;
-            arrayOfPlane[3] = v4;
-            arrayOfPlane[4] = v1End;
-            arrayOfPlane[5] = v2End;
-            arrayOfPlane[6] = v4End;
-            arrayOfPlane[7] = v3End;
+            v2EndBack.X = v2.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
+            v2EndBack.Z = v2.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v2EndBack.Distance = totalDepthBack;
+            v2EndBack.Azimut = (int)(180 - Math.Atan(width / totalDepthBack) * 180 / Math.PI);
+
+            v3EndBack.X = v3.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
+            v3EndBack.Z = v3.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v3EndBack.Distance = totalDepthBack;
+            v3EndBack.Azimut = (int)(180 - Math.Atan(width / totalDepthBack) * 180 / Math.PI);
+            v3EndBack.Beam = (int)(height / 0.3125);
+
+            v4EndBack.X = v4.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
+            v4EndBack.Z = v4.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v4EndBack.Distance = totalDepthBack;
+            v4EndBack.Azimut = (int)(180 + Math.Atan(width / totalDepthBack) * 180 / Math.PI);
+            v4EndBack.Beam = (int)(height / 0.3125);
+
+            arrayOfPlaneFront[0] = v1EndFront;
+            arrayOfPlaneFront[1] = v2EndFront;
+            arrayOfPlaneFront[2] = v4EndFront;
+            arrayOfPlaneFront[3] = v3EndFront;
+
+            arrayOfPlaneBack[0] = v1EndBack;
+            arrayOfPlaneBack[1] = v2EndBack;
+            arrayOfPlaneBack[2] = v4EndBack;
+            arrayOfPlaneBack[3] = v3EndBack;
         }
 
         #endregion
