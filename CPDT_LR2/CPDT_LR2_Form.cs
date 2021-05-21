@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using MathNet.Numerics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace CPDT_LR2
 {
@@ -32,9 +30,10 @@ namespace CPDT_LR2
         private readonly double[] shootingAngles, verAngles;
 
         private readonly double angleDelta, allowedDistance;
-        private double isometricDistance, angleX, angleY;
+        private double isometricDistance, angleX, angleY, 
+                       maximumDepth, totalDepthFront, totalDepthBack;
 
-        private readonly int pointSize, overheadDistance;
+        private readonly int pointSize, overheadDistance, planesAngle;
 
         private string count;
 
@@ -101,8 +100,14 @@ namespace CPDT_LR2
                     new double[] { 0, 1, 0 }
             };
 
-            arrayOfPlaneFront = new Vector[4];
-            arrayOfPlaneBack = new Vector[4];
+            planesAngle = (int)numCorAngle.Value;
+
+            maximumDepth = 10.0;
+            totalDepthFront = maximumDepth;
+            totalDepthBack = maximumDepth;
+
+            arrayOfPlaneFront = new Vector[8];
+            arrayOfPlaneBack = new Vector[8];
 
             for (int i = 0; i < arrayOfPlaneFront.Length; i++)
             {
@@ -110,8 +115,8 @@ namespace CPDT_LR2
                 arrayOfPlaneBack[i] = new Vector();
             }
 
-            drawablePlaneFront = new Vector[4];
-            drawablePlaneBack = new Vector[4];
+            drawablePlaneFront = new Vector[8];
+            drawablePlaneBack = new Vector[8];
         }
 
 
@@ -451,14 +456,14 @@ namespace CPDT_LR2
                               (float)overheadMinMaxXYZ[2].X, (float)overheadMinMaxXYZ[2].Z);
             }
 
-            if (!arrayOfPlaneFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
-                arrayOfPlaneFront.All(v => CheckDrawability(v)))
+            var checkableArrayFront = arrayOfPlaneFront.Where(v => v.Distance > 0);
+
+            if (!checkableArrayFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
+                checkableArrayFront.All(v => CheckDrawability(v)))
             {
                 for (int i = 0; i < arrayOfPlaneFront.Length; i++)
                 {
-                    drawablePlaneFront[i] = arrayOfPlaneFront[i];
-
-                    var v = drawablePlaneFront[i];
+                    var v = arrayOfPlaneFront[i];
 
                     Vector rotated = MatMul(isometricRotationX, v);
                     rotated = MatMul(isometricRotationY, rotated);
@@ -474,20 +479,21 @@ namespace CPDT_LR2
 
                 var arrayOfPlanePoints = new PointF[4];
 
-                for (int i = 0; i < drawablePlaneFront.Length; i++)
-                    arrayOfPlanePoints[i] = new PointF((float)drawablePlaneFront[i].X,
+                for (int i = 4; i < drawablePlaneFront.Length; i++)
+                    arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneFront[i].X,
                                                        (float)drawablePlaneFront[i].Y);
+
                 iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
             }
 
-            if (!arrayOfPlaneBack.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
-            arrayOfPlaneBack.All(v => CheckDrawability(v)))
+            var checkableArrayBack = arrayOfPlaneBack.Where(v => v.Distance > 0);
+
+            if (!checkableArrayBack.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
+                 checkableArrayBack.All(v => CheckDrawability(v)))
             {
                 for (int i = 0; i < arrayOfPlaneBack.Length; i++)
                 {
-                    drawablePlaneBack[i] = arrayOfPlaneBack[i];
-
-                    var v = drawablePlaneBack[i];
+                    var v = arrayOfPlaneBack[i];
 
                     Vector rotated = MatMul(isometricRotationX, v);
                     rotated = MatMul(isometricRotationY, rotated);
@@ -503,11 +509,72 @@ namespace CPDT_LR2
 
                 var arrayOfPlanePoints = new PointF[4];
 
-                for (int i = 0; i < drawablePlaneBack.Length; i++)
-                    arrayOfPlanePoints[i] = new PointF((float)drawablePlaneBack[i].X,
+                for (int i = 4; i < drawablePlaneBack.Length; i++)
+                    arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneBack[i].X,
                                                        (float)drawablePlaneBack[i].Y);
 
                 iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+            }
+
+            if (!checkableArrayFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0))
+            {
+                for (int i = 0; i < arrayOfPlaneFront.Length; i++)
+                {
+                    var v = arrayOfPlaneFront[i];
+
+                    Vector rotated = MatMul(overheadRotationY, v);
+                    rotated = MatMul(overheadRotationZ, rotated);
+
+                    Vector projected2d = MatMul(overheadProjection, rotated);
+
+                    projected2d.Mult(overheadDistance);
+
+                    projected2d.Move(175, 0, 200);
+
+                    drawablePlaneFront[i] = projected2d;
+                }
+
+                for (int i = 0; i < arrayOfPlaneBack.Length; i++)
+                {
+                    var v = arrayOfPlaneBack[i];
+
+                    Vector rotated = MatMul(overheadRotationY, v);
+                    rotated = MatMul(overheadRotationZ, rotated);
+
+                    Vector projected2d = MatMul(overheadProjection, rotated);
+
+                    projected2d.Mult(overheadDistance);
+
+                    projected2d.Move(175, 0, 200);
+
+                    drawablePlaneBack[i] = projected2d;
+                }
+
+                var arrayOfPlanePoints = new PointF[4];
+
+                if (!checkableArrayFront.All(v => CheckDrawability(v)))
+                {
+                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneBack[7].X, (float)drawablePlaneBack[7].Z);
+                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneBack[6].X, (float)drawablePlaneBack[6].Z);
+                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneBack[3].X, (float)drawablePlaneBack[3].Z);
+                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneBack[2].X, (float)drawablePlaneBack[2].Z);
+                }
+                else if (!checkableArrayBack.All(v => CheckDrawability(v)))
+                {
+                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[3].X, (float)drawablePlaneFront[3].Z);
+                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[2].X, (float)drawablePlaneFront[2].Z);
+                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z);
+                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z);
+                }
+                else
+                {
+                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneBack[6].X, (float)drawablePlaneBack[6].Z);
+                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneBack[7].X, (float)drawablePlaneBack[7].Z);
+                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z);
+                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z);
+                }
+
+                oG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
             }
 
             iG.Dispose(); oG.Dispose();
@@ -618,11 +685,8 @@ namespace CPDT_LR2
 
         private void ComputeDepth()
         {
-            var angle = (int)numCorAngle.Value;
             var width = (double)numCorWidth.Value;
             var height = (double)numCorHeight.Value;
-            var totalDepthFront = (double)numCorWidth.Maximum;
-            var totalDepthBack = (double)numCorWidth.Maximum;
 
             Vector v1, v2, v3, v4, v1EndFront, v2EndFront, v3EndFront, v4EndFront,
                    v1EndBack, v2EndBack, v3EndBack, v4EndBack;
@@ -630,21 +694,21 @@ namespace CPDT_LR2
             Vector startingPoint = new Vector();
 
             v1 = new Vector(startingPoint,
-                            (double)startingPoint.X + width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.X + width * Math.Cos(-planesAngle * Math.PI / 180),
                             (double)startingPoint.Y - height,
-                            (double)startingPoint.Z + width * Math.Sin(-angle * Math.PI / 180));
+                            (double)startingPoint.Z + width * Math.Sin(-planesAngle * Math.PI / 180));
             v2 = new Vector(startingPoint,
-                            (double)startingPoint.X - width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.X - width * Math.Cos(-planesAngle * Math.PI / 180),
                             (double)startingPoint.Y - height,
-                            (double)startingPoint.Z - width * Math.Sin(-angle * Math.PI / 180));
+                            (double)startingPoint.Z - width * Math.Sin(-planesAngle * Math.PI / 180));
             v3 = new Vector(startingPoint,
-                            (double)startingPoint.X + width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.X + width * Math.Cos(-planesAngle * Math.PI / 180),
                             (double)startingPoint.Y + height,
-                            (double)startingPoint.Z + width * Math.Sin(-angle * Math.PI / 180));
+                            (double)startingPoint.Z + width * Math.Sin(-planesAngle * Math.PI / 180));
             v4 = new Vector(startingPoint,
-                            (double)startingPoint.X - width * Math.Cos(-angle * Math.PI / 180),
+                            (double)startingPoint.X - width * Math.Cos(-planesAngle * Math.PI / 180),
                             (double)startingPoint.Y + height,
-                            (double)startingPoint.Z - width * Math.Sin(-angle * Math.PI / 180));
+                            (double)startingPoint.Z - width * Math.Sin(-planesAngle * Math.PI / 180));
 
             v1EndFront = new Vector(v1); v2EndFront = new Vector(v2);
             v3EndFront = new Vector(v3); v4EndFront = new Vector(v4);
@@ -665,21 +729,24 @@ namespace CPDT_LR2
                         if (v.X == v.Y && v.X == v.Z && v.X == v.Distance)
                             continue;
 
-                        while (depthFront < (double)numCorWidth.Maximum)
+                        while (depthFront < maximumDepth)
                         {
-                            v1EndFront.X = v1.X + depthFront * Math.Sin(angle * Math.PI / 180);
-                            v1EndFront.Z = v1.Z + depthFront * Math.Cos(angle * Math.PI / 180);
-                            v2EndFront.X = v2.X + depthFront * Math.Sin(angle * Math.PI / 180);
-                            v2EndFront.Z = v2.Z + depthFront * Math.Cos(angle * Math.PI / 180);
-                            v3EndFront.X = v3.X + depthFront * Math.Sin(angle * Math.PI / 180);
-                            v3EndFront.Z = v3.Z + depthFront * Math.Cos(angle * Math.PI / 180);
-                            v4EndFront.X = v4.X + depthFront * Math.Sin(angle * Math.PI / 180);
-                            v4EndFront.Z = v4.Z + depthFront * Math.Cos(angle * Math.PI / 180);
+                            v1EndFront.X = v1.X + depthFront * Math.Sin(planesAngle * Math.PI / 180);
+                            v1EndFront.Z = v1.Z + depthFront * Math.Cos(planesAngle * Math.PI / 180);
+                            v2EndFront.X = v2.X + depthFront * Math.Sin(planesAngle * Math.PI / 180);
+                            v2EndFront.Z = v2.Z + depthFront * Math.Cos(planesAngle * Math.PI / 180);
+                            v3EndFront.X = v3.X + depthFront * Math.Sin(planesAngle * Math.PI / 180);
+                            v3EndFront.Z = v3.Z + depthFront * Math.Cos(planesAngle * Math.PI / 180);
+                            v4EndFront.X = v4.X + depthFront * Math.Sin(planesAngle * Math.PI / 180);
+                            v4EndFront.Z = v4.Z + depthFront * Math.Cos(planesAngle * Math.PI / 180);
 
-                            var minXFront = v1.X < v2.X ? v1.X < v1EndFront.X ? v1.X < v2EndFront.X ? v1.X : v2EndFront.X : v1EndFront.X : v2.X;
-                            var maxXFront = v1.X > v2.X ? v1.X > v1EndFront.X ? v1.X > v2EndFront.X ? v1.X : v2EndFront.X : v1EndFront.X : v2.X;
-                            var minZFront = v1.Z < v2.Z ? v1.Z < v1EndFront.Z ? v1.Z < v2EndFront.Z ? v1.Z : v2EndFront.Z : v1EndFront.Z : v2.Z;
-                            var maxZFront = v1.Z > v2.Z ? v1.Z > v1EndFront.Z ? v1.Z > v2EndFront.Z ? v1.Z : v2EndFront.Z : v1EndFront.Z : v2.Z;
+                            var minXFront = Min(v1.X, v2.X, v1EndFront.X, v2EndFront.X);
+                            var maxXFront = Max(v1.X, v2.X, v1EndFront.X, v2EndFront.X);
+                            var minZFront = Min(v1.Z, v2.Z, v1EndFront.Z, v2EndFront.Z);
+                            var maxZFront = Max(v1.Z, v2.Z, v1EndFront.Z, v2EndFront.Z);
+
+                            if (depthFront >= 1.35)
+                                Console.WriteLine();
 
                             if (v.X > minXFront && v.X < maxXFront)
                                 if (v.Y > -height && v.Y < height)
@@ -697,26 +764,21 @@ namespace CPDT_LR2
                             depthFront += 0.01;
                         }
 
-                        while (depthBack < (double)numCorWidth.Maximum)
+                        while (depthBack < maximumDepth)
                         {
-                            v1EndBack.X = v1.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
-                            v1EndBack.Z = v1.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
-                            v2EndBack.X = v2.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
-                            v2EndBack.Z = v2.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
-                            v3EndBack.X = v3.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
-                            v3EndBack.Z = v3.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
-                            v4EndBack.X = v4.X + depthBack * Math.Sin((angle + 180) * Math.PI / 180);
-                            v4EndBack.Z = v4.Z + depthBack * Math.Cos((angle + 180) * Math.PI / 180);
+                            v1EndBack.X = v1.X + depthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+                            v1EndBack.Z = v1.Z + depthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
+                            v2EndBack.X = v2.X + depthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+                            v2EndBack.Z = v2.Z + depthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
+                            v3EndBack.X = v3.X + depthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+                            v3EndBack.Z = v3.Z + depthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
+                            v4EndBack.X = v4.X + depthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+                            v4EndBack.Z = v4.Z + depthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
 
-                            var minXBack = v1.X < v2.X ? v1.X < v1EndBack.X ? v1.X < v2EndBack.X ? v1.X : v2EndBack.X : v1EndBack.X : v2.X;
-                            var maxXBack = v1.X > v2.X ? v1.X > v1EndBack.X ? v1.X > v2EndBack.X ? v1.X : v2EndBack.X : v1EndBack.X : v2.X;
-                            var minZBack = v1.Z < v2.Z ? v1.Z < v1EndBack.Z ? v1.Z < v2EndBack.Z ? v1.Z : v2EndBack.Z : v1EndBack.Z : v2.Z;
-                            var maxZBack = v1.Z > v2.Z ? v1.Z > v1EndBack.Z ? v1.Z > v2EndBack.Z ? v1.Z : v2EndBack.Z : v1EndBack.Z : v2.Z;
-
-                            var minXBack = Math.Min(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
-
-                            if (depthBack >= 1.52)
-                                Console.WriteLine();
+                            var minXBack = Min(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
+                            var maxXBack = Max(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
+                            var minZBack = Min(v1.Z, v2.Z, v1EndBack.X, v2EndBack.Z);
+                            var maxZBack = Max(v1.Z, v2.Z, v1EndBack.X, v2EndBack.Z);
 
                             if (v.X > minXBack && v.X < maxXBack)
                                 if (v.Y > -height && v.Y < height)
@@ -738,63 +800,71 @@ namespace CPDT_LR2
             }
             else
             {
-                totalDepthFront = (double)numCorWidth.Maximum;
-                totalDepthBack = (double)numCorWidth.Maximum;
+                totalDepthFront = maximumDepth;
+                totalDepthBack = maximumDepth;
             }
 
-            v1EndFront.X = v1.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
-            v1EndFront.Z = v1.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v1EndFront.X = v1.X + totalDepthFront * Math.Sin(planesAngle * Math.PI / 180);
+            v1EndFront.Z = v1.Z + totalDepthFront * Math.Cos(planesAngle * Math.PI / 180);
             v1EndFront.Distance = totalDepthFront;
             v1EndFront.Azimut = (int)(Math.Atan(width / totalDepthFront) * 180 / Math.PI);
 
-            v2EndFront.X = v2.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
-            v2EndFront.Z = v2.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v2EndFront.X = v2.X + totalDepthFront * Math.Sin(planesAngle * Math.PI / 180);
+            v2EndFront.Z = v2.Z + totalDepthFront * Math.Cos(planesAngle * Math.PI / 180);
             v2EndFront.Distance = totalDepthFront;
             v2EndFront.Azimut = (int)(360 - Math.Atan(width / totalDepthFront) * 180 / Math.PI);
 
-            v3EndFront.X = v3.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
-            v3EndFront.Z = v3.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v3EndFront.X = v3.X + totalDepthFront * Math.Sin(planesAngle * Math.PI / 180);
+            v3EndFront.Z = v3.Z + totalDepthFront * Math.Cos(planesAngle * Math.PI / 180);
             v3EndFront.Distance = totalDepthFront;
             v3EndFront.Azimut = (int)(360 - Math.Atan(width / totalDepthFront) * 180 / Math.PI);
             v3EndFront.Beam = (int)(height / 0.3125);
 
-            v4EndFront.X = v4.X + totalDepthFront * Math.Sin(angle * Math.PI / 180);
-            v4EndFront.Z = v4.Z + totalDepthFront * Math.Cos(angle * Math.PI / 180);
+            v4EndFront.X = v4.X + totalDepthFront * Math.Sin(planesAngle * Math.PI / 180);
+            v4EndFront.Z = v4.Z + totalDepthFront * Math.Cos(planesAngle * Math.PI / 180);
             v4EndFront.Distance = totalDepthFront;
             v4EndFront.Azimut = (int)(Math.Atan(width / totalDepthFront) * 180 / Math.PI);
             v4EndFront.Beam = (int)(height / 0.3125);
 
-            v1EndBack.X = v1.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
-            v1EndBack.Z = v1.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v1EndBack.X = v1.X + totalDepthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+            v1EndBack.Z = v1.Z + totalDepthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
             v1EndBack.Distance = totalDepthBack;
             v1EndBack.Azimut = (int)(180 + Math.Atan(width / totalDepthBack) * 180 / Math.PI);
 
-            v2EndBack.X = v2.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
-            v2EndBack.Z = v2.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v2EndBack.X = v2.X + totalDepthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+            v2EndBack.Z = v2.Z + totalDepthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
             v2EndBack.Distance = totalDepthBack;
             v2EndBack.Azimut = (int)(180 - Math.Atan(width / totalDepthBack) * 180 / Math.PI);
 
-            v3EndBack.X = v3.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
-            v3EndBack.Z = v3.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v3EndBack.X = v3.X + totalDepthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+            v3EndBack.Z = v3.Z + totalDepthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
             v3EndBack.Distance = totalDepthBack;
             v3EndBack.Azimut = (int)(180 - Math.Atan(width / totalDepthBack) * 180 / Math.PI);
             v3EndBack.Beam = (int)(height / 0.3125);
 
-            v4EndBack.X = v4.X + totalDepthBack * Math.Sin((angle + 180) * Math.PI / 180);
-            v4EndBack.Z = v4.Z + totalDepthBack * Math.Cos((angle + 180) * Math.PI / 180);
+            v4EndBack.X = v4.X + totalDepthBack * Math.Sin((planesAngle + 180) * Math.PI / 180);
+            v4EndBack.Z = v4.Z + totalDepthBack * Math.Cos((planesAngle + 180) * Math.PI / 180);
             v4EndBack.Distance = totalDepthBack;
             v4EndBack.Azimut = (int)(180 + Math.Atan(width / totalDepthBack) * 180 / Math.PI);
             v4EndBack.Beam = (int)(height / 0.3125);
 
-            arrayOfPlaneFront[0] = v1EndFront;
-            arrayOfPlaneFront[1] = v2EndFront;
-            arrayOfPlaneFront[2] = v4EndFront;
-            arrayOfPlaneFront[3] = v3EndFront;
+            arrayOfPlaneFront[0] = v1;
+            arrayOfPlaneFront[1] = v2;
+            arrayOfPlaneFront[2] = v3;
+            arrayOfPlaneFront[3] = v4;
+            arrayOfPlaneFront[4] = v1EndFront;
+            arrayOfPlaneFront[5] = v2EndFront;
+            arrayOfPlaneFront[6] = v4EndFront;
+            arrayOfPlaneFront[7] = v3EndFront;
 
-            arrayOfPlaneBack[0] = v1EndBack;
-            arrayOfPlaneBack[1] = v2EndBack;
-            arrayOfPlaneBack[2] = v4EndBack;
-            arrayOfPlaneBack[3] = v3EndBack;
+            arrayOfPlaneBack[0] = v1;
+            arrayOfPlaneBack[1] = v2;
+            arrayOfPlaneBack[2] = v3;
+            arrayOfPlaneBack[3] = v4;
+            arrayOfPlaneBack[4] = v1EndBack;
+            arrayOfPlaneBack[5] = v2EndBack;
+            arrayOfPlaneBack[6] = v4EndBack;
+            arrayOfPlaneBack[7] = v3EndBack;
         }
 
         #endregion
@@ -833,7 +903,7 @@ namespace CPDT_LR2
 
 
 
-        #region MatMaths
+        #region Math Methods
 
         private double[][] Vec_To_Mat(Vector v)
         {
@@ -899,6 +969,36 @@ namespace CPDT_LR2
                 }
             }
             return result;
+        }
+
+
+        private double Max(double a, double b, double c, double d)
+        {
+            double minimumValue = a;
+
+            if (minimumValue < b)
+                minimumValue = b;
+            if (minimumValue < c)
+                minimumValue = c;
+            if (minimumValue < d)
+                minimumValue = d;
+
+            return minimumValue;
+        }
+
+
+        private double Min(double a, double b, double c, double d)
+        {
+            double minimumValue = a;
+
+            if (minimumValue > b)
+                minimumValue = b;
+            if (minimumValue > c)
+                minimumValue = c;
+            if (minimumValue > d)
+                minimumValue = d;
+
+            return minimumValue;
         }
 
         #endregion
