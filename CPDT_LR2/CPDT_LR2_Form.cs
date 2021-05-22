@@ -29,9 +29,9 @@ namespace CPDT_LR2
 
         private readonly double[] shootingAngles, verAngles;
 
-        private readonly double angleDelta, allowedDistance;
+        private readonly double angleDelta, allowedDistance, maximumDepth;
         private double isometricDistance, angleX, angleY, 
-                       maximumDepth, totalDepthFront, totalDepthBack;
+                       totalDepthFront, totalDepthBack;
 
         private readonly int pointSize, overheadDistance, planesAngle;
 
