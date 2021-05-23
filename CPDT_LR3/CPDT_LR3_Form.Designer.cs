@@ -41,7 +41,6 @@ namespace CPDT_LR3
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -54,6 +53,7 @@ namespace CPDT_LR3
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPDT_LR3_Form));
             this.frameGraph = new System.Windows.Forms.PictureBox();
             this.gridAddresses = new System.Windows.Forms.DataGridView();
@@ -62,9 +62,6 @@ namespace CPDT_LR3
             this.statHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.percentageHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gridGate = new System.Windows.Forms.DataGridView();
-            this.inHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.outHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnPP = new System.Windows.Forms.Button();
             this.gridLog = new System.Windows.Forms.DataGridView();
             this.messageHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -84,6 +81,9 @@ namespace CPDT_LR3
             this.chart3 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart4 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.inHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.outHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.frameGraph)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridAddresses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridStats)).BeginInit();
@@ -224,7 +224,6 @@ namespace CPDT_LR3
             // 
             // gridGate
             // 
-            this.gridGate.AllowUserToDeleteRows = false;
             this.gridGate.AllowUserToResizeColumns = false;
             this.gridGate.AllowUserToResizeRows = false;
             dataGridViewCellStyle9.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -264,30 +263,6 @@ namespace CPDT_LR3
             this.gridGate.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.gridGate.Size = new System.Drawing.Size(295, 195);
             this.gridGate.TabIndex = 1;
-            // 
-            // inHeader
-            // 
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.Fuchsia;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.Color.White;
-            this.inHeader.DefaultCellStyle = dataGridViewCellStyle11;
-            this.inHeader.HeaderText = "In";
-            this.inHeader.Name = "inHeader";
-            this.inHeader.ReadOnly = true;
-            this.inHeader.Width = 75;
-            // 
-            // outHeader
-            // 
-            this.outHeader.HeaderText = "Out";
-            this.outHeader.Name = "outHeader";
-            this.outHeader.ReadOnly = true;
-            // 
-            // valHeader
-            // 
-            this.valHeader.HeaderText = "Value";
-            this.valHeader.Name = "valHeader";
-            this.valHeader.ReadOnly = true;
             // 
             // btnPP
             // 
@@ -568,6 +543,27 @@ namespace CPDT_LR3
             this.chart4.TabIndex = 6;
             this.chart4.Text = "chart1";
             // 
+            // inHeader
+            // 
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.Fuchsia;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.Color.White;
+            this.inHeader.DefaultCellStyle = dataGridViewCellStyle11;
+            this.inHeader.HeaderText = "In";
+            this.inHeader.Name = "inHeader";
+            this.inHeader.Width = 75;
+            // 
+            // outHeader
+            // 
+            this.outHeader.HeaderText = "Out";
+            this.outHeader.Name = "outHeader";
+            // 
+            // valHeader
+            // 
+            this.valHeader.HeaderText = "Value";
+            this.valHeader.Name = "valHeader";
+            // 
             // CPDT_LR3_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -620,9 +616,6 @@ namespace CPDT_LR3
         private System.Windows.Forms.DataGridViewTextBoxColumn statHeader;
         private System.Windows.Forms.DataGridViewTextBoxColumn percentageHeader;
         private System.Windows.Forms.DataGridView gridGate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn inHeader;
-        private System.Windows.Forms.DataGridViewTextBoxColumn outHeader;
-        private System.Windows.Forms.DataGridViewTextBoxColumn valHeader;
         private System.Windows.Forms.Button btnPP;
         private System.Windows.Forms.DataGridView gridLog;
         private System.Windows.Forms.DataGridViewTextBoxColumn messageHeader;
@@ -642,6 +635,9 @@ namespace CPDT_LR3
         private System.Windows.Forms.DataVisualization.Charting.Chart chart3;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart4;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn inHeader;
+        private System.Windows.Forms.DataGridViewTextBoxColumn outHeader;
+        private System.Windows.Forms.DataGridViewTextBoxColumn valHeader;
     }
 }
 
