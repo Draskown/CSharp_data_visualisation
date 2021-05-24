@@ -25,10 +25,15 @@ namespace CPDT_LR3
         private readonly List<Connection> connections;
 
         private readonly List<Message> messages;
+        private Message sendMsg;
 
-        private bool paused;
+        private int[] packetAmountOfMessages;
+        private int amountOfMessagesSent;
+
+        private bool paused, sendingPending;
 
         private readonly string allPattern;
+
 
         public CPDT_LR3_Form()
         {
@@ -36,7 +41,9 @@ namespace CPDT_LR3
 
             this.timer.Interval = 1000;
 
-            paused = false;
+            amountOfMessagesSent = 0;
+
+            paused = sendingPending = false;
 
             allPattern = "*";
 
@@ -63,6 +70,14 @@ namespace CPDT_LR3
 
             this.timer.Tick += (ss, ee) =>
             {
+                if (sendingPending && packetAmountOfMessages[amountOfMessagesSent] == 1)
+                {
+                    AddMessage($"The send complete! (0x{sendMsg.From:X2} ({sendMsg.Value}) -> 0x{sendMsg.Into:X2})", sendMsg);
+                    amountOfMessagesSent++;
+
+                    sendingPending = amountOfMessagesSent < packetAmountOfMessages.Length;
+                }
+
                 ReadData();
                 DrawData(99);
             };
@@ -157,7 +172,7 @@ namespace CPDT_LR3
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Check your inputs please!", ex.ToString());
+                MessageBox.Show("Check your inputs please!\r\n" + ex.ToString());
                 grid.SelectedCells[0].Value = "";
             }
         }
@@ -181,16 +196,18 @@ namespace CPDT_LR3
 
             this.frameIndicator.BackColor = Color.Transparent;
 
+            var msg = new Message(message[6], message[7], message[9]);
+
             if (!FilterMessage(message))
             {
-                messages.Add(new Message(message[6], message[7], message[9]));
-                AddMessage("Message did not pass the filter", message);
+                messages.Add(msg);
+                AddMessage("Message did not pass the filter", msg);
                 this.frameIndicator.BackColor = Color.Red;
                 RemoveConnectionsAndDevices();
                 return;
             }
 
-            AddMessage($"0x{message[6]:X2} sent a value of {message[9]} to 0x{message[7]:X2}", message);
+            AddMessage($"0x{message[6]:X2} sent a value of {message[9]} to 0x{message[7]:X2}", msg);
 
             for (int i = 5; i < message.Length - 9; i++)
             {
@@ -419,7 +436,7 @@ namespace CPDT_LR3
         }
 
 
-        private void AddMessage(string text, byte[] message)
+        private void AddMessage(string text, Message message)
         {
             if (this.gridLog.Rows.Count == 3445)
                 this.gridLog.Rows.Clear();
@@ -429,16 +446,16 @@ namespace CPDT_LR3
 
             if (connections.Count > 0)
                 foreach (var c in connections)
-                    if ((c.From == message[6] || c.Into == message[6]) &&
-                        (c.Into == message[7] || c.From == message[7]))
+                    if ((c.From == message.From || c.Into == message.From) &&
+                        (c.Into == message.Into || c.From == message.Into))
                     {
-                        c.Values.Add(message[9]);
+                        c.Values.Add(message.Value);
                         c.TimeStamps.Add(DateTime.Now.ToString("HH:mm:ss"));
 
                         UpdatePlot(c);
                     }
 
-            messages.Add(new Message(message[6], message[7], message[9]));
+            messages.Add(message);
 
             this.gridLog.SelectionChanged -= DisplayTheValues;
 
@@ -577,25 +594,65 @@ namespace CPDT_LR3
 
         private void SendPacket(object sender, EventArgs e)
         {
-            try
+            if (!sendingPending)
             {
-                var totalAmountOfMessages = Convert.ToInt32(this.boxAmount.Text);
-                var period = Convert.ToInt32(this.boxPeriod.Text);
-                var from = Convert.ToByte(this.boxFrom.Text.Substring(2, 2));
-                var into = Convert.ToByte(this.boxInto.Text.Substring(2, 2));
-                var value = Convert.ToInt32(this.boxValue.Text);
-
-                var packetAmountOfMessages = new int[period];
-
-                Random r = new Random();
-
-                for (int i = 0; i < period; i++)
+                try
                 {
-                    if (totalAmountOfMessages == period)
-                        packetAmountOfMessages[i] = 1;
+                    var totalAmountOfMessages = Convert.ToInt32(this.boxAmount.Text);
+                    var period = Convert.ToInt32(this.boxPeriod.Text);
+                    var from = Convert.ToByte(this.boxFrom.Text.Substring(2, 2), 16);
+                    var into = Convert.ToByte(this.boxInto.Text.Substring(2, 2), 16);
+                    var value = Convert.ToInt32(this.boxValue.Text);
 
-                    if (totalAmountOfMessages < period)
+                    if (totalAmountOfMessages > period)
                     {
+                        MessageBox.Show("Amount of messages should be <= period");
+                        return;
+                    }
+                    if (from == into)
+                    {
+                        MessageBox.Show("Devices must differ");
+                        return;
+                    }
+
+                    Device sendingDevice = new Device(0);
+                    if (devices.All(d => d.ID != from))
+                    {
+                        sendingDevice.ID = from;
+                        devices.Add(sendingDevice);
+                    }
+                    else if (devices.All(d => d.ID != into))
+                    {
+                        sendingDevice.ID = into;
+                        devices.Add(sendingDevice);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < devices.Count; i++)
+                        {
+                            if (devices[i].ID == from || devices[i].ID == into)
+                                sendingDevice = devices[i];
+                        }
+                    }
+
+                    if (sendingDevice.Joints.All(j => j.ID != into))
+                        sendingDevice.Joints.Add(new Joint(into, 0));
+
+                    if (sendingDevice.Joints.All(j => j.ID != from))
+                        sendingDevice.Joints.Add(new Joint(from, 1));
+
+                    packetAmountOfMessages = new int[period];
+
+                    Random r = new Random();
+
+                    for (int i = 0; i < period; i++)
+                    {
+                        if (totalAmountOfMessages == period)
+                        {
+                            packetAmountOfMessages[i] = 1;
+                            continue;
+                        }
+
                         var diff = period - totalAmountOfMessages;
 
                         for (int j = 0; j < diff; j++)
@@ -606,11 +663,14 @@ namespace CPDT_LR3
                         else
                             packetAmountOfMessages[i] = 0;
                     }
+
+                    sendingPending = true;
+                    sendMsg = new Message(from, into, value);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Check the packet input please", ex.ToString());
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Check the packet input please \r\n" + ex.ToString());
+                }
             }
         }
 
