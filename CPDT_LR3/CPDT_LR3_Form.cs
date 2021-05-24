@@ -1,9 +1,10 @@
-﻿using System;
+﻿using System.Windows.Forms.DataVisualization.Charting;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
+using System.Drawing;
+using System.Linq;
+using System.IO;
+using System;
 
 namespace CPDT_LR3
 {
@@ -14,6 +15,8 @@ namespace CPDT_LR3
         private Bitmap bmp;
 
         private readonly TextBox[] textBoxes;
+        private readonly ComboBox[] combos;
+        private readonly Chart[] plots;
 
         private readonly FileStream stream;
 
@@ -44,11 +47,13 @@ namespace CPDT_LR3
             devices = new List<Device>();
             connections = new List<Connection>();
 
-            textBoxes = new[] { boxAmount, boxFrom, boxInto, boxPeriod, boxValue };
+            plots = new[] { chart1, chart2, chart3, chart4 };
+
+            combos = new[] { comboConnection1, comboConnection2, comboConnection3, comboConnection4 };
+
+            textBoxes = new[] { boxFrom, boxInto, boxValue, boxPeriod, boxAmount };
             foreach (var box in textBoxes)
                 LeaveText(box, null);
-
-            DrawBorder();
         }
 
 
@@ -69,16 +74,20 @@ namespace CPDT_LR3
             this.gridGate.Click += ClearSelection;
             this.gridAddresses.Click += ClearSelection;
 
+            this.gridAddresses.SelectionChanged += DisplayTheStats;
+            this.gridLog.SelectionChanged += DisplayTheValues;
+            this.gridGate.CellEndEdit += CheckInput;
+
+            foreach (var cb in combos)
+                cb.SelectedIndexChanged += ShowPlot;
+
             foreach (var box in textBoxes)
             {
                 box.Enter += EnterText;
                 box.Leave += LeaveText;
             }
 
-            this.gridAddresses.SelectionChanged += DisplayTheStats;
-            this.gridGate.CellEndEdit += CheckInput;
-
-            ClearSelection(null, null);
+            this.btnSend.Click += SendPacket;
 
             this.timer.Start();
         }
@@ -111,6 +120,28 @@ namespace CPDT_LR3
         }
 
 
+        private void DisplayTheValues(object sender, EventArgs e)
+        {
+            var grid = (DataGridView)sender;
+
+            if (grid.SelectedCells.Count == 0)
+                return;
+
+            var index = grid.SelectedCells[0].RowIndex;
+
+            var from = messages[index].From;
+            var into = messages[index].Into;
+            var value = messages[index].Value;
+
+            for (int i = 0; i < textBoxes.Length - 2; i++)
+                textBoxes[i].ForeColor = Color.White;
+
+            this.boxFrom.Text = $"0x{from:X2}";
+            this.boxInto.Text = $"0x{into:X2}";
+            this.boxValue.Text = $"{value}";
+        }
+
+
         private void CheckInput(object sender, DataGridViewCellEventArgs e)
         {
             var grid = (DataGridView)sender;
@@ -122,7 +153,7 @@ namespace CPDT_LR3
 
             try
             {
-                byte a = Convert.ToByte(value);
+                byte a = Convert.ToByte(value, 16);
             }
             catch (Exception ex)
             {
@@ -159,7 +190,7 @@ namespace CPDT_LR3
                 return;
             }
 
-            AddMessage($"Device 0x{message[6]:X2} sent a value of {message[9]} to device 0x{message[7]:X2}", message);
+            AddMessage($"0x{message[6]:X2} sent a value of {message[9]} to 0x{message[7]:X2}", message);
 
             for (int i = 5; i < message.Length - 9; i++)
             {
@@ -188,7 +219,7 @@ namespace CPDT_LR3
                     d.Joints.Add(new Joint(message[7], 1));
 
                     if (connections.All(c => c.From != message[7] && c.Into != message[6]))
-                        connections.Add(new Connection(message[6], message[7]));
+                        connections.Add(new Connection(message[6], message[7], message[9], DateTime.Now.ToString("HH:mm:ss")));
                 }
 
                 if (message[6] != d.ID && message[7] == d.ID &&
@@ -197,20 +228,18 @@ namespace CPDT_LR3
                     d.Joints.Add(new Joint(message[6], 0));
 
                     if (connections.All(c => c.From != message[6] && c.Into != message[7]))
-                        connections.Add(new Connection(message[7], message[6]));
+                        connections.Add(new Connection(message[7], message[6], message[9], DateTime.Now.ToString("HH:mm:ss")));
                 }
             }
 
             gridAddresses.Rows.Clear();
             devices.ForEach(d => gridAddresses.Rows.Add(new object[] { "0x" + d.ID.ToString("X2") }));
 
-            var combos = new ComboBox[] { comboConnection1, comboConnection2, comboConnection3, comboConnection4 };
-
             foreach (var box in combos)
             {
                 box.Items.Clear();
                 foreach (var c in connections)
-                    box.Items.Add($"0x{c.From:X2} -> 0x{c.Into:X2}");
+                    box.Items.Add($"0x{c.From:X2} <-> 0x{c.Into:X2}");
             }
         }
 
@@ -331,15 +360,15 @@ namespace CPDT_LR3
 
                 if (fromRuleStr != allPattern)
                 {
-                    fromRule = Convert.ToByte(row.Cells[0].Value.ToString());
+                    fromRule = Convert.ToByte(row.Cells[0].Value.ToString(), 16);
 
                     if (intoRuleStr != allPattern)
                     {
-                        intoRule = Convert.ToByte(row.Cells[1].Value.ToString());
+                        intoRule = Convert.ToByte(row.Cells[1].Value.ToString(), 16);
 
                         if (valueRuleStr != allPattern)
                         {
-                            valueRule = Convert.ToByte(row.Cells[2].Value.ToString());
+                            valueRule = Convert.ToByte(row.Cells[2].Value.ToString(), 16);
 
                             if (from == fromRule && into == intoRule && value <= valueRule)
                                 conclusion[ruleN] = true;
@@ -349,7 +378,7 @@ namespace CPDT_LR3
                     }
                     else if (valueRuleStr != allPattern)
                     {
-                        valueRule = Convert.ToByte(row.Cells[2].Value.ToString());
+                        valueRule = Convert.ToByte(row.Cells[2].Value.ToString(), 16);
 
                         if (from == fromRule && value <= valueRule)
                             conclusion[ruleN] = true;
@@ -361,11 +390,11 @@ namespace CPDT_LR3
                 {
                     if (intoRuleStr != allPattern)
                     {
-                        intoRule = Convert.ToByte(row.Cells[1].Value.ToString());
+                        intoRule = Convert.ToByte(row.Cells[1].Value.ToString(), 16);
 
                         if (valueRuleStr != allPattern)
                         {
-                            valueRule = Convert.ToByte(row.Cells[2].Value.ToString());
+                            valueRule = Convert.ToByte(row.Cells[2].Value.ToString(), 16);
 
                             if (into == intoRule && value <= valueRule)
                                 conclusion[ruleN] = true;
@@ -375,7 +404,7 @@ namespace CPDT_LR3
                     }
                     else if (valueRuleStr != allPattern)
                     {
-                        valueRule = Convert.ToByte(row.Cells[2].Value.ToString());
+                        valueRule = Convert.ToByte(row.Cells[2].Value.ToString(), 16);
 
                         if (value <= valueRule)
                             conclusion[ruleN] = true;
@@ -398,8 +427,31 @@ namespace CPDT_LR3
             if (messages.Count == 3445)
                 messages.Clear();
 
+            if (connections.Count > 0)
+                foreach (var c in connections)
+                    if ((c.From == message[6] || c.Into == message[6]) &&
+                        (c.Into == message[7] || c.From == message[7]))
+                    {
+                        c.Values.Add(message[9]);
+                        c.TimeStamps.Add(DateTime.Now.ToString("HH:mm:ss"));
+
+                        UpdatePlot(c);
+                    }
+
             messages.Add(new Message(message[6], message[7], message[9]));
-            gridLog.Rows.Add(new[] { text });
+
+            this.gridLog.SelectionChanged -= DisplayTheValues;
+
+            if (this.gridLog.SelectedCells.Count == 0)
+                foreach (var box in textBoxes)
+                {
+                    box.Text = "";
+                    LeaveText(box, null);
+                }
+
+            this.gridLog.Rows.Add(new[] { DateTime.Now.ToString("HH:mm:ss") + "> " + text });
+            this.gridLog.SelectionChanged += DisplayTheValues;
+            this.gridLog.FirstDisplayedScrollingRowIndex = this.gridLog.Rows.Count - 1;
         }
 
 
@@ -418,12 +470,12 @@ namespace CPDT_LR3
                     continue;
 
                 if (row.Cells[0].Value.ToString() != allPattern)
-                    from = Convert.ToByte(row.Cells[0].Value.ToString());
+                    from = Convert.ToByte(row.Cells[0].Value.ToString(), 16);
                 else
                     allFrom = true;
 
                 if (row.Cells[1].Value.ToString() != allPattern)
-                    into = (Convert.ToByte(row.Cells[0].Value.ToString()));
+                    into = (Convert.ToByte(row.Cells[0].Value.ToString(), 16));
                 else
                     allInto = true;
 
@@ -478,6 +530,94 @@ namespace CPDT_LR3
 
 
 
+        #region Plotting
+
+        private void ShowPlot(object sender, EventArgs e)
+        {
+            var cb = (ComboBox)sender;
+
+            var text = cb.SelectedItem.ToString();
+            var fi = text.Split(new[] { " <-> " }, StringSplitOptions.None);
+
+            foreach (var c in connections)
+            {
+                if ((c.From == Convert.ToByte(fi[0].Substring(2, 2), 16) ||
+                    c.From == Convert.ToByte(fi[0].Substring(2, 2), 16)) &&
+                    (c.Into == Convert.ToByte(fi[1].Substring(2, 2), 16) ||
+                     c.From == Convert.ToByte(fi[1].Substring(2, 2), 16)))
+                    UpdatePlot(c);
+            }
+        }
+
+
+        private void UpdatePlot(Connection c)
+        {
+            var str = $"0x{c.From:X2} <-> 0x{c.Into:X2}";
+
+            foreach (var cb in combos)
+                if (cb.SelectedItem != null)
+                    if (cb.SelectedItem.ToString() == str)
+                    {
+                        var index = cb.Name.Last();
+
+                        foreach (var p in plots)
+                            if (p.Name.Last() == index)
+                            {
+                                p.Series[0].Points.DataBindXY(c.TimeStamps, c.Values);
+                                p.Update();
+                            }
+                    }
+        }
+
+        #endregion
+
+
+
+        #region Packet sending
+
+        private void SendPacket(object sender, EventArgs e)
+        {
+            try
+            {
+                var totalAmountOfMessages = Convert.ToInt32(this.boxAmount.Text);
+                var period = Convert.ToInt32(this.boxPeriod.Text);
+                var from = Convert.ToByte(this.boxFrom.Text.Substring(2, 2));
+                var into = Convert.ToByte(this.boxInto.Text.Substring(2, 2));
+                var value = Convert.ToInt32(this.boxValue.Text);
+
+                var packetAmountOfMessages = new int[period];
+
+                Random r = new Random();
+
+                for (int i = 0; i < period; i++)
+                {
+                    if (totalAmountOfMessages == period)
+                        packetAmountOfMessages[i] = 1;
+
+                    if (totalAmountOfMessages < period)
+                    {
+                        var diff = period - totalAmountOfMessages;
+
+                        for (int j = 0; j < diff; j++)
+                            packetAmountOfMessages[r.Next(0, period)] = 99;
+
+                        if (packetAmountOfMessages[i] == 0)
+                            packetAmountOfMessages[i] = 1;
+                        else
+                            packetAmountOfMessages[i] = 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Check the packet input please", ex.ToString());
+            }
+        }
+
+        #endregion
+
+
+
         #region Button Action
 
         private void StartPause(object sender, EventArgs e)
@@ -504,20 +644,11 @@ namespace CPDT_LR3
 
         #region Crutches of visuals
 
-        private void DrawBorder()
-        {
-            bmp = new Bitmap(this.frameGraph.Width, this.frameGraph.Height);
-
-            using (Graphics g = Graphics.FromImage(bmp))
-                g.DrawRectangle(new Pen(Color.White), 1, 1, bmp.Width - 1, bmp.Height - 1);
-        }
-
-
         private void ClearSelection(object sender, EventArgs e)
         {
             try
             {
-                DataGridView grid = (DataGridView)sender;
+                var grid = (DataGridView)sender;
 
                 if (grid == null)
                 {
@@ -638,10 +769,14 @@ namespace CPDT_LR3
     {
         public byte From { get; set; }
         public byte Into { get; set; }
+        public List<int> Values { get; set; }
+        public List<string> TimeStamps { get; set; }
 
-        public Connection(byte f, byte i)
+        public Connection(byte f, byte i, int v, string d)
         {
             this.From = f; this.Into = i;
+            this.Values = new List<int> { v };
+            this.TimeStamps = new List<string> { d };
         }
     }
 

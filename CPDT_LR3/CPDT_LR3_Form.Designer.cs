@@ -41,10 +41,10 @@ namespace CPDT_LR3
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
@@ -53,7 +53,7 @@ namespace CPDT_LR3
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPDT_LR3_Form));
             this.frameGraph = new System.Windows.Forms.PictureBox();
             this.gridAddresses = new System.Windows.Forms.DataGridView();
@@ -62,9 +62,11 @@ namespace CPDT_LR3
             this.statHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.percentageHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gridGate = new System.Windows.Forms.DataGridView();
+            this.inHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.outHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnPP = new System.Windows.Forms.Button();
             this.gridLog = new System.Windows.Forms.DataGridView();
-            this.messageHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.frameIndicator = new System.Windows.Forms.PictureBox();
             this.comboConnection1 = new System.Windows.Forms.ComboBox();
             this.comboConnection3 = new System.Windows.Forms.ComboBox();
@@ -81,9 +83,8 @@ namespace CPDT_LR3
             this.chart3 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart4 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.timer = new System.Windows.Forms.Timer(this.components);
-            this.inHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.outHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.btnSend = new System.Windows.Forms.Button();
+            this.messageHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.frameGraph)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridAddresses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridStats)).BeginInit();
@@ -142,6 +143,7 @@ namespace CPDT_LR3
             this.gridAddresses.GridColor = System.Drawing.Color.White;
             this.gridAddresses.Location = new System.Drawing.Point(365, 12);
             this.gridAddresses.Name = "gridAddresses";
+            this.gridAddresses.ReadOnly = true;
             this.gridAddresses.RowHeadersVisible = false;
             this.gridAddresses.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.gridAddresses.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -264,6 +266,27 @@ namespace CPDT_LR3
             this.gridGate.Size = new System.Drawing.Size(295, 195);
             this.gridGate.TabIndex = 1;
             // 
+            // inHeader
+            // 
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.Fuchsia;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.Color.White;
+            this.inHeader.DefaultCellStyle = dataGridViewCellStyle11;
+            this.inHeader.HeaderText = "In";
+            this.inHeader.Name = "inHeader";
+            this.inHeader.Width = 75;
+            // 
+            // outHeader
+            // 
+            this.outHeader.HeaderText = "Out";
+            this.outHeader.Name = "outHeader";
+            // 
+            // valHeader
+            // 
+            this.valHeader.HeaderText = "Value";
+            this.valHeader.Name = "valHeader";
+            // 
             // btnPP
             // 
             this.btnPP.Location = new System.Drawing.Point(201, 322);
@@ -310,23 +333,12 @@ namespace CPDT_LR3
             this.gridLog.GridColor = System.Drawing.Color.White;
             this.gridLog.Location = new System.Drawing.Point(12, 358);
             this.gridLog.Name = "gridLog";
+            this.gridLog.ReadOnly = true;
             this.gridLog.RowHeadersVisible = false;
             this.gridLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.gridLog.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.gridLog.Size = new System.Drawing.Size(308, 260);
             this.gridLog.TabIndex = 1;
-            // 
-            // messageHeader
-            // 
-            dataGridViewCellStyle15.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle15.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.Color.Fuchsia;
-            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.Color.White;
-            this.messageHeader.DefaultCellStyle = dataGridViewCellStyle15;
-            this.messageHeader.HeaderText = "Header";
-            this.messageHeader.Name = "messageHeader";
-            this.messageHeader.ReadOnly = true;
-            this.messageHeader.Width = 300;
             // 
             // frameIndicator
             // 
@@ -385,14 +397,14 @@ namespace CPDT_LR3
             // 
             // boxPeriod
             // 
-            this.boxPeriod.Location = new System.Drawing.Point(118, 33);
+            this.boxPeriod.Location = new System.Drawing.Point(118, 20);
             this.boxPeriod.Name = "boxPeriod";
             this.boxPeriod.Size = new System.Drawing.Size(100, 23);
             this.boxPeriod.TabIndex = 4;
             // 
             // boxAmount
             // 
-            this.boxAmount.Location = new System.Drawing.Point(118, 62);
+            this.boxAmount.Location = new System.Drawing.Point(118, 49);
             this.boxAmount.Name = "boxAmount";
             this.boxAmount.Size = new System.Drawing.Size(100, 23);
             this.boxAmount.TabIndex = 4;
@@ -411,6 +423,7 @@ namespace CPDT_LR3
             this.groupBox1.Controls.Add(this.boxFrom);
             this.groupBox1.Controls.Add(this.boxValue);
             this.groupBox1.Controls.Add(this.boxPeriod);
+            this.groupBox1.Controls.Add(this.btnSend);
             this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(532, 212);
             this.groupBox1.Name = "groupBox1";
@@ -432,7 +445,7 @@ namespace CPDT_LR3
             chartArea1.AxisY.LabelStyle.Font = new System.Drawing.Font("Gilroy", 8.25F);
             chartArea1.AxisY.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea1.AxisY.LineColor = System.Drawing.Color.Transparent;
-            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.White;
+            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.Transparent;
             chartArea1.BackColor = System.Drawing.Color.Transparent;
             chartArea1.BorderColor = System.Drawing.Color.White;
             chartArea1.Name = "ChartArea1";
@@ -463,7 +476,7 @@ namespace CPDT_LR3
             chartArea2.AxisY.LabelStyle.Font = new System.Drawing.Font("Gilroy", 8.25F);
             chartArea2.AxisY.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea2.AxisY.LineColor = System.Drawing.Color.Transparent;
-            chartArea2.AxisY.MajorGrid.LineColor = System.Drawing.Color.White;
+            chartArea2.AxisY.MajorGrid.LineColor = System.Drawing.Color.Transparent;
             chartArea2.BackColor = System.Drawing.Color.Transparent;
             chartArea2.BorderColor = System.Drawing.Color.White;
             chartArea2.Name = "ChartArea1";
@@ -494,7 +507,7 @@ namespace CPDT_LR3
             chartArea3.AxisY.LabelStyle.Font = new System.Drawing.Font("Gilroy", 8.25F);
             chartArea3.AxisY.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea3.AxisY.LineColor = System.Drawing.Color.Transparent;
-            chartArea3.AxisY.MajorGrid.LineColor = System.Drawing.Color.White;
+            chartArea3.AxisY.MajorGrid.LineColor = System.Drawing.Color.Transparent;
             chartArea3.BackColor = System.Drawing.Color.Transparent;
             chartArea3.BorderColor = System.Drawing.Color.White;
             chartArea3.Name = "ChartArea1";
@@ -525,7 +538,7 @@ namespace CPDT_LR3
             chartArea4.AxisY.LabelStyle.Font = new System.Drawing.Font("Gilroy", 8.25F);
             chartArea4.AxisY.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea4.AxisY.LineColor = System.Drawing.Color.Transparent;
-            chartArea4.AxisY.MajorGrid.LineColor = System.Drawing.Color.White;
+            chartArea4.AxisY.MajorGrid.LineColor = System.Drawing.Color.Transparent;
             chartArea4.BackColor = System.Drawing.Color.Transparent;
             chartArea4.BorderColor = System.Drawing.Color.White;
             chartArea4.Name = "ChartArea1";
@@ -543,26 +556,26 @@ namespace CPDT_LR3
             this.chart4.TabIndex = 6;
             this.chart4.Text = "chart1";
             // 
-            // inHeader
+            // btnSend
             // 
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.Fuchsia;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.Color.White;
-            this.inHeader.DefaultCellStyle = dataGridViewCellStyle11;
-            this.inHeader.HeaderText = "In";
-            this.inHeader.Name = "inHeader";
-            this.inHeader.Width = 75;
+            this.btnSend.Location = new System.Drawing.Point(129, 77);
+            this.btnSend.Name = "btnSend";
+            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.TabIndex = 2;
+            this.btnSend.Text = "Send";
+            this.btnSend.UseVisualStyleBackColor = true;
             // 
-            // outHeader
+            // messageHeader
             // 
-            this.outHeader.HeaderText = "Out";
-            this.outHeader.Name = "outHeader";
-            // 
-            // valHeader
-            // 
-            this.valHeader.HeaderText = "Value";
-            this.valHeader.Name = "valHeader";
+            dataGridViewCellStyle15.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle15.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.Color.Fuchsia;
+            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.Color.White;
+            this.messageHeader.DefaultCellStyle = dataGridViewCellStyle15;
+            this.messageHeader.HeaderText = "Header";
+            this.messageHeader.Name = "messageHeader";
+            this.messageHeader.ReadOnly = true;
+            this.messageHeader.Width = 280;
             // 
             // CPDT_LR3_Form
             // 
@@ -613,12 +626,9 @@ namespace CPDT_LR3
         private System.Windows.Forms.DataGridView gridAddresses;
         private System.Windows.Forms.DataGridView gridStats;
         private System.Windows.Forms.DataGridViewTextBoxColumn addressHeader;
-        private System.Windows.Forms.DataGridViewTextBoxColumn statHeader;
-        private System.Windows.Forms.DataGridViewTextBoxColumn percentageHeader;
         private System.Windows.Forms.DataGridView gridGate;
         private System.Windows.Forms.Button btnPP;
         private System.Windows.Forms.DataGridView gridLog;
-        private System.Windows.Forms.DataGridViewTextBoxColumn messageHeader;
         private System.Windows.Forms.PictureBox frameIndicator;
         private System.Windows.Forms.ComboBox comboConnection1;
         private System.Windows.Forms.ComboBox comboConnection3;
@@ -638,6 +648,10 @@ namespace CPDT_LR3
         private System.Windows.Forms.DataGridViewTextBoxColumn inHeader;
         private System.Windows.Forms.DataGridViewTextBoxColumn outHeader;
         private System.Windows.Forms.DataGridViewTextBoxColumn valHeader;
+        private System.Windows.Forms.DataGridViewTextBoxColumn statHeader;
+        private System.Windows.Forms.DataGridViewTextBoxColumn percentageHeader;
+        private System.Windows.Forms.Button btnSend;
+        private System.Windows.Forms.DataGridViewTextBoxColumn messageHeader;
     }
 }
 
