@@ -24,8 +24,8 @@ namespace LRs
 
         int key = 0;
 
-        int[] x_freq_count = new int[10];
-        int[] y_freq_count = new int[10];
+        private readonly int[] x_freq_count = new int[10];
+        private readonly int[] y_freq_count = new int[10];
 
 
         public DVT_1_Form()
@@ -109,19 +109,18 @@ namespace LRs
         private void KeyParameter_TextChanged(object sender, EventArgs e)
         {
             TextBox box = (TextBox)sender;
-            int inx = Convert.ToInt32(box.Name.Substring(box.Name.Length - 1));
 
             if (box.Text != "" && box.Text != "-")
             {
                 if (box.Name.Contains("X1"))
-                    AscendingCheck(X1_s, inx);
+                    AscendingCheck(X1_s);
                 if (box.Name.Contains("X2"))
-                    AscendingCheck(X2_s, inx);
+                    AscendingCheck(X2_s);
             }
         }
 
 
-        static void AscendingCheck(TextBox[] array, int index)
+        static void AscendingCheck(TextBox[] array)
         {
             for (int i = 1; i < 4; i++)
             {
