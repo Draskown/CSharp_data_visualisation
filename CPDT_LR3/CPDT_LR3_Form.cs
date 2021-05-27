@@ -27,8 +27,10 @@ namespace CPDT_LR3
         private readonly List<Message> messages;
         private Message sendMsg;
 
+        private readonly DateTime startTime;
+
         private int[] packetAmountOfMessages;
-        private int amountOfMessagesSent;
+        private int amountOfMessagesSent, time;
 
         private bool paused, sendingPending;
 
@@ -61,21 +63,42 @@ namespace CPDT_LR3
             textBoxes = new[] { boxFrom, boxInto, boxValue, boxPeriod, boxAmount };
             foreach (var box in textBoxes)
                 LeaveText(box, null);
+
+            startTime = DateTime.Now;
+            time = 0;
         }
 
 
         private void CPDT_LR3_Form_Load(object sender, EventArgs e)
         {
-            this.Click += ClearSelection;
-
             this.timer.Tick += (ss, ee) =>
             {
-                if (sendingPending && packetAmountOfMessages[amountOfMessagesSent] == 1)
+                if (sendingPending)
                 {
-                    AddMessage($"The send complete! (0x{sendMsg.From:X2} ({sendMsg.Value}) -> 0x{sendMsg.Into:X2})", sendMsg);
-                    amountOfMessagesSent++;
+                    do
+                    {
+                        if (!FilterMessage(sendMsg))
+                        {
+                            messages.Add(sendMsg);
+                            AddMessage("Message did not pass the filter", sendMsg);
+                            this.frameIndicator.BackColor = Color.Red;
+                            amountOfMessagesSent++;
+                            sendingPending = amountOfMessagesSent < packetAmountOfMessages.Length;
+                            break;
+                        }
+                        if (packetAmountOfMessages[amountOfMessagesSent] == 1)
+                        {
+                            AddMessage($"The send complete! (0x{sendMsg.From:X2} ({sendMsg.Value}) -> 0x{sendMsg.Into:X2})", sendMsg);
+                            amountOfMessagesSent++;
 
-                    sendingPending = amountOfMessagesSent < packetAmountOfMessages.Length;
+                            sendingPending = amountOfMessagesSent < packetAmountOfMessages.Length;
+                        }
+                        else
+                        {
+                            amountOfMessagesSent++;
+                            sendingPending = amountOfMessagesSent < packetAmountOfMessages.Length;
+                        }
+                    } while (false);
                 }
 
                 ReadData();
@@ -84,17 +107,9 @@ namespace CPDT_LR3
 
             this.btnPP.Click += StartPause;
 
-            this.gridStats.Click += ClearSelection;
-            this.gridLog.Click += ClearSelection;
-            this.gridGate.Click += ClearSelection;
-            this.gridAddresses.Click += ClearSelection;
-
             this.gridAddresses.SelectionChanged += DisplayTheStats;
             this.gridLog.SelectionChanged += DisplayTheValues;
             this.gridGate.CellEndEdit += CheckInput;
-
-            foreach (var cb in combos)
-                cb.SelectedIndexChanged += ShowPlot;
 
             foreach (var box in textBoxes)
             {
@@ -137,23 +152,26 @@ namespace CPDT_LR3
 
         private void DisplayTheValues(object sender, EventArgs e)
         {
-            var grid = (DataGridView)sender;
+            if (!sendingPending)
+            {
+                var grid = (DataGridView)sender;
 
-            if (grid.SelectedCells.Count == 0)
-                return;
+                if (grid.SelectedCells.Count == 0)
+                    return;
 
-            var index = grid.SelectedCells[0].RowIndex;
+                var index = grid.SelectedCells[0].RowIndex;
 
-            var from = messages[index].From;
-            var into = messages[index].Into;
-            var value = messages[index].Value;
+                var from = messages[index].From;
+                var into = messages[index].Into;
+                var value = messages[index].Value;
 
-            for (int i = 0; i < textBoxes.Length - 2; i++)
-                textBoxes[i].ForeColor = Color.White;
+                for (int i = 0; i < textBoxes.Length - 2; i++)
+                    textBoxes[i].ForeColor = Color.White;
 
-            this.boxFrom.Text = $"0x{from:X2}";
-            this.boxInto.Text = $"0x{into:X2}";
-            this.boxValue.Text = $"{value}";
+                this.boxFrom.Text = $"0x{from:X2}";
+                this.boxInto.Text = $"0x{into:X2}";
+                this.boxValue.Text = $"{value}";
+            }
         }
 
 
@@ -192,13 +210,11 @@ namespace CPDT_LR3
 
             stream.Read(message, 0, message.Length);
 
-            int messageIndex = (int)(stream.Position / message.Length - 1);
-
             this.frameIndicator.BackColor = Color.Transparent;
 
             var msg = new Message(message[6], message[7], message[9]);
 
-            if (!FilterMessage(message))
+            if (!FilterMessage(msg))
             {
                 messages.Add(msg);
                 AddMessage("Message did not pass the filter", msg);
@@ -209,43 +225,27 @@ namespace CPDT_LR3
 
             AddMessage($"0x{message[6]:X2} sent a value of {message[9]} to 0x{message[7]:X2}", msg);
 
-            for (int i = 5; i < message.Length - 9; i++)
-            {
-                if (i == 6)
-                {
-                    messages[messageIndex].From = message[i];
-                    if (devices.All(d => d.ID != message[i]))
-                        devices.Add(new Device(message[i]));
-                }
-                if (i == 7)
-                {
-                    messages[messageIndex].Into = message[i];
-                    if (devices.All(d => d.ID != message[i]))
-                        devices.Add(new Device(message[i]));
+            if (devices.All(d => d.ID != msg.From))
+                devices.Add(new Device(msg.From));
 
-                }
-                if (i == 9)
-                    messages[messageIndex].Value = message[i];
-            }
+            if (devices.All(d => d.ID != msg.Into))
+                devices.Add(new Device(msg.Into));
 
             foreach (var d in devices)
             {
-                if (message[6] == d.ID && message[7] != d.ID &&
+                if (message[6] == d.ID &&
                     d.Joints.All(j => j.ID != message[7]))
                 {
                     d.Joints.Add(new Joint(message[7], 1));
 
-                    if (connections.All(c => c.From != message[7] && c.Into != message[6]))
-                        connections.Add(new Connection(message[6], message[7], message[9], DateTime.Now.ToString("HH:mm:ss")));
+                    time = (Int16)(DateTime.Now - startTime).TotalSeconds;
+                    connections.Add(new Connection(message[6], message[7], message[9], time.ToString()));
                 }
 
-                if (message[6] != d.ID && message[7] == d.ID &&
+                if (message[7] == d.ID &&
                     d.Joints.All(j => j.ID != message[6]))
                 {
                     d.Joints.Add(new Joint(message[6], 0));
-
-                    if (connections.All(c => c.From != message[6] && c.Into != message[7]))
-                        connections.Add(new Connection(message[7], message[6], message[9], DateTime.Now.ToString("HH:mm:ss")));
                 }
             }
 
@@ -256,7 +256,7 @@ namespace CPDT_LR3
             {
                 box.Items.Clear();
                 foreach (var c in connections)
-                    box.Items.Add($"0x{c.From:X2} <-> 0x{c.Into:X2}");
+                    box.Items.Add($"0x{c.From:X2} -> 0x{c.Into:X2}");
             }
         }
 
@@ -268,16 +268,16 @@ namespace CPDT_LR3
 
         private void DrawData(int deviceIndex)
         {
-            if (devices.Count == 0)
-                return;
+            int shape = devices.Count;
+            int angle = 0;
+            if (shape != 0)
+                angle = 360 / shape;
 
             bmp = new Bitmap(frameGraph.Width, frameGraph.Height);
 
             Point dRectCenter;
             int rectWidth = 30, rectHeight = 15;
 
-            int shape = devices.Count;
-            int angle = 360 / shape;
             int radius = 120;
 
             using (Graphics g = Graphics.FromImage(bmp))
@@ -347,11 +347,11 @@ namespace CPDT_LR3
 
         #region Message handling
 
-        private bool FilterMessage(byte[] msg)
+        private bool FilterMessage(Message msg)
         {
-            byte from = msg[6];
-            byte into = msg[7];
-            int value = msg[9];
+            byte from = msg.From;
+            byte into = msg.Into;
+            int value = msg.Value;
 
             var conclusion = new bool[this.gridGate.Rows.Count];
             for (int i = 0; i < conclusion.Length; i++)
@@ -362,7 +362,10 @@ namespace CPDT_LR3
                 if (row.Index == this.gridGate.Rows.Count - 1 ||
                     row.Cells[0].Value == null ||
                     row.Cells[1].Value == null ||
-                    row.Cells[2].Value == null)
+                    row.Cells[2].Value == null || 
+                    row.Cells[0].Value.ToString() == "" ||
+                    row.Cells[1].Value.ToString() == "" ||
+                    row.Cells[2].Value.ToString() == "")
                 {
                     conclusion[row.Index] = true;
                     continue;
@@ -446,14 +449,17 @@ namespace CPDT_LR3
 
             if (connections.Count > 0)
                 foreach (var c in connections)
+                {
                     if ((c.From == message.From || c.Into == message.From) &&
                         (c.Into == message.Into || c.From == message.Into))
                     {
+                        time = (Int16)(DateTime.Now - startTime).TotalSeconds;
                         c.Values.Add(message.Value);
-                        c.TimeStamps.Add(DateTime.Now.ToString("HH:mm:ss"));
-
-                        UpdatePlot(c);
+                        c.TimeStamps.Add(time.ToString());
                     }
+
+                    UpdatePlot(c);
+                }
 
             messages.Add(message);
 
@@ -466,7 +472,9 @@ namespace CPDT_LR3
                     LeaveText(box, null);
                 }
 
-            this.gridLog.Rows.Add(new[] { DateTime.Now.ToString("HH:mm:ss") + "> " + text });
+            time = (Int16)(DateTime.Now - startTime).TotalSeconds;
+
+            this.gridLog.Rows.Add(new[] { time.ToString() + "> " + text });
             this.gridLog.SelectionChanged += DisplayTheValues;
             this.gridLog.FirstDisplayedScrollingRowIndex = this.gridLog.Rows.Count - 1;
         }
@@ -474,8 +482,6 @@ namespace CPDT_LR3
 
         private void RemoveConnectionsAndDevices()
         {
-            var froms = new List<byte>();
-            var intos = new List<byte>();
             var safe = new List<byte>();
 
             byte from = 0, into = 0;
@@ -492,17 +498,25 @@ namespace CPDT_LR3
                     allFrom = true;
 
                 if (row.Cells[1].Value.ToString() != allPattern)
-                    into = (Convert.ToByte(row.Cells[0].Value.ToString(), 16));
+                    into = (Convert.ToByte(row.Cells[1].Value.ToString(), 16));
                 else
                     allInto = true;
 
                 for (int i = 0; i < devices.Count; i++)
                 {
                     if (devices[i].ID == from && allInto)
-                        devices[i].Joints.ForEach(j => safe.Add(j.ID));
+                        devices[i].Joints.ForEach(j =>
+                        {
+                            if (j.Direction == 1)
+                                safe.Add(j.ID);
+                        });
 
                     if (devices[i].ID == into && allFrom)
-                        devices[i].Joints.ForEach(j => safe.Add(j.ID));
+                        devices[i].Joints.ForEach(j =>
+                        {
+                            if (j.Direction == 0)
+                                safe.Add(j.ID);
+                        });
                 }
 
                 for (int i = 0; i < devices.Count; i++)
@@ -524,16 +538,37 @@ namespace CPDT_LR3
                     }
                 }
 
+                for (int i = 0; i < devices.Count; i++)
+                {
+                    var d = devices[i];
+
+                    var count = 0;
+                    for (int j = 0; j < d.Joints.Count; j++)
+                    {
+                        for (int l = 0; l < devices.Count; l++)
+                            if (d.Joints[j].ID == devices[l].ID)
+                                count++;
+
+                        if (count == 0)
+                        {
+                            d.Joints.RemoveAt(j);
+                            j = -1;
+                            continue;
+                        }
+                    }
+
+                }
+
                 for (int i = 0; i < connections.Count; i++)
                 {
-                    if (connections[i].From != from && !allFrom)
+                    var c = connections[i];
+                    if (c.From != from && !allFrom)
                     {
                         connections.RemoveAt(i);
                         i = -1;
                         continue;
                     }
-
-                    if (connections[i].Into != into && !allInto)
+                    if (c.Into != into && !allInto)
                     {
                         connections.RemoveAt(i);
                         i = -1;
@@ -549,41 +584,22 @@ namespace CPDT_LR3
 
         #region Plotting
 
-        private void ShowPlot(object sender, EventArgs e)
-        {
-            var cb = (ComboBox)sender;
-
-            var text = cb.SelectedItem.ToString();
-            var fi = text.Split(new[] { " <-> " }, StringSplitOptions.None);
-
-            foreach (var c in connections)
-            {
-                if ((c.From == Convert.ToByte(fi[0].Substring(2, 2), 16) ||
-                    c.From == Convert.ToByte(fi[0].Substring(2, 2), 16)) &&
-                    (c.Into == Convert.ToByte(fi[1].Substring(2, 2), 16) ||
-                     c.From == Convert.ToByte(fi[1].Substring(2, 2), 16)))
-                    UpdatePlot(c);
-            }
-        }
-
-
         private void UpdatePlot(Connection c)
         {
-            var str = $"0x{c.From:X2} <-> 0x{c.Into:X2}";
+            var str = $"0x{c.From:X2} -> 0x{c.Into:X2}";
 
             foreach (var cb in combos)
-                if (cb.SelectedItem != null)
-                    if (cb.SelectedItem.ToString() == str)
-                    {
-                        var index = cb.Name.Last();
+                if (cb.Text == str)
+                {
+                    var index = cb.Name.Last();
 
-                        foreach (var p in plots)
-                            if (p.Name.Last() == index)
-                            {
-                                p.Series[0].Points.DataBindXY(c.TimeStamps, c.Values);
-                                p.Update();
-                            }
-                    }
+                    foreach (var p in plots)
+                        if (p.Name.Last() == index)
+                        {
+                            p.Series[0].Points.DataBindXY(c.TimeStamps, c.Values);
+                            p.Update();
+                        }
+                }
         }
 
         #endregion
@@ -598,10 +614,12 @@ namespace CPDT_LR3
             {
                 try
                 {
+                    amountOfMessagesSent = 0;
+
                     var totalAmountOfMessages = Convert.ToInt32(this.boxAmount.Text);
                     var period = Convert.ToInt32(this.boxPeriod.Text);
-                    var from = Convert.ToByte(this.boxFrom.Text.Substring(2, 2), 16);
-                    var into = Convert.ToByte(this.boxInto.Text.Substring(2, 2), 16);
+                    var from = Convert.ToByte(this.boxFrom.Text, 16);
+                    var into = Convert.ToByte(this.boxInto.Text, 16);
                     var value = Convert.ToInt32(this.boxValue.Text);
 
                     if (totalAmountOfMessages > period)
@@ -616,22 +634,26 @@ namespace CPDT_LR3
                     }
 
                     Device sendingDevice = new Device(0);
+                    Device receivingDevice = new Device(0);
+
                     if (devices.All(d => d.ID != from))
                     {
                         sendingDevice.ID = from;
                         devices.Add(sendingDevice);
                     }
-                    else if (devices.All(d => d.ID != into))
+                    if (devices.All(d => d.ID != into))
                     {
-                        sendingDevice.ID = into;
-                        devices.Add(sendingDevice);
+                        receivingDevice.ID = into;
+                        devices.Add(receivingDevice);
                     }
                     else
                     {
                         for (int i = 0; i < devices.Count; i++)
                         {
-                            if (devices[i].ID == from || devices[i].ID == into)
+                            if (devices[i].ID == from)
                                 sendingDevice = devices[i];
+                            if (devices[i].ID == into)
+                                receivingDevice = devices[i];
                         }
                     }
 
@@ -639,39 +661,108 @@ namespace CPDT_LR3
                         sendingDevice.Joints.Add(new Joint(into, 0));
 
                     if (sendingDevice.Joints.All(j => j.ID != from))
-                        sendingDevice.Joints.Add(new Joint(from, 1));
+                        receivingDevice.Joints.Add(new Joint(from, 1));
+
+                    for (int i = 0; i < connections.Count; i++)
+                    {
+                        var c = connections[i];
+
+                        time = (Int16)(DateTime.Now - startTime).TotalSeconds;
+
+                        if (c.From != from && c.Into != into ||
+                            c.From == from && c.Into != into ||
+                            c.From != from && c.Into == into)
+                        {
+                            connections.Add(new Connection(from, into, value, time.ToString()));
+                            break;
+                        }
+                        if (c.From == from && c.Into == into)
+                        {
+                            c.Values.Add(value);
+                            c.TimeStamps.Add(time.ToString());
+                            break;
+                        }
+                    }
 
                     packetAmountOfMessages = new int[period];
 
                     Random r = new Random();
 
-                    for (int i = 0; i < period; i++)
+                    while (true)
                     {
-                        if (totalAmountOfMessages == period)
-                        {
-                            packetAmountOfMessages[i] = 1;
-                            continue;
-                        }
+                        packetAmountOfMessages[r.Next(0, period)] = 1;
 
-                        var diff = period - totalAmountOfMessages;
-
-                        for (int j = 0; j < diff; j++)
-                            packetAmountOfMessages[r.Next(0, period)] = 99;
-
-                        if (packetAmountOfMessages[i] == 0)
-                            packetAmountOfMessages[i] = 1;
-                        else
-                            packetAmountOfMessages[i] = 0;
+                        if (packetAmountOfMessages.Count(p => p == 1) == totalAmountOfMessages)
+                            break;
                     }
+
+                    if (totalAmountOfMessages == period)
+                        for (int i = 0; i < period; i++)
+                            packetAmountOfMessages[i] = 1;
 
                     sendingPending = true;
                     sendMsg = new Message(from, into, value);
+
+                    WriteIntoFile();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Check the packet input please \r\n" + ex.ToString());
                 }
             }
+        }
+
+        #endregion
+
+
+
+        #region Writing generetaed message
+
+        private void WriteIntoFile()
+        {
+            FileStream writer = new FileStream("sentData.dmp", FileMode.Open);
+
+            var sendingData = new byte[19];
+
+            time = (Int16)(DateTime.Now - startTime).TotalSeconds;
+
+            var timeBytes = BitConverter.GetBytes(time);
+
+            for (int i = 0; i < sendingData.Length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        sendingData[0] = timeBytes[0];
+                        break;
+                    case 1:
+                        sendingData[1] = timeBytes[1];
+                        break;
+                    case 6:
+                        sendingData[6] = sendMsg.From;
+                        break;
+                    case 7:
+                        sendingData[7] = sendMsg.Into;
+                        break;
+                    case 8:
+                        sendingData[8] = 0x08;
+                        break;
+                    case 9:
+                        sendingData[9] = (byte)sendMsg.Value;
+                        break;
+                    case 18:
+                        sendingData[18] = 0xff;
+                        break;
+                    case 19:
+                        sendingData[19] = 0xff;
+                        break;
+                    default:
+                        sendingData[i] = 0x00;
+                        break;
+                }
+            }
+
+            writer.Write(sendingData, 0, sendingData.Length);
         }
 
         #endregion
@@ -703,57 +794,6 @@ namespace CPDT_LR3
 
 
         #region Crutches of visuals
-
-        private void ClearSelection(object sender, EventArgs e)
-        {
-            try
-            {
-                var grid = (DataGridView)sender;
-
-                if (grid == null)
-                {
-                    gridLog.ClearSelection();
-                    gridGate.ClearSelection();
-                    gridStats.ClearSelection();
-                    gridAddresses.ClearSelection();
-                    this.ActiveControl = null;
-                    return;
-                }
-
-                switch (grid.Name)
-                {
-                    case "gridLog":
-                        gridGate.ClearSelection();
-                        gridStats.ClearSelection();
-                        gridAddresses.ClearSelection();
-                        break;
-                    case "gridGate":
-                        gridLog.ClearSelection();
-                        gridStats.ClearSelection();
-                        gridAddresses.ClearSelection();
-                        break;
-                    case "gridStats":
-                        gridLog.ClearSelection();
-                        gridGate.ClearSelection();
-                        gridAddresses.ClearSelection();
-                        break;
-                    case "gridAddresses":
-                        gridLog.ClearSelection();
-                        gridGate.ClearSelection();
-                        gridStats.ClearSelection();
-                        break;
-                }
-            }
-            catch (InvalidCastException)
-            {
-                gridLog.ClearSelection();
-                gridGate.ClearSelection();
-                gridStats.ClearSelection();
-                gridAddresses.ClearSelection();
-                this.ActiveControl = null;
-            }
-        }
-
 
         private void LeaveText(object sender, EventArgs e)
         {
