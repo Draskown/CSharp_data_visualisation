@@ -64,9 +64,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bitmapshit.Designer.cs">
-      <DependentUpon>Bitmapshit.cs</DependentUpon>
-    </Compile>
     <Compile Include="CPDT_LR1_Form.cs">
       <SubType>Form</SubType>
     </Compile>
