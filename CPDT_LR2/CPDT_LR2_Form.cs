@@ -29,11 +29,12 @@ namespace CPDT_LR2
 
         private readonly double[] shootingAngles, verAngles;
 
-        private readonly double angleDelta, allowedDistance;
-        private double isometricDistance, angleX, angleY, 
-                       maximumDepth, totalDepthFront, totalDepthBack;
+        private readonly double angleDelta, allowedDistance, maximumDepth;
+        private double isometricDistance, angleX, angleY,
+                       totalDepthFront, totalDepthBack;
 
-        private readonly int pointSize, overheadDistance, planesAngle;
+        private readonly int pointSize, overheadDistance;
+        private int planesAngle;
 
         private string count;
 
@@ -100,8 +101,6 @@ namespace CPDT_LR2
                     new double[] { 0, 1, 0 }
             };
 
-            planesAngle = (int)numCorAngle.Value;
-
             maximumDepth = 10.0;
             totalDepthFront = maximumDepth;
             totalDepthBack = maximumDepth;
@@ -125,6 +124,8 @@ namespace CPDT_LR2
             this.frameRate.Interval = (int)this.numFramerate.Value;
             this.frameRate.Tick += (ss, ee) =>
             {
+                planesAngle = (int)numCorAngle.Value;
+
                 ReadData();
                 FindObjects();
                 ComputeDepth();
@@ -561,8 +562,8 @@ namespace CPDT_LR2
                 }
                 else if (!checkableArrayBack.All(v => CheckDrawability(v)))
                 {
-                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[3].X, (float)drawablePlaneFront[3].Z);
-                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[2].X, (float)drawablePlaneFront[2].Z);
+                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneFront[2].X, (float)drawablePlaneFront[2].Z);
+                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneFront[3].X, (float)drawablePlaneFront[3].Z);
                     arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z);
                     arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z);
                 }
@@ -685,8 +686,8 @@ namespace CPDT_LR2
 
         private void ComputeDepth()
         {
-            var width = (double)numCorWidth.Value;
-            var height = (double)numCorHeight.Value;
+            var width = (double)numCorWidth.Value / 2;
+            var height = (double)numCorHeight.Value / 2;
 
             Vector v1, v2, v3, v4, v1EndFront, v2EndFront, v3EndFront, v4EndFront,
                    v1EndBack, v2EndBack, v3EndBack, v4EndBack;
@@ -745,12 +746,10 @@ namespace CPDT_LR2
                             var minZFront = Min(v1.Z, v2.Z, v1EndFront.Z, v2EndFront.Z);
                             var maxZFront = Max(v1.Z, v2.Z, v1EndFront.Z, v2EndFront.Z);
 
-                            if (depthFront >= 1.35)
-                                Console.WriteLine();
-
                             if (v.X > minXFront && v.X < maxXFront)
                                 if (v.Y > -height && v.Y < height)
                                     if (v.Z > minZFront && v.Z < maxZFront)
+                                        if (Math.Abs(v.Azimut - planesAngle) <= 180 / width)
                                         if ((int)(v.Distance - depthFront) == 0)
                                         {
                                             threshForCountingAsAnObstacleFront++;
@@ -777,13 +776,14 @@ namespace CPDT_LR2
 
                             var minXBack = Min(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
                             var maxXBack = Max(v1.X, v2.X, v1EndBack.X, v2EndBack.X);
-                            var minZBack = Min(v1.Z, v2.Z, v1EndBack.X, v2EndBack.Z);
-                            var maxZBack = Max(v1.Z, v2.Z, v1EndBack.X, v2EndBack.Z);
+                            var minZBack = Min(v1.Z, v2.Z, v1EndBack.Z, v2EndBack.Z);
+                            var maxZBack = Max(v1.Z, v2.Z, v1EndBack.Z, v2EndBack.Z);
 
                             if (v.X > minXBack && v.X < maxXBack)
                                 if (v.Y > -height && v.Y < height)
                                     if (v.Z > minZBack && v.Z < maxZBack)
-                                        if ((int)(v.Distance - depthBack) == 0)
+                                        if (Math.Abs(v.Azimut - planesAngle + 180) <= 180 / width)
+                                            if ((int)(v.Distance - depthBack) == 0)
                                         {
                                             threshForCountingAsAnObstacleBack++;
                                             if (threshForCountingAsAnObstacleBack >= 10)
