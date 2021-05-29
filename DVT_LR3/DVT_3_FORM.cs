@@ -26,6 +26,7 @@ namespace DVT_LR3
         private int actualAmount;
         private float distance;
 
+
         public Application()
         {
             InitializeComponent();
@@ -70,7 +71,7 @@ namespace DVT_LR3
 
             this.btnLoad.Click += LoadPoints;
 
-            this.btnSave.Click += SavePlots;
+            this.btnSave.Click += SavePlot;
 
             this.timer1.Tick += TimerTick;
         }
@@ -545,7 +546,7 @@ namespace DVT_LR3
         }
 
 
-        private void SavePlots(object sender, EventArgs e)
+        private void SavePlot(object sender, EventArgs e)
         {
             var lockMode = System.Drawing.Imaging.ImageLockMode.WriteOnly;
             var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;

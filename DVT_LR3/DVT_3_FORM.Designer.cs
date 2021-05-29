@@ -30,7 +30,6 @@ namespace DVT_LR3
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.scatterPlot = new SharpGL.OpenGLControl();
             this.label1 = new System.Windows.Forms.Label();
             this.pointsAmount = new System.Windows.Forms.NumericUpDown();
@@ -41,6 +40,7 @@ namespace DVT_LR3
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btnLoad = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.scatterPlot)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pointsAmount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thinning)).BeginInit();
@@ -180,7 +180,6 @@ namespace DVT_LR3
             this.Controls.Add(this.scatterPlot);
             this.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ForeColor = System.Drawing.Color.White;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Application";
             this.Text = "Application";
             this.Load += new System.EventHandler(this.Application_Load);
@@ -204,6 +203,7 @@ namespace DVT_LR3
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.Button btnSave;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
