@@ -51,12 +51,15 @@ namespace DVT_LR4
         private Bitmap xyHistBmp, xzHistBmp, yzHistBmp,
                        xyScatBmp, xzScatBmp, yzScatBmp;
 
-        private readonly uint[] textures = new uint[6];
+        private readonly Texture[] textures = new Texture[6];
 
 
         public DVT_LR4_Form()
         {
             InitializeComponent();
+
+            for (int i = 0; i < textures.Length; i++)
+                textures[i] = new Texture();
 
             stream = new FileStream("dump.dmp", FileMode.Open);
 
@@ -100,7 +103,9 @@ namespace DVT_LR4
             for (int i = 0; i < avgX.Length; i++)
                 pointsAvg.Add(new Point3F(avgX[i] / 10.0f, avgY[i] / 10.0f, avgZ[i] / 10.0f));
 
-            CalculateHistograms(null, null);
+            CalculateHistograms();
+
+            FormBitmaps();
 
             InitializeGL();
         }
@@ -118,7 +123,10 @@ namespace DVT_LR4
 
             this.btnSave.Click += SaveImage;
 
-            this.switchDisplay.CheckedChanged += CalculateHistograms;
+            this.switchDisplay.CheckedChanged += (ss, ee) => {
+                CalculateHistograms();
+                FormBitmaps();
+            };
         }
 
 
@@ -126,7 +134,13 @@ namespace DVT_LR4
         {
             GL.Enable(OpenGL.GL_BLEND);
             GL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
-            GL.GenTextures(6, textures);
+            GL.Enable(OpenGL.GL_TEXTURE_2D);
+            textures[0].Create(GL, xyHistBmp);
+            textures[1].Create(GL, xyScatBmp);
+            textures[2].Create(GL, xzHistBmp);
+            textures[3].Create(GL, xzScatBmp);
+            textures[4].Create(GL, yzHistBmp);
+            textures[5].Create(GL, yzScatBmp);
         }
 
         #endregion
@@ -295,7 +309,7 @@ namespace DVT_LR4
         }
 
 
-        private void CalculateHistograms(object sender, EventArgs e)
+        private void CalculateHistograms()
         {
             if (this.switchDisplay.Checked)
                 calculatedArrays = new float[][] { avgX, avgY, avgZ };
@@ -337,6 +351,42 @@ namespace DVT_LR4
 
         private void FormBitmaps()
         {
+            if (this.switchDisplay.Checked)
+                operatingPoints = (Point3F[])pointsAvg.ToArray().Clone();
+            else
+                operatingPoints = (Point3F[])pointsReg.ToArray().Clone();
+
+            pminX = operatingPoints.Min(p => p.X);
+            pmaxX = operatingPoints.Max(p => p.X);
+            pminY = operatingPoints.Min(p => p.Y);
+            pmaxY = operatingPoints.Max(p => p.Y);
+            pminZ = operatingPoints.Min(p => p.Z);
+            pmaxZ = operatingPoints.Max(p => p.Z);
+
+            width = pmaxX - pminX;
+            height = pmaxY - pminY;
+            depth = pmaxZ - pminZ;
+
+            a = new[] { width, height, depth }.Max();
+
+            centreX = (pmaxX + pminX) / 2;
+            centreY = (pmaxY + pminY) / 2;
+            centreZ = (pmaxZ + pminZ) / 2;
+
+            pminX = centreX - a / 2 - cubeOffset;
+            pmaxX = centreX + a / 2 + cubeOffset;
+            pminY = centreY - a / 2 - cubeOffset;
+            pmaxY = centreY + a / 2 + cubeOffset;
+            pminZ = centreZ - a / 2 - cubeOffset;
+            pmaxZ = centreZ + a / 2 + cubeOffset;
+
+            xyHistBmp = new Bitmap(Map(width, pminX, pmaxX, 0, 512),
+                               Map(height, pminY, pmaxY, 0, 512));
+            xzHistBmp = new Bitmap(Map(width, pminX, pmaxX, 0, 500),
+                               Map(depth, pminZ, pmaxZ, 0, 500));
+            yzHistBmp = new Bitmap(Map(height, pminY, pmaxY, 0, 500),
+                               Map(depth, pminZ, pmaxZ, 0, 500));
+
             if (xyScatBmp == null)
                 xyScatBmp = new Bitmap(xyHistBmp);
             if (xzScatBmp == null)
@@ -351,10 +401,10 @@ namespace DVT_LR4
                 for (int i = 0; i < xFreq.Length; i++)
                 {
                     g.DrawRectangle(
-                        new Pen(Color.Red),
+                        new Pen(Color.White),
                         i * bitmapDelta,
                         xyHistBmp.Height - Map(xFreq[i], 0, xFreq.Max(), 0, xyHistBmp.Height),
-                        bitmapDelta, 
+                        bitmapDelta,
                         Map(xFreq[i], 0, xFreq.Max(), 0, xyHistBmp.Height) - 1);
                 }
             }
@@ -429,10 +479,6 @@ namespace DVT_LR4
                         scatPointSize, scatPointSize);
                 }
             }
-
-            //this.pictureBox1.Image = xyScatBmp;
-            //this.pictureBox2.Image = xzScatBmp;
-            //this.pictureBox3.Image = yzScatBmp;
         }
 
         #endregion
@@ -449,43 +495,99 @@ namespace DVT_LR4
             GL.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             GL.LoadIdentity();
 
-            if (this.switchDisplay.Checked)
-                operatingPoints = (Point3F[])pointsAvg.ToArray().Clone();
-            else
-                operatingPoints = (Point3F[])pointsReg.ToArray().Clone();
-
             GL.Translate(delta.X, delta.Y, -distance);
             GL.Rotate(angle.Y, angle.X, 0.0f);
 
-            pminX = operatingPoints.Min(p => p.X);
-            pmaxX = operatingPoints.Max(p => p.X);
-            pminY = operatingPoints.Min(p => p.Y);
-            pmaxY = operatingPoints.Max(p => p.Y);
-            pminZ = operatingPoints.Min(p => p.Z);
-            pmaxZ = operatingPoints.Max(p => p.Z);
+            if (!this.hideXYHist.Checked)
+            {
+                textures[0].Bind(GL);
 
-            width = pmaxX - pminX;
-            height = pmaxY - pminY;
-            depth = pmaxZ - pminZ;
+                GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
 
-            a = new[] { width, height, depth }.Max();
+                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pmaxY, pmaxZ + bitmapsOffset);
+                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pmaxY, pmaxZ + bitmapsOffset);
+                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pminY, pmaxZ + bitmapsOffset);
+                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pminY, pmaxZ + bitmapsOffset);
 
-            centreX = (pmaxX + pminX) / 2;
-            centreY = (pmaxY + pminY) / 2;
-            centreZ = (pmaxZ + pminZ) / 2;
+                GL.End();
+            }
 
-            pminX = centreX - a / 2 - cubeOffset;
-            pmaxX = centreX + a / 2 + cubeOffset;
-            pminY = centreY - a / 2 - cubeOffset;
-            pmaxY = centreY + a / 2 + cubeOffset;
-            pminZ = centreZ - a / 2 - cubeOffset;
-            pmaxZ = centreZ + a / 2 + cubeOffset;
+            //if (!this.hideXYScat.Checked)
+            //{
+            //    textures[1].Bind(GL);
+
+            //    GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
+
+            //    GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY, pminZ - bitmapsOffset);
+            //    GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY, pminZ - bitmapsOffset);
+            //    GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY, pminZ - bitmapsOffset);
+            //    GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY, pminZ - bitmapsOffset);
+
+            //    GL.End();
+            //}
+
+            //if (!hideXZHist.Checked)
+            //{
+            //    textures[2].Bind(GL);
+
+            //    GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
+
+            //    GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX - bitmapsOffset, pminY, pminZ);
+            //    GL.TexCoord(1.0f, 0.0f); GL.Vertex(pminX - bitmapsOffset, pminY, pmaxZ);
+            //    GL.TexCoord(1.0f, 1.0f); GL.Vertex(pminX - bitmapsOffset, pmaxY, pmaxZ);
+            //    GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX - bitmapsOffset, pmaxY, pminZ);
+
+            //    GL.End();
+            //}
+
+            //if (!hideXZScat.Checked)
+            //{
+            //    textures[3].Bind(GL);
+
+            //    GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
+
+            //    GL.TexCoord(0.0f, 0.0f); GL.Vertex(pmaxX + bitmapsOffset, pminY, pminZ);
+            //    GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX + bitmapsOffset, pminY, pmaxZ);
+            //    GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX + bitmapsOffset, pmaxY, pmaxZ);
+            //    GL.TexCoord(0.0f, 1.0f); GL.Vertex(pmaxX + bitmapsOffset, pmaxY, pminZ);
+
+            //    GL.End();
+            //}
+
+            //if (!hideYZHist.Checked)
+            //{
+            //    textures[4].Bind(GL);
+
+            //    GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
+
+            //    GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY - bitmapsOffset, pmaxZ);
+            //    GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY - bitmapsOffset, pmaxZ);
+            //    GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pminY - bitmapsOffset, pminZ);
+            //    GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pminY - bitmapsOffset, pminZ);
+
+            //    GL.End();
+            //}
+
+            //if (!hideYZScat.Checked)
+            //{
+            //    textures[5].Bind(GL);
+
+            //    GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
+
+            //    GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pmaxY + bitmapsOffset, pmaxZ);
+            //    GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pmaxY + bitmapsOffset, pmaxZ);
+            //    GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY + bitmapsOffset, pminZ);
+            //    GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY + bitmapsOffset, pminZ);
+
+            //    GL.End();
+            //}
+
 
             if (!hideCube.Checked)
             {
                 GL.PointSize(2.0f);
                 GL.Begin(OpenGL.GL_POINTS);
-                GL.Color(1.0f, 1.0f, 1.0f);
+                GL.Color(1.0f, 1.0f, 1.0f, 1.0f);
 
                 foreach (var p in operatingPoints)
                     GL.Vertex(p.X, p.Y, p.Z);
@@ -573,162 +675,6 @@ namespace DVT_LR4
                 GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Courier New", 12, labelZ.Text);
             }
 
-            xyHistBmp = new Bitmap(Map(width, pminX, pmaxX, 0, 512),
-                               Map(height, pminY, pmaxY, 0, 512));
-            xzHistBmp = new Bitmap(Map(width, pminX, pmaxX, 0, 500),
-                               Map(depth, pminZ, pmaxZ, 0, 500));
-            yzHistBmp = new Bitmap(Map(height, pminY, pmaxY, 0, 500),
-                               Map(depth, pminZ, pmaxZ, 0, 500));
-
-            FormBitmaps();
-
-            //var txt = new uint[1];
-
-            //GL.Enable(OpenGL.GL_TEXTURE_2D);
-
-            //var gbitmapdata = bmp.LockBits(
-            //    new Rectangle(0, 0, bmp.Width, bmp.Height),
-            //    System.Drawing.Imaging.ImageLockMode.ReadOnly,
-            //    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            //GL.GenTextures(1, txt);
-
-            //GL.BindTexture(OpenGL.GL_TEXTURE_2D, txt[0]);
-
-            //GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_NEAREST);
-            //GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_NEAREST);
-
-            //GL.TexImage2D(
-            //    OpenGL.GL_TEXTURE_2D,
-            //    0,
-            //    OpenGL.GL_RGBA8,
-            //    bmp.Width,
-            //    bmp.Height,
-            //    0,
-            //    OpenGL.GL_RGBA8,
-            //    OpenGL.GL_UNSIGNED_BYTE,
-            //    gbitmapdata.Scan0);
-
-            //GL.BindTexture(OpenGL.GL_TEXTURE_2D, txt[0]);
-            //GL.Enable(OpenGL.GL_TEXTURE_2D);
-            //GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
-
-            ////GL.Color(1.0f, 1.0f, 1.0f, 0.4f);
-            //GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY, pmaxZ + bitmapsOffset);
-            //GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY, pmaxZ + bitmapsOffset);
-            //GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY, pmaxZ + bitmapsOffset);
-            //GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY, pmaxZ + bitmapsOffset);
-
-            //GL.Disable(OpenGL.GL_TEXTURE_2D);
-
-            //GL.End();
-
-            //bmp.UnlockBits(gbitmapdata);
-
-            GL.Color(1.0f, 1.0f, 1.0f, 0.4f);
-
-            if (!this.hideXYHist.Checked)
-            {
-                PopBitmapIn(xyHistBmp, 0);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY, pmaxZ + bitmapsOffset);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY, pmaxZ + bitmapsOffset);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY, pmaxZ + bitmapsOffset);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY, pmaxZ + bitmapsOffset);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            if (!this.hideXYScat.Checked)
-            {
-                PopBitmapIn(xyScatBmp, 1);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY, pminZ - bitmapsOffset);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY, pminZ - bitmapsOffset);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY, pminZ - bitmapsOffset);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY, pminZ - bitmapsOffset);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            if (!hideXZHist.Checked)
-            {
-                PopBitmapIn(xzHistBmp, 2);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX - bitmapsOffset, pminY, pminZ);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pminX - bitmapsOffset, pminY, pmaxZ);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pminX - bitmapsOffset, pmaxY, pmaxZ);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX - bitmapsOffset, pmaxY, pminZ);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            if (!hideXZScat.Checked)
-            {
-                PopBitmapIn(xzScatBmp, 3);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pmaxX + bitmapsOffset, pminY, pminZ);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX + bitmapsOffset, pminY, pmaxZ);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX + bitmapsOffset, pmaxY, pmaxZ);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pmaxX + bitmapsOffset, pmaxY, pminZ);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            if (!hideYZHist.Checked)
-            {
-                PopBitmapIn(yzHistBmp, 4);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pminY - bitmapsOffset, pmaxZ);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pminY - bitmapsOffset, pmaxZ);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pminY - bitmapsOffset, pminZ);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pminY - bitmapsOffset, pminZ);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            if (!hideYZScat.Checked)
-            {
-                PopBitmapIn(yzScatBmp, 5);
-
-                GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[0]);
-                GL.Enable(OpenGL.GL_TEXTURE_2D);
-                GL.Begin(OpenGL.GL_QUADS);
-
-                GL.TexCoord(0.0f, 0.0f); GL.Vertex(pminX, pmaxY + bitmapsOffset, pmaxZ);
-                GL.TexCoord(1.0f, 0.0f); GL.Vertex(pmaxX, pmaxY + bitmapsOffset, pmaxZ);
-                GL.TexCoord(1.0f, 1.0f); GL.Vertex(pmaxX, pmaxY + bitmapsOffset, pminZ);
-                GL.TexCoord(0.0f, 1.0f); GL.Vertex(pminX, pmaxY + bitmapsOffset, pminZ);
-
-                GL.End();
-                GL.Disable(OpenGL.GL_TEXTURE_2D);
-            }
-
             GL.Flush();
         }
 
@@ -806,36 +752,6 @@ namespace DVT_LR4
         private int Map(int value, int inMin, int inMax, int outMin, int outMax)
         {
             return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-        }
-
-
-        private void PopBitmapIn(Bitmap bmp, int texIndex)
-        {
-            var gbitmapdata = bmp.LockBits(
-                new Rectangle(0, 0, bmp.Width, bmp.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            GL.Enable(OpenGL.GL_TEXTURE_2D);
-
-            GL.BindTexture(OpenGL.GL_TEXTURE_2D, textures[texIndex]);
-            GL.TexImage2D(
-                OpenGL.GL_TEXTURE_2D,
-                0,
-                OpenGL.GL_RGBA8,
-                bmp.Width, 
-                bmp.Height, 
-                0, 
-                OpenGL.GL_RGBA8, 
-                OpenGL.GL_UNSIGNED_BYTE, 
-                gbitmapdata.Scan0);
-
-            GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_CLAMP_TO_EDGE);
-            GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_CLAMP_TO_EDGE);
-            GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);
-            GL.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);
-
-            bmp.UnlockBits(gbitmapdata);
         }
 
         #endregion
