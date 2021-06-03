@@ -1,15 +1,12 @@
-﻿using SharpGL;
-using SharpGL.Enumerations;
-using SharpGL.SceneGraph;
-using SharpGL.SceneGraph.Assets;
-using System;
+﻿using static SharpGL.SceneGraph.Evaluators.NurbsBase;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Threading;
+using SharpGL.SceneGraph.Assets;
 using System.Windows.Forms;
-using static SharpGL.SceneGraph.Evaluators.NurbsBase;
+using System.Drawing;
+using System.Linq;
+using System.IO;
+using SharpGL;
+using System;
 
 namespace DVT_LR4
 {
@@ -29,10 +26,10 @@ namespace DVT_LR4
         private Point3F[] operatingPoints;
         private PointF initPoint, angle, delta;
 
-        private float[][] calculatedArrays;
+        private float[][] calculatedArrays, colours;
 
         private readonly float[] knots;
-        private float[] avgX, avgY, avgZ, recalculatedY;
+        private float[] avgX, avgY, avgZ, recalculatedY, vertices;
 
         private readonly float angleDelta, bitmapsOffset,
                                cubeOffset, axisSize, axisArrowSize;
@@ -58,6 +55,9 @@ namespace DVT_LR4
         private readonly Texture[] textures;
 
         private IntPtr nurb;
+
+        private readonly Color histColor;
+        private readonly Brush scatBrush;
 
 
         public DVT_LR4_Form()
@@ -104,22 +104,10 @@ namespace DVT_LR4
             for (int i = 0; i < textures.Length; i++)
                 textures[i] = new Texture();
 
-            ReadData();
+            histColor = Color.Fuchsia;
+            scatBrush = Brushes.Bisque;
 
-            CalculateAvgs(valuesX, "X");
-            CalculateAvgs(valuesZ, "Z");
-
-            RecalculateY(valuesX.ToArray(), valuesZ.ToArray(), 0);
-            RecalculateY(avgX, avgZ, 1);
-
-            for (int i = 0; i < avgX.Length; i++)
-                pointsAvg.Add(new Point3F(avgX[i] / 10.0f, avgY[i] / 10.0f, avgZ[i] / 10.0f));
-
-            CalculateHistograms();
-
-            FormBitmaps();
-
-            InitializeTextures();
+            FirstMoves();
         }
 
 
@@ -141,6 +129,40 @@ namespace DVT_LR4
                 FormBitmaps();
                 InitializeTextures();
             };
+
+            this.numDepth.ValueChanged += (ss, ee) => { FirstMoves(); };
+
+            this.numLength.ValueChanged += (ss, ee) => { FirstMoves(); };
+        }
+
+
+        private void FirstMoves()
+        {
+            ReadData();
+
+            CalculateAvgs(valuesX, "X");
+            CalculateAvgs(valuesZ, "Z");
+
+            RecalculateY(valuesX.ToArray(), valuesZ.ToArray(), 0);
+            RecalculateY(avgX, avgZ, 1);
+
+            pointsAvg.Clear();
+            for (int i = 0; i < avgX.Length; i++)
+                pointsAvg.Add(new Point3F(avgX[i] / 10.0f, avgY[i] / 10.0f, avgZ[i] / 10.0f));
+
+            CalculateHistograms();
+
+            FormBitmaps();
+
+            Random r = new Random();
+            colours = new float[][] { 
+                new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
+                new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
+                new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
+                new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()}
+            };
+
+            InitializeTextures();
         }
 
 
@@ -170,12 +192,20 @@ namespace DVT_LR4
 
         private void ReadData()
         {
+            pointsReg.Clear();
+            valuesX.Clear();
+            valuesY.Clear();
+            valuesZ.Clear();
+
             do
             {
                 byte[] message = new byte[19];
 
                 if (stream.Position == 58900)
+                {
+                    stream.Position = 0;
                     break;
+                }
 
                 stream.Read(message, 0, message.Length);
 
@@ -410,6 +440,14 @@ namespace DVT_LR4
             xzScatBmp = new Bitmap(xzHistBmp);
             yzScatBmp = new Bitmap(yzHistBmp);
 
+            vertices = new float[operatingPoints.Length * 3];
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                vertices[i] = operatingPoints[i / 3].X;
+                vertices[i + 1] = operatingPoints[i / 3].Y;
+                vertices[i + 2] = operatingPoints[i / 3].Z;
+            }
+
             using (Graphics g = Graphics.FromImage(xyHistBmp))
             {
                 bitmapDelta = xyHistBmp.Width / xFreq.Length;
@@ -417,11 +455,12 @@ namespace DVT_LR4
                 for (int i = 0; i < xFreq.Length; i++)
                 {
                     g.DrawRectangle(
-                        new Pen(Color.White),
+                        new Pen(histColor),
                         i * bitmapDelta,
                         xyHistBmp.Height - Map(xFreq[i], 0, xFreq.Max(), 0, xyHistBmp.Height),
                         bitmapDelta,
-                        Map(xFreq[i], 0, xFreq.Max(), 0, xyHistBmp.Height) - 1);
+                        Map(xFreq[i], 0, xFreq.Max(), 0, xyHistBmp.Height) - 1
+                    );
                 }
             }
 
@@ -432,11 +471,12 @@ namespace DVT_LR4
                 for (int i = 0; i < zFreq.Length; i++)
                 {
                     g.DrawRectangle(
-                        new Pen(Color.White),
+                        new Pen(histColor),
                         i * bitmapDelta,
                         0,
                         bitmapDelta,
-                        Map(zFreq[zFreq.Length - 1 - i], 0, zFreq.Max(), 0, xzHistBmp.Height) - 1);
+                        Map(zFreq[zFreq.Length - 1 - i], 0, zFreq.Max(), 0, xzHistBmp.Height) - 1
+                    );
                 }
             }
 
@@ -447,11 +487,12 @@ namespace DVT_LR4
                 for (int i = 0; i < yFreq.Length; i++)
                 {
                     g.DrawRectangle(
-                        new Pen(Color.White),
+                        new Pen(histColor),
                         0,
                         i * bitmapDelta,
                         Map(yFreq[zFreq.Length - 1 - i], 0, yFreq.Max(), 0, yzHistBmp.Width) - 1,
-                        bitmapDelta);
+                        bitmapDelta
+                    );
                 }
             }
 
@@ -471,10 +512,11 @@ namespace DVT_LR4
                 for (int i = 0; i < calculatedArrays[0].Length; i++)
                 {
                     g.FillEllipse(
-                        Brushes.White,
+                        scatBrush,
                         Map(calculatedArrays[0][i], minX, maxX, 0, xyScatBmp.Width - scatPointSize),
                         Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, xyScatBmp.Height - scatPointSize) + (float)crutches1 * 0.6f,
-                        scatPointSize, scatPointSize);
+                        scatPointSize, scatPointSize
+                    );
                 }
             }
 
@@ -483,10 +525,11 @@ namespace DVT_LR4
                 for (int i = 0; i < calculatedArrays[0].Length; i++)
                 {
                     g.FillEllipse(
-                        Brushes.White,
+                        scatBrush,
                         Map(calculatedArrays[0][i], minX, maxX, 0, xzScatBmp.Width - scatPointSize),
                         Map(calculatedArrays[2][i], minZ, maxZ, 0, xzScatBmp.Height - scatPointSize),
-                        scatPointSize, scatPointSize);
+                        scatPointSize, scatPointSize
+                    );
                 }
             }
 
@@ -494,13 +537,12 @@ namespace DVT_LR4
             {
                 for (int i = 0; i < calculatedArrays[1].Length; i++)
                 {
-
-
                     g.FillEllipse(
-                        Brushes.White,
+                        scatBrush,
                         Map(calculatedArrays[2][i], minZ, maxZ, 0, yzScatBmp.Height - scatPointSize),
                         Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, yzScatBmp.Width - scatPointSize) + (float)crutches2 * 1.5f,
-                        scatPointSize, scatPointSize);
+                        scatPointSize, scatPointSize
+                    );
                 }
             }
         }
@@ -523,62 +565,76 @@ namespace DVT_LR4
             GL.Rotate(angle.Y, angle.X, 0.0f);
 
             GL.Enable(OpenGL.GL_DEPTH_TEST);
+            GL.Enable(OpenGL.GL_BLEND);
+            GL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
 
-            if (!hideCube.Checked)
+            if (this.showPoints.Checked)
             {
                 GL.PointSize(2.0f);
-                GL.Color(1.0f, 1.0f, 1.0f, 1.0f);
-
                 GL.Begin(OpenGL.GL_POINTS);
-                {
-                    foreach (var p in operatingPoints)
-                        GL.Vertex(p.X, p.Y, p.Z);
-                }
+                GL.Color(1.0f, 1.0f, 1.0f, 0.5f);
+
+                foreach (var p in operatingPoints)
+                    GL.Vertex(p.X, p.Y, p.Z);
+
                 GL.End();
+            }
 
-                GL.Begin(OpenGL.GL_LINES);
-                {
-                    GL.Vertex(pminX, pminY, pminZ);
-                    GL.Vertex(pmaxX, pminY, pminZ);
+            GL.Disable(OpenGL.GL_BLEND);
 
-                    GL.Vertex(pmaxX, pminY, pminZ);
-                    GL.Vertex(pmaxX, pminY, pmaxZ);
+            if (!this.hideCube.Checked)
+            {
+                GL.Color(1.0f, 1.0f, 1.0f, 1.0f);
+                GL.BeginSurface(nurb);
 
-                    GL.Vertex(pmaxX, pminY, pmaxZ);
-                    GL.Vertex(pminX, pminY, pmaxZ);
+                GL.NurbsSurface(
+                    nurb,
+                    knots.Length,
+                    knots,
+                    knots.Length,
+                    knots,
+                    100 * 3,
+                    3,
+                    vertices,
+                    4,
+                    4,
+                    OpenGL.GL_MAP2_VERTEX_3
+                    );
 
-                    GL.Vertex(pminX, pminY, pmaxZ);
-                    GL.Vertex(pminX, pminY, pminZ);
-
-                    GL.Vertex(pminX, pminY, pminZ);
-                    GL.Vertex(pminX, pmaxY, pminZ);
-
-                    GL.Vertex(pminX, pmaxY, pminZ);
-                    GL.Vertex(pmaxX, pmaxY, pminZ);
-
-                    GL.Vertex(pmaxX, pmaxY, pminZ);
-                    GL.Vertex(pmaxX, pminY, pminZ);
-
-                    GL.Vertex(pmaxX, pmaxY, pminZ);
-                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
-
-                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
-                    GL.Vertex(pmaxX, pminY, pmaxZ);
-
-                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
-                    GL.Vertex(pminX, pmaxY, pmaxZ);
-
-                    GL.Vertex(pminX, pminY, pmaxZ);
-                    GL.Vertex(pminX, pmaxY, pmaxZ);
-
-                    GL.Vertex(pminX, pmaxY, pmaxZ);
-                    GL.Vertex(pminX, pmaxY, pminZ);
-                }
-                GL.End();
+                GL.EndSurface(nurb);
 
                 GL.LineWidth(2.0f);
                 GL.Begin(OpenGL.GL_LINES);
                 {
+                    GL.Color(colours[0]);
+                    GL.Vertex(pminX, pminY, pminZ);
+                    GL.Vertex(pmaxX, pminY, pminZ);
+                    GL.Vertex(pmaxX, pminY, pminZ);
+                    GL.Vertex(pmaxX, pminY, pmaxZ);
+                    GL.Vertex(pmaxX, pminY, pmaxZ);
+                    GL.Vertex(pminX, pminY, pmaxZ);
+                    GL.Color(colours[1]);
+                    GL.Vertex(pminX, pminY, pmaxZ);
+                    GL.Vertex(pminX, pminY, pminZ);
+                    GL.Vertex(pminX, pminY, pminZ);
+                    GL.Vertex(pminX, pmaxY, pminZ);
+                    GL.Vertex(pminX, pmaxY, pminZ);
+                    GL.Vertex(pmaxX, pmaxY, pminZ);
+                    GL.Color(colours[2]);
+                    GL.Vertex(pmaxX, pmaxY, pminZ);
+                    GL.Vertex(pmaxX, pminY, pminZ);
+                    GL.Vertex(pmaxX, pmaxY, pminZ);
+                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
+                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
+                    GL.Vertex(pmaxX, pminY, pmaxZ);
+                    GL.Color(colours[3]);
+                    GL.Vertex(pmaxX, pmaxY, pmaxZ);
+                    GL.Vertex(pminX, pmaxY, pmaxZ);
+                    GL.Vertex(pminX, pminY, pmaxZ);
+                    GL.Vertex(pminX, pmaxY, pmaxZ);
+                    GL.Vertex(pminX, pmaxY, pmaxZ);
+                    GL.Vertex(pminX, pmaxY, pminZ);
+
                     GL.Color(1.0f, 0.0f, 0.0f);
                     GL.Vertex(centreX, centreY, centreZ);
                     GL.Vertex(centreX + axisSize, centreY, centreZ);
@@ -608,40 +664,14 @@ namespace DVT_LR4
                 GL.DrawText(0, 0, 0.0f, 0.0f, 0.0f, "Gilroy", 1, ".");
 
                 var sv = SharpGL.SceneGraph.OpenGLSceneGraphExtensions.Project(GL, new SharpGL.SceneGraph.Vertex(centreX + axisSize, centreY, centreZ));
-                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Courier New", 12, labelX.Text);
+                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Gilroy", 12, labelX.Text);
 
                 sv = SharpGL.SceneGraph.OpenGLSceneGraphExtensions.Project(GL, new SharpGL.SceneGraph.Vertex(centreX, centreY + axisSize, centreZ));
-                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Courier New", 12, labelY.Text);
+                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Gilroy", 12, labelY.Text);
 
                 sv = SharpGL.SceneGraph.OpenGLSceneGraphExtensions.Project(GL, new SharpGL.SceneGraph.Vertex(centreX, centreY, centreZ + axisSize));
-                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Courier New", 12, labelZ.Text);
+                GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Gilroy", 12, labelZ.Text);
             }
-
-            float[] vertices = new float[operatingPoints.Length * 3];
-            for (int i = 0; i < vertices.Length; i += 3)
-            {
-                vertices[i] = operatingPoints[i / 3].X;
-                vertices[i + 1] = operatingPoints[i / 3].Y;
-                vertices[i + 2] = operatingPoints[i / 3].Z;
-            }
-
-            GL.BeginSurface(nurb);
-
-            GL.NurbsSurface(
-                nurb,
-                knots.Length,
-                knots,
-                knots.Length,
-                knots,
-                100 * 3,
-                3,
-                vertices,
-                4,
-                4,
-                OpenGL.GL_MAP2_VERTEX_3
-                );
-
-            GL.EndSurface(nurb);
 
             GL.Enable(OpenGL.GL_TEXTURE_2D);
 
@@ -687,7 +717,7 @@ namespace DVT_LR4
                 GL.End();
             }
 
-            if (!hideYZScat.Checked)
+            if (!this.hideYZScat.Checked)
             {
                 textures[3].Bind(GL);
                 GL.Begin(SharpGL.Enumerations.BeginMode.Quads);
@@ -700,7 +730,7 @@ namespace DVT_LR4
                 GL.End();
             }
 
-            if (!hideYZHist.Checked)
+            if (!this.hideYZHist.Checked)
             {
                 textures[4].Bind(GL);
 
@@ -714,7 +744,7 @@ namespace DVT_LR4
                 GL.End();
             }
 
-            if (!hideXZScat.Checked)
+            if (!this.hideXZScat.Checked)
             {
                 textures[5].Bind(GL);
 
@@ -796,7 +826,7 @@ namespace DVT_LR4
 
 
 
-        #region Secondary methods
+        #region Map methods
 
         private int Map(float value, float inMin, float inMax, int outMin, int outMax)
         {

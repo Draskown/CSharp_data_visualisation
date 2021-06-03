@@ -48,6 +48,7 @@ namespace DVT_LR4
             this.hideXZHist = new System.Windows.Forms.CheckBox();
             this.hideYZScat = new System.Windows.Forms.CheckBox();
             this.hideYZHist = new System.Windows.Forms.CheckBox();
+            this.showPoints = new System.Windows.Forms.CheckBox();
             this.switchDisplay = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -247,6 +248,16 @@ namespace DVT_LR4
             this.hideYZHist.Text = "Hide YZ histogram";
             this.hideYZHist.UseVisualStyleBackColor = true;
             // 
+            // showPoints
+            // 
+            this.showPoints.AutoSize = true;
+            this.showPoints.Location = new System.Drawing.Point(647, 385);
+            this.showPoints.Name = "showPoints";
+            this.showPoints.Size = new System.Drawing.Size(134, 19);
+            this.showPoints.TabIndex = 7;
+            this.showPoints.Text = "Show points";
+            this.showPoints.UseVisualStyleBackColor = true;
+            // 
             // switchDisplay
             // 
             this.switchDisplay.AutoSize = true;
@@ -333,6 +344,7 @@ namespace DVT_LR4
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.graphMain);
+            this.Controls.Add(this.showPoints);
             this.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ForeColor = System.Drawing.Color.White;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -371,6 +383,7 @@ namespace DVT_LR4
         private System.Windows.Forms.CheckBox hideXZHist;
         private System.Windows.Forms.CheckBox hideYZScat;
         private System.Windows.Forms.CheckBox hideYZHist;
+        private System.Windows.Forms.CheckBox showPoints;
         private System.Windows.Forms.CheckBox switchDisplay;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
