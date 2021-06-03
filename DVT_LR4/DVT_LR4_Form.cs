@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using SharpGL.Enumerations;
+using SharpGL.SceneGraph;
 using SharpGL.SceneGraph.Assets;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using static SharpGL.SceneGraph.Evaluators.NurbsBase;
 
 namespace DVT_LR4
 {
@@ -29,6 +31,7 @@ namespace DVT_LR4
 
         private float[][] calculatedArrays;
 
+        private readonly float[] knots;
         private float[] avgX, avgY, avgZ, recalculatedY;
 
         private readonly float angleDelta, bitmapsOffset,
@@ -52,15 +55,14 @@ namespace DVT_LR4
         private Bitmap xyHistBmp, xzHistBmp, yzHistBmp,
                        xyScatBmp, xzScatBmp, yzScatBmp;
 
-        private readonly Texture[] textures = new Texture[6];
+        private readonly Texture[] textures;
+
+        private IntPtr nurb;
 
 
         public DVT_LR4_Form()
         {
             InitializeComponent();
-
-            for (int i = 0; i < textures.Length; i++)
-                textures[i] = new Texture();
 
             stream = new FileStream("dump.dmp", FileMode.Open);
 
@@ -77,6 +79,11 @@ namespace DVT_LR4
             pointsReg = new List<Point3F>();
             pointsAvg = new List<Point3F>();
 
+            knots = new float[] { 
+                0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 1.0f 
+            };
+
             angleDelta = 0.2f;
             cubeOffset = 0.4f;
             bitmapsOffset = 10.0f;
@@ -92,6 +99,10 @@ namespace DVT_LR4
             zFreq = new int[10];
 
             bitmapDelta = 0;
+
+            textures = new Texture[6];
+            for (int i = 0; i < textures.Length; i++)
+                textures[i] = new Texture();
 
             ReadData();
 
@@ -135,7 +146,14 @@ namespace DVT_LR4
 
         private void InitializeTextures()
         {
-            GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            nurb = GL.NewNurbsRenderer();
+
+            GL.NurbsProperty(
+                nurb,
+                (int)OpenGL.GLU_DISPLAY_MODE,
+                (float)NurbsDisplayMode.OutlinePolygon
+            );
+
             textures[0].Create(GL, xyHistBmp);
             textures[1].Create(GL, xyScatBmp);
             textures[2].Create(GL, xzHistBmp);
@@ -455,7 +473,7 @@ namespace DVT_LR4
                     g.FillEllipse(
                         Brushes.White,
                         Map(calculatedArrays[0][i], minX, maxX, 0, xyScatBmp.Width - scatPointSize),
-                        Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, xyScatBmp.Height - scatPointSize) + (float)crutches1*0.6f,
+                        Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, xyScatBmp.Height - scatPointSize) + (float)crutches1 * 0.6f,
                         scatPointSize, scatPointSize);
                 }
             }
@@ -479,9 +497,9 @@ namespace DVT_LR4
 
 
                     g.FillEllipse(
-                        Brushes.White, 
+                        Brushes.White,
                         Map(calculatedArrays[2][i], minZ, maxZ, 0, yzScatBmp.Height - scatPointSize),
-                        Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, yzScatBmp.Width - scatPointSize) + (float)crutches2*1.5f,
+                        Map(calculatedArrays[1][i] / 10.0f, minY, maxY, 0, yzScatBmp.Width - scatPointSize) + (float)crutches2 * 1.5f,
                         scatPointSize, scatPointSize);
                 }
             }
@@ -598,6 +616,32 @@ namespace DVT_LR4
                 sv = SharpGL.SceneGraph.OpenGLSceneGraphExtensions.Project(GL, new SharpGL.SceneGraph.Vertex(centreX, centreY, centreZ + axisSize));
                 GL.DrawText((int)sv.X, (int)sv.Y, 1f, 1f, 1f, "Courier New", 12, labelZ.Text);
             }
+
+            float[] vertices = new float[operatingPoints.Length * 3];
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                vertices[i] = operatingPoints[i / 3].X;
+                vertices[i + 1] = operatingPoints[i / 3].Y;
+                vertices[i + 2] = operatingPoints[i / 3].Z;
+            }
+
+            GL.BeginSurface(nurb);
+
+            GL.NurbsSurface(
+                nurb,
+                knots.Length,
+                knots,
+                knots.Length,
+                knots,
+                100 * 3,
+                3,
+                vertices,
+                4,
+                4,
+                OpenGL.GL_MAP2_VERTEX_3
+                );
+
+            GL.EndSurface(nurb);
 
             GL.Enable(OpenGL.GL_TEXTURE_2D);
 
