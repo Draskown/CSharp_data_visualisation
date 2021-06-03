@@ -13,8 +13,10 @@ namespace DVT_LR2
 {
     public partial class DVT_LR2_Form : Form
     {
-        private double[][] rotationY, defaultMultipliers, a;
-        private double distance, angleX, angleDelta;
+        private double[][] rotationY, a;
+        private readonly double[][] defaultMultipliers;
+        private double distance, angleX;
+        private readonly double angleDelta;
         private readonly PVector[] lineX, lineY;
         private PointF initial_point, delta;
         private readonly int pointSize;
@@ -107,13 +109,13 @@ namespace DVT_LR2
                     switch (r.Next(0, 3))
                     {
                         case 0:
-                            v.x *= -1;
+                            v.X *= -1;
                             break;
                         case 1:
-                            v.y *= -1;
+                            v.Y *= -1;
                             break;
                         case 2:
-                            v.z *= -1;
+                            v.Z *= -1;
                             break;
                     }
                 }
@@ -160,9 +162,9 @@ namespace DVT_LR2
                                     Math.Round(y_arr[i] + deviation_y, 2),
                                     Math.Round(z_arr[i] + deviation_z, 2));
 
-                v.x = v.x > 1 ? 1 : v.x < -1 ? -1 : v.x;
-                v.y = v.y > 1 ? 1 : v.y < -1 ? -1 : v.y;
-                v.z = v.z > 1 ? 1 : v.z < -1 ? -1 : v.z;
+                v.X = v.X > 1 ? 1 : v.X < -1 ? -1 : v.X;
+                v.Y = v.Y > 1 ? 1 : v.Y < -1 ? -1 : v.Y;
+                v.Z = v.Z > 1 ? 1 : v.Z < -1 ? -1 : v.Z;
 
                 coords.Add(v);
             }
@@ -177,7 +179,7 @@ namespace DVT_LR2
 
             try
             {
-                coords.ForEach(v => message += $"{v.x}, {v.y}, {v.z}; ");
+                coords.ForEach(v => message += $"{v.X}, {v.Y}, {v.Z}; ");
 
                 using (StreamWriter writer = new StreamWriter("data.csv"))
                     writer.Write(message);
@@ -338,10 +340,10 @@ namespace DVT_LR2
                     PVector projected2d = MatMul(projection, rotated);
                     projected2d.Mult(distance);
                     projected2d.Move(delta);
-                    int alpha = (int)((rotated.z + 0.86) * 255 / 0.85 / 2);
+                    int alpha = (int)((rotated.Z + 0.86) * 255 / 0.85 / 2);
                     alpha = alpha > 255 ? 255 : alpha < 50 ? 50 : alpha;
 
-                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.x, (float)projected2d.y, pointSize, pointSize);
+                    g.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 255, 0, 255)), (float)projected2d.X, (float)projected2d.Y, pointSize, pointSize);
 
                     var x_string_proj = MatMul(projection, x_string_rot);
                     x_string_proj.Mult(distance);
@@ -351,8 +353,8 @@ namespace DVT_LR2
                     y_string_proj.Mult(distance);
                     y_string_proj.Move(delta);
 
-                    g.DrawString("X", new Font("Gilroy Black", 14), Brushes.Red, (float)x_string_proj.x, (float)x_string_proj.y);
-                    g.DrawString("Y", new Font("Gilroy Black", 14), Brushes.Yellow, (float)y_string_proj.x, (float)y_string_proj.y);
+                    g.DrawString("X", new Font("Gilroy Black", 14), Brushes.Red, (float)x_string_proj.X, (float)x_string_proj.Y);
+                    g.DrawString("Y", new Font("Gilroy Black", 14), Brushes.Yellow, (float)y_string_proj.X, (float)y_string_proj.Y);
 
                     var projectedX = new PVector[lineX.Length];
                     var projectedY = new PVector[lineY.Length];
@@ -368,8 +370,8 @@ namespace DVT_LR2
 
                         if (i != 0)
                         {
-                            g.DrawLine(new Pen(Color.Red, 3), (float)projectedX[i / 2].x, (float)projectedX[i / 2].y, (float)projectedX[i % 4].x, (float)projectedX[i % 4].y);
-                            g.DrawLine(new Pen(Color.Yellow, 3), (float)projectedY[i / 2].x, (float)projectedY[i / 2].y, (float)projectedY[i % 4].x, (float)projectedY[i % 4].y);
+                            g.DrawLine(new Pen(Color.Red, 3), (float)projectedX[i / 2].X, (float)projectedX[i / 2].Y, (float)projectedX[i % 4].X, (float)projectedX[i % 4].Y);
+                            g.DrawLine(new Pen(Color.Yellow, 3), (float)projectedY[i / 2].X, (float)projectedY[i / 2].Y, (float)projectedY[i % 4].X, (float)projectedY[i % 4].Y);
                         }
                     }
                 }
@@ -395,9 +397,9 @@ namespace DVT_LR2
         {
             double[][] m = new double[3][];
 
-            m[0] = new[] { v.x };
-            m[1] = new[] { v.y };
-            m[2] = new[] { v.z };
+            m[0] = new[] { v.X };
+            m[1] = new[] { v.Y };
+            m[2] = new[] { v.Z };
 
             return m;
         }
@@ -407,12 +409,12 @@ namespace DVT_LR2
         {
             PVector v = new PVector
             {
-                x = m[0][0],
-                y = m[1][0]
+                X = m[0][0],
+                Y = m[1][0]
             };
 
             if (m.Length > 2)
-                v.z = m[2][0];
+                v.Z = m[2][0];
 
             return v;
         }
@@ -475,33 +477,33 @@ namespace DVT_LR2
 
     public partial class PVector
     {
-        public double x { get; set; }
-        public double y { get; set; }
-        public double z { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
 
         public PVector(double x, double y, double z)
         {
-            this.x = x; this.y = y; this.z = z;
+            this.X = x; this.Y = y; this.Z = z;
         }
 
         public PVector()
         {
-            this.x = 0; this.y = 0; this.z = 0;
+            this.X = 0; this.Y = 0; this.Z = 0;
         }
 
         public PVector(double x, double y)
         {
-            this.x = x; this.y = y; this.z = 0;
+            this.X = x; this.Y = y; this.Z = 0;
         }
 
         public void Mult(double d)
         {
-            this.x *= d; this.y *= d; this.z *= d;
+            this.X *= d; this.Y *= d; this.Z *= d;
         }
 
         public void Move(PointF p)
         {
-            this.x += p.X; this.y += p.Y;
+            this.X += p.X; this.Y += p.Y;
         }
     }
 }
