@@ -79,9 +79,9 @@ namespace DVT_LR4
             pointsReg = new List<Point3F>();
             pointsAvg = new List<Point3F>();
 
-            knots = new float[] { 
+            knots = new float[] {
                 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 1.0f, 1.0f 
+                1.0f, 1.0f, 1.0f, 1.0f
             };
 
             angleDelta = 0.2f;
@@ -155,7 +155,7 @@ namespace DVT_LR4
             FormBitmaps();
 
             Random r = new Random();
-            colours = new float[][] { 
+            colours = new float[][] {
                 new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
                 new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
                 new float[] {(float)r.NextDouble(), (float)r.NextDouble(), (float)r.NextDouble()},
@@ -168,14 +168,6 @@ namespace DVT_LR4
 
         private void InitializeTextures()
         {
-            nurb = GL.NewNurbsRenderer();
-
-            GL.NurbsProperty(
-                nurb,
-                (int)OpenGL.GLU_DISPLAY_MODE,
-                (float)NurbsDisplayMode.OutlinePolygon
-            );
-
             textures[0].Create(GL, xyHistBmp);
             textures[1].Create(GL, xyScatBmp);
             textures[2].Create(GL, xzHistBmp);
@@ -585,23 +577,8 @@ namespace DVT_LR4
             if (!this.hideCube.Checked)
             {
                 GL.Color(1.0f, 1.0f, 1.0f, 1.0f);
-                GL.BeginSurface(nurb);
 
-                GL.NurbsSurface(
-                    nurb,
-                    knots.Length,
-                    knots,
-                    knots.Length,
-                    knots,
-                    100 * 3,
-                    3,
-                    vertices,
-                    4,
-                    4,
-                    OpenGL.GL_MAP2_VERTEX_3
-                    );
-
-                GL.EndSurface(nurb);
+                DrawSurface();
 
                 GL.LineWidth(2.0f);
                 GL.Begin(OpenGL.GL_LINES);
@@ -763,6 +740,66 @@ namespace DVT_LR4
             GL.Flush();
         }
 
+
+        private void DrawSurface()
+        {
+            var yMaxs = new float[10, 10];
+            var yMaxMax = 0.0f;
+
+            for (int k = 0; k < valuesX.Count; k++)
+            {
+                int xIndex = (int)(valuesX[k] / xDelta + xOffset);
+                int zIndex = (int)(valuesZ[k] / zDelta + zOffset);
+
+                for (int i = 0; i < 10; i++)
+                {
+                    if (xIndex == i)
+                        for (int j = 0; j < 10; j++)
+                            if (zIndex == j && recalculatedY[k] / 10.0f > yMaxs[i, j])
+                            {
+                                yMaxs[i, j] = recalculatedY[k] / 10.0f;
+                                if (yMaxs[i, j] > yMaxMax)
+                                    yMaxMax = yMaxs[i, j];
+                            }
+                }
+            }
+
+            GL.Begin(OpenGL.GL_TRIANGLES);
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                    {
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * i + xDelta / 10.0f / 2,
+                                  yMaxs[i, j],
+                                  zDelta / 10.0f * j + zDelta / 10.0f / 2);
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * i + xDelta / 10.0f / 2,
+                                  yMaxs[i, j + 1],
+                                  zDelta / 10.0f * (j + 1) + zDelta / 10.0f / 2);
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * (i + 1) + xDelta / 10.0f / 2,
+                                  yMaxs[i + 1, j],
+                                  zDelta / 10.0f * (j) + zDelta / 10.0f / 2);
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * i + xDelta / 10.0f / 2,
+                                  yMaxs[i, j + 1],
+                                  zDelta / 10.0f * (j + 1) + zDelta / 10.0f / 2);
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * (i + 1) + xDelta / 10.0f / 2,
+                                  yMaxs[i + 1, j],
+                                  zDelta / 10.0f * j + zDelta / 10.0f / 2);
+                        GL.Color(0.0f, Map(yMaxs[i, j], 0.0f, yMaxMax, 0.4f, 1.0f), 0.0f);
+                        GL.Vertex(xDelta / 10.0f * (i + 1) + xDelta / 10.0f / 2,
+                                  yMaxs[i + 1, j + 1],
+                                  zDelta / 10.0f * (j + 1) + zDelta / 10.0f / 2);
+                    }
+                }
+            }
+            GL.End();
+        }
+
         #endregion
 
 
@@ -835,6 +872,11 @@ namespace DVT_LR4
 
 
         private int Map(int value, int inMin, int inMax, int outMin, int outMax)
+        {
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+
+        private float Map(float value, float inMin, float inMax, float outMin, float outMax)
         {
             return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
         }

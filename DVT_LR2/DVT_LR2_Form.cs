@@ -17,7 +17,7 @@ namespace DVT_LR2
         private readonly double[][] defaultMultipliers;
         private double distance, angleX;
         private readonly double angleDelta;
-        private readonly PVector[] lineX, lineY;
+        private readonly PVector[] lineX, lineY, lineZ;
         private PointF initial_point, delta;
         private readonly int pointSize;
         private List<PVector> coords;
@@ -32,6 +32,7 @@ namespace DVT_LR2
             coords = new List<PVector>();
             lineX = new PVector[4];
             lineY = new PVector[4];
+            lineZ = new PVector[4];
             angleDelta = 0.01;
             r = new Random();
             pointSize = 7;
@@ -308,6 +309,12 @@ namespace DVT_LR2
             lineX[3] = new PVector(-0.1, 1.04);
             var x_string = new PVector(-0.2, 1.04);
 
+            lineZ[0] = new PVector(-1, 1, 0);
+            lineZ[1] = new PVector(-1, 1, 1);
+            lineZ[2] = new PVector(-1.04, 1, 0.96);
+            lineZ[3] = new PVector(-0.96, 1, 1.04);
+            var z_string = new PVector(-1.04, 1, 1.04);
+
             rotationY = new double[][] {
                         new double[] { Math.Cos(angleX) * a[0][0], 0* a[0][1], Math.Sin(angleX)*a[0][2] },
                         new double[] { 0*a[1][0], 1* a[1][1], 0*a[1][2] },
@@ -322,13 +329,17 @@ namespace DVT_LR2
 
                     var x_string_rot = MatMul(rotationY, x_string);
                     var y_string_rot = MatMul(rotationY, y_string);
+                    var z_string_rot = MatMul(rotationY, z_string);
 
                     var rotatedX = new PVector[lineX.Length];
                     var rotatedY = new PVector[lineY.Length];
+                    var rotatedZ = new PVector[lineZ.Length];
+
                     for (int i = 0; i < lineX.Length; i++)
                     {
                         rotatedX[i] = MatMul(rotationY, lineX[i]);
                         rotatedY[i] = MatMul(rotationY, lineY[i]);
+                        rotatedZ[i] = MatMul(rotationY, lineZ[i]);
                     }
 
                     double[][] projection =
@@ -353,11 +364,17 @@ namespace DVT_LR2
                     y_string_proj.Mult(distance);
                     y_string_proj.Move(delta);
 
+                    var z_string_proj = MatMul(projection, z_string_rot);
+                    z_string_proj.Mult(distance);
+                    z_string_proj.Move(delta);
+
                     g.DrawString("X", new Font("Gilroy Black", 14), Brushes.Red, (float)x_string_proj.X, (float)x_string_proj.Y);
                     g.DrawString("Y", new Font("Gilroy Black", 14), Brushes.Yellow, (float)y_string_proj.X, (float)y_string_proj.Y);
+                    g.DrawString("Z", new Font("Gilroy Black", 14), Brushes.Blue, (float)z_string_proj.X, (float)z_string_proj.Y);
 
                     var projectedX = new PVector[lineX.Length];
                     var projectedY = new PVector[lineY.Length];
+                    var projectedZ = new PVector[lineZ.Length];
                     for (int i = 0; i < lineX.Length; i++)
                     {
                         projectedX[i] = MatMul(projection, rotatedX[i]);
@@ -368,10 +385,15 @@ namespace DVT_LR2
                         projectedY[i].Mult(distance);
                         projectedY[i].Move(delta);
 
+                        projectedZ[i] = MatMul(projection, rotatedZ[i]);
+                        projectedZ[i].Mult(distance);
+                        projectedZ[i].Move(delta);
+
                         if (i != 0)
                         {
                             g.DrawLine(new Pen(Color.Red, 3), (float)projectedX[i / 2].X, (float)projectedX[i / 2].Y, (float)projectedX[i % 4].X, (float)projectedX[i % 4].Y);
                             g.DrawLine(new Pen(Color.Yellow, 3), (float)projectedY[i / 2].X, (float)projectedY[i / 2].Y, (float)projectedY[i % 4].X, (float)projectedY[i % 4].Y);
+                            g.DrawLine(new Pen(Color.Blue, 3), (float)projectedZ[i / 2].X, (float)projectedZ[i / 2].Y, (float)projectedZ[i % 4].X, (float)projectedZ[i % 4].Y);
                         }
                     }
                 }

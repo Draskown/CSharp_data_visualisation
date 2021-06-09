@@ -53,7 +53,7 @@ namespace CPDT_LR2
             overheadDistance = 25;
             angleX = angleY = 0;
             angleDelta = 0.01;
-            pointSize = 2;
+            pointSize = 4;
 
             stream = new FileStream("UDPFromVelodyneTest_lidardata.pcap", FileMode.Open);
 
@@ -102,8 +102,6 @@ namespace CPDT_LR2
             };
 
             maximumDepth = 10.0;
-            totalDepthFront = maximumDepth;
-            totalDepthBack = maximumDepth;
 
             arrayOfPlaneFront = new Vector[8];
             arrayOfPlaneBack = new Vector[8];
@@ -195,7 +193,7 @@ namespace CPDT_LR2
 
         private void ReadData()
         {
-            byte[] line = new byte[300 * 360];
+            byte[] line = new byte[150 * 360];
 
             var pointsCount = 0;
             var maxLengthOfAMessage = $"23:23:23> received {line.Length} points".Length;
@@ -294,7 +292,7 @@ namespace CPDT_LR2
 
             for (int row = 0; row < pointsCloud.Length; row++)
             {
-                for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
+                for (int column = 0; column < pointsCloud[row].Beams.Length; column += pointSize / 2)
                 {
                     var v = pointsCloud[row].Beams[column];
 
@@ -584,6 +582,7 @@ namespace CPDT_LR2
             this.frameOverhead.Image = bmpOverhead;
         }
 
+
         private bool CheckDrawability(Vector _v)
         {
             double xyPlane = (double)this.numXYPlane.Value,
@@ -686,6 +685,9 @@ namespace CPDT_LR2
 
         private void ComputeDepth()
         {
+            totalDepthFront = maximumDepth;
+            totalDepthBack = maximumDepth;
+
             var width = (double)numCorWidth.Value / 2;
             var height = (double)numCorHeight.Value / 2;
 
@@ -750,15 +752,16 @@ namespace CPDT_LR2
                                 if (v.Y > -height && v.Y < height)
                                     if (v.Z > minZFront && v.Z < maxZFront)
                                         if (Math.Abs(v.Azimut - planesAngle) <= 180 / width)
-                                        if ((int)(v.Distance - depthFront) == 0)
-                                        {
-                                            threshForCountingAsAnObstacleFront++;
-                                            if (threshForCountingAsAnObstacleFront >= 10)
+                                            if ((int)(v.Distance - depthFront) == 0)
                                             {
-                                                totalDepthFront = depthFront < totalDepthFront ? depthFront : totalDepthFront;
-                                                break;
+                                                threshForCountingAsAnObstacleFront++;
+
+                                                if (threshForCountingAsAnObstacleFront >= 20 / pointSize)
+                                                {
+                                                    totalDepthFront = depthFront < totalDepthFront ? depthFront : totalDepthFront;
+                                                    break;
+                                                }
                                             }
-                                        }
 
                             depthFront += 0.01;
                         }
@@ -782,16 +785,16 @@ namespace CPDT_LR2
                             if (v.X > minXBack && v.X < maxXBack)
                                 if (v.Y > -height && v.Y < height)
                                     if (v.Z > minZBack && v.Z < maxZBack)
-                                        if (Math.Abs(v.Azimut - planesAngle + 180) <= 180 / width)
+                                        if (Math.Abs(v.Azimut - planesAngle) <= 180 / width)
                                             if ((int)(v.Distance - depthBack) == 0)
-                                        {
-                                            threshForCountingAsAnObstacleBack++;
-                                            if (threshForCountingAsAnObstacleBack >= 10)
                                             {
-                                                totalDepthBack = depthBack < totalDepthBack ? depthBack : totalDepthBack;
-                                                break;
+                                                threshForCountingAsAnObstacleBack++;
+                                                if (threshForCountingAsAnObstacleBack >= 20 / pointSize)
+                                                {
+                                                    totalDepthBack = depthBack < totalDepthBack ? depthBack : totalDepthBack;
+                                                    break;
+                                                }
                                             }
-                                        }
 
                             depthBack += 0.01;
                         }

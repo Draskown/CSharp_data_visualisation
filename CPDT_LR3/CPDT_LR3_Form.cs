@@ -41,7 +41,7 @@ namespace CPDT_LR3
         {
             InitializeComponent();
 
-            this.timer.Interval = 1000;
+            this.timer.Interval = 50;
 
             amountOfMessagesSent = 0;
 
@@ -716,7 +716,7 @@ namespace CPDT_LR3
 
 
 
-        #region Writing generetaed message
+        #region Writing generetated message
 
         private void WriteIntoFile()
         {
@@ -763,6 +763,7 @@ namespace CPDT_LR3
             }
 
             writer.Write(sendingData, 0, sendingData.Length);
+            writer.Close();
         }
 
         #endregion
