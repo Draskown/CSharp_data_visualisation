@@ -88,6 +88,7 @@ namespace CPDT_LR3
                         }
                         if (packetAmountOfMessages[amountOfMessagesSent] == 1)
                         {
+                            WriteIntoFile();
                             AddMessage($"The send complete! (0x{sendMsg.From:X2} ({sendMsg.Value}) -> 0x{sendMsg.Into:X2})", sendMsg);
                             amountOfMessagesSent++;
 
@@ -702,8 +703,6 @@ namespace CPDT_LR3
 
                     sendingPending = true;
                     sendMsg = new Message(from, into, value);
-
-                    WriteIntoFile();
                 }
                 catch (Exception ex)
                 {
@@ -720,7 +719,7 @@ namespace CPDT_LR3
 
         private void WriteIntoFile()
         {
-            FileStream writer = new FileStream("sentData.dmp", FileMode.Open);
+            FileStream writer = new FileStream("sentData.dmp", FileMode.Open, FileAccess.Write);
 
             var sendingData = new byte[19];
 
@@ -762,6 +761,7 @@ namespace CPDT_LR3
                 }
             }
 
+            writer.Seek(writer.Length, SeekOrigin.Begin);
             writer.Write(sendingData, 0, sendingData.Length);
             writer.Close();
         }
