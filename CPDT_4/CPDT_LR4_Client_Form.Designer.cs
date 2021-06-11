@@ -171,11 +171,6 @@ namespace CPDT_4
             // numY1YScale
             // 
             this.numY1YScale.ForeColor = System.Drawing.Color.White;
-            this.numY1YScale.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
             this.numY1YScale.Location = new System.Drawing.Point(113, 75);
             this.numY1YScale.Maximum = new decimal(new int[] {
             200,

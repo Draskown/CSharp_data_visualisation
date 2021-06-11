@@ -255,8 +255,8 @@ namespace CPDT_4
                                 this.mainChart.ChartAreas[n].AxisX.Minimum = x.Last().AddSeconds(-10 + (double)numsXScale[n].Value / 20).ToOADate();
                             }
 
-                            this.mainChart.ChartAreas[n].AxisY.Maximum = ys[n].Last() + (double)numsYScale[n].Value;
-                            this.mainChart.ChartAreas[n].AxisY.Minimum = ys[n].Last() - (double)numsYScale[n].Value;
+                            this.mainChart.ChartAreas[n].AxisY.Maximum = ys[n].Last() + (double)numsYScale[n].Maximum - (double)numsYScale[n].Value / 1.1;
+                            this.mainChart.ChartAreas[n].AxisY.Minimum = ys[n].Last() - (double)numsYScale[n].Maximum + (double)numsYScale[n].Value / 1.1;
                         }
                     }
                     catch (Exception) { }
