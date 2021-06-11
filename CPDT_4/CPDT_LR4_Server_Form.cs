@@ -1,14 +1,19 @@
-﻿using System.Windows.Forms;
-using System.Net;
-using System.IO;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Net.Sockets;
 using System;
 
 namespace CPDT_4
 {
     public partial class CPDT_LR4_Server_Form : Form
     {
-        private readonly string url, port;
-        private string sendLine;
+        private UdpClient sendClient;
+
+        private readonly string address;
+
+        private readonly int connectingPort;
+
+        private double x;
 
         private bool started;
 
@@ -17,8 +22,10 @@ namespace CPDT_4
         {
             InitializeComponent();
 
-            url = "http://127.0.0.1";
-            port = "8888";
+            address = "127.0.0.1";
+            connectingPort = 8888;
+
+            x = 0.0;
 
             started = false;
         }
@@ -26,11 +33,9 @@ namespace CPDT_4
 
         private void CPDT_LR4_Server_Form_Load(object sender, EventArgs e)
         {
-            //this.btnStart.Click += ButtonAction;
+            this.btnStart.Click += ButtonAction;
 
-            //this.timer.Tick += SendData;
-
-            SendData(null, null);
+            this.timer.Tick += SendData;
         }
 
 
@@ -42,13 +47,18 @@ namespace CPDT_4
 
                 this.btnStart.Text = "Start Server";
                 started = false;
+                sendClient.Close();
+                sendClient.Dispose();
             }
             else
             {
+                this.timer.Interval = 1000;
                 this.timer.Start();
 
                 this.btnStart.Text = "Stop Server";
                 started = true;
+
+                sendClient = new UdpClient();
             }
         }
 
@@ -57,13 +67,8 @@ namespace CPDT_4
         {
             try
             {
-                var httpRequest = (HttpWebRequest)WebRequest.Create($"{url}:{port}/");
-                httpRequest.Method = "POST";
-
-                sendLine = String.Join(", ", GenerateData());
-
-                using (var writer = new StreamWriter(httpRequest.GetRequestStream()))
-                    writer.Write(sendLine);
+                var data = GenerateData();
+                sendClient.Send(data, data.Length, address, connectingPort);
             }
             catch (Exception ex)
             {
@@ -76,9 +81,11 @@ namespace CPDT_4
         {
             var data = new byte[3];
 
-            data[0] = 53;
-            data[1] = 20;
-            data[2] = 74;
+            x += 0.1;
+
+            data[0] = (byte)(Math.Cos(x) * 100);
+            data[1] = (byte)(x * 255 - 70);
+            data[2] = (byte)(Math.Abs(x - 5) * Math.Tanh(x) - Math.Atan2(x, x));
 
             return data;
         }
