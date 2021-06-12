@@ -79,13 +79,14 @@ namespace CPDT_4
 
         private byte[] GenerateData()
         {
-            var data = new byte[3];
+            var data = new byte[4];
 
             x += 0.1;
 
             data[0] = (byte)(Math.Cos(x) * 100);
             data[1] = (byte)(x * 255 - 70);
             data[2] = (byte)(Math.Abs(x - 5) * Math.Tanh(x) - Math.Atan2(x, x));
+            data[3] = (byte) (x * x * x);
 
             return data;
         }

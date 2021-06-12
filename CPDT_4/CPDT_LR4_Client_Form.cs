@@ -43,25 +43,26 @@ namespace CPDT_4
         {
             InitializeComponent();
 
-            numsXScale = new NumericUpDown[] { numY1XScale, numY2XScale, numY3XScale };
-            numsYScale = new NumericUpDown[] { numY1YScale, numY2YScale, numY3YScale };
-            numsThinning = new NumericUpDown[] { numY1Thinning, numY2Thinning, numY3Thinning };
+            numsXScale = new NumericUpDown[] { numY1XScale, numY2XScale, numY3XScale, numY4XScale };
+            numsYScale = new NumericUpDown[] { numY1YScale, numY2YScale, numY3YScale, numY4YScale };
+            numsThinning = new NumericUpDown[] { numY1Thinning, numY2Thinning, numY3Thinning, numY4Thinning };
 
             boxes = new TextBox[] { tbY1MaxSpan, tbY1MinSpan,
                                     tbY2MaxSpan, tbY2MinSpan,
-                                    tbY3MaxSpan, tbY3MinSpan};
+                                    tbY3MaxSpan, tbY3MinSpan,
+                                    tbY4MaxSpan, tbY4MinSpan};
 
-            normies = new CheckBox[] { cbNormY1, cbNormY2, cbNormY3 };
+            normies = new CheckBox[] { cbNormY1, cbNormY2, cbNormY3, cbNormY4 };
 
             x = new List<DateTime>();
             status = new List<string>();
 
-            ys = new List<double>[3];
+            ys = new List<double>[4];
             for (int i = 0; i < ys.Length; i++)
                 ys[i] = new List<double>();
 
-            ysMax = new double[] { 100, 200, 5};
-            ysSlope = new double[] { 50.0, 10.0, 2.0};
+            ysMax = new double[] { 100, 200, 5, 10};
+            ysSlope = new double[] { 50.0, 10.0, 2.0, 6.0};
 
             localPort = 8888;
             depth = 10;
@@ -143,14 +144,8 @@ namespace CPDT_4
                 {
                     var data = receiverClient.Receive(ref remoteIp);
 
-                    if (ys[0].Count == 0 &&
-                        ys[1].Count == 0 &&
-                        ys[2].Count == 0
-                        ||
-                        data[0] != ys[0].Last() ||
-                        data[1] != ys[1].Last() ||
-                        data[2] != ys[2].Last()
-                        )
+                    if (ys.All(y => y.Count == 0) || 
+                        ys.Where((y, i) => y.Last() != data[i]).Count() != 0)
                         FillArrays(data);
                 }
                 catch (Exception ex)
@@ -225,7 +220,7 @@ namespace CPDT_4
         private void FillDB(string stamp, byte[] values, string keys)
         {
             cmd = new OleDbCommand(
-                "INSERT INTO log VALUES ('"+stamp+"', '"+values[0]+"', '"+values[1]+"', '"+values[2]+"', '"+keys+"')",
+                "INSERT INTO log VALUES ('"+stamp+"', '"+values[0]+"', '"+values[1]+"', '"+values[2]+"', '"+values[3]+"', '"+keys+"')",
                 connection
             );
 

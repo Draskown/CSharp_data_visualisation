@@ -33,9 +33,11 @@ namespace CPDT_4
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPDT_LR4_Client_Form));
             this.mainChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.numY1XScale = new System.Windows.Forms.NumericUpDown();
@@ -76,6 +78,18 @@ namespace CPDT_4
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cbNormY3 = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.tbY4MaxSpan = new System.Windows.Forms.TextBox();
+            this.cbNormY4 = new System.Windows.Forms.CheckBox();
+            this.numY4XScale = new System.Windows.Forms.NumericUpDown();
+            this.numY4YScale = new System.Windows.Forms.NumericUpDown();
+            this.numY4Thinning = new System.Windows.Forms.NumericUpDown();
+            this.label16 = new System.Windows.Forms.Label();
+            this.tbY4MinSpan = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.mainChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numY1XScale)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numY1YScale)).BeginInit();
@@ -89,6 +103,10 @@ namespace CPDT_4
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4XScale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4YScale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4Thinning)).BeginInit();
             this.SuspendLayout();
             // 
             // mainChart
@@ -129,9 +147,24 @@ namespace CPDT_4
             chartArea3.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Gray;
             chartArea3.BackColor = System.Drawing.Color.Transparent;
             chartArea3.Name = "ChartArea3";
+            chartArea4.AxisX.IsLabelAutoFit = false;
+            chartArea4.AxisX.LabelStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea4.AxisX.LabelStyle.ForeColor = System.Drawing.Color.White;
+            chartArea4.AxisX.LineColor = System.Drawing.Color.Gray;
+            chartArea4.AxisX.MajorGrid.LineColor = System.Drawing.Color.Gray;
+            chartArea4.AxisX.MajorTickMark.LineColor = System.Drawing.Color.Gray;
+            chartArea4.AxisY.IsLabelAutoFit = false;
+            chartArea4.AxisY.LabelStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea4.AxisY.LabelStyle.ForeColor = System.Drawing.Color.White;
+            chartArea4.AxisY.LineColor = System.Drawing.Color.Gray;
+            chartArea4.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
+            chartArea4.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Gray;
+            chartArea4.BackColor = System.Drawing.Color.Transparent;
+            chartArea4.Name = "ChartArea4";
             this.mainChart.ChartAreas.Add(chartArea1);
             this.mainChart.ChartAreas.Add(chartArea2);
             this.mainChart.ChartAreas.Add(chartArea3);
+            this.mainChart.ChartAreas.Add(chartArea4);
             this.mainChart.Location = new System.Drawing.Point(12, 12);
             this.mainChart.Name = "mainChart";
             series1.BorderWidth = 3;
@@ -142,15 +175,24 @@ namespace CPDT_4
             series2.BorderWidth = 3;
             series2.ChartArea = "ChartArea2";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             series2.Name = "Series1";
             series3.BorderWidth = 3;
             series3.ChartArea = "ChartArea3";
             series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             series3.Name = "Series2";
+            series4.BorderWidth = 3;
+            series4.ChartArea = "ChartArea4";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series4.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            series4.Name = "Series4";
+            series4.YValuesPerPoint = 4;
             this.mainChart.Series.Add(series1);
             this.mainChart.Series.Add(series2);
             this.mainChart.Series.Add(series3);
-            this.mainChart.Size = new System.Drawing.Size(891, 495);
+            this.mainChart.Series.Add(series4);
+            this.mainChart.Size = new System.Drawing.Size(891, 693);
             this.mainChart.TabIndex = 0;
             this.mainChart.Text = "chart1";
             // 
@@ -272,7 +314,7 @@ namespace CPDT_4
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(1009, 519);
+            this.btnSave.Location = new System.Drawing.Point(1014, 682);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 4;
@@ -604,11 +646,157 @@ namespace CPDT_4
             this.groupBox3.TabIndex = 8;
             this.groupBox3.TabStop = false;
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.tbY4MaxSpan);
+            this.groupBox4.Controls.Add(this.cbNormY4);
+            this.groupBox4.Controls.Add(this.numY4XScale);
+            this.groupBox4.Controls.Add(this.numY4YScale);
+            this.groupBox4.Controls.Add(this.numY4Thinning);
+            this.groupBox4.Controls.Add(this.label16);
+            this.groupBox4.Controls.Add(this.tbY4MinSpan);
+            this.groupBox4.Controls.Add(this.label17);
+            this.groupBox4.Controls.Add(this.label18);
+            this.groupBox4.Controls.Add(this.label19);
+            this.groupBox4.Controls.Add(this.label20);
+            this.groupBox4.Location = new System.Drawing.Point(912, 504);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(175, 146);
+            this.groupBox4.TabIndex = 8;
+            this.groupBox4.TabStop = false;
+            // 
+            // tbY4MaxSpan
+            // 
+            this.tbY4MaxSpan.Location = new System.Drawing.Point(4, 27);
+            this.tbY4MaxSpan.Name = "tbY4MaxSpan";
+            this.tbY4MaxSpan.Size = new System.Drawing.Size(100, 23);
+            this.tbY4MaxSpan.TabIndex = 3;
+            // 
+            // cbNormY4
+            // 
+            this.cbNormY4.AutoSize = true;
+            this.cbNormY4.Location = new System.Drawing.Point(56, 123);
+            this.cbNormY4.Name = "cbNormY4";
+            this.cbNormY4.Size = new System.Drawing.Size(85, 19);
+            this.cbNormY4.TabIndex = 5;
+            this.cbNormY4.Text = "Normalize";
+            this.cbNormY4.UseVisualStyleBackColor = true;
+            // 
+            // numY4XScale
+            // 
+            this.numY4XScale.ForeColor = System.Drawing.Color.White;
+            this.numY4XScale.Location = new System.Drawing.Point(111, 27);
+            this.numY4XScale.Maximum = new decimal(new int[] {
+            200,
+            0,
+            0,
+            0});
+            this.numY4XScale.Name = "numY4XScale";
+            this.numY4XScale.Size = new System.Drawing.Size(59, 23);
+            this.numY4XScale.TabIndex = 1;
+            this.numY4XScale.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // numY4YScale
+            // 
+            this.numY4YScale.ForeColor = System.Drawing.Color.White;
+            this.numY4YScale.Location = new System.Drawing.Point(111, 67);
+            this.numY4YScale.Maximum = new decimal(new int[] {
+            200,
+            0,
+            0,
+            0});
+            this.numY4YScale.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numY4YScale.Name = "numY4YScale";
+            this.numY4YScale.Size = new System.Drawing.Size(59, 23);
+            this.numY4YScale.TabIndex = 1;
+            this.numY4YScale.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numY4YScale.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // numY4Thinning
+            // 
+            this.numY4Thinning.ForeColor = System.Drawing.Color.White;
+            this.numY4Thinning.Location = new System.Drawing.Point(95, 94);
+            this.numY4Thinning.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numY4Thinning.Name = "numY4Thinning";
+            this.numY4Thinning.Size = new System.Drawing.Size(59, 23);
+            this.numY4Thinning.TabIndex = 1;
+            this.numY4Thinning.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numY4Thinning.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(115, 12);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(50, 15);
+            this.label16.TabIndex = 2;
+            this.label16.Text = "X scale";
+            // 
+            // tbY4MinSpan
+            // 
+            this.tbY4MinSpan.Location = new System.Drawing.Point(4, 67);
+            this.tbY4MinSpan.Name = "tbY4MinSpan";
+            this.tbY4MinSpan.Size = new System.Drawing.Size(100, 23);
+            this.tbY4MinSpan.TabIndex = 3;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(7, 12);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(94, 15);
+            this.label17.TabIndex = 2;
+            this.label17.Text = "Max time span";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(33, 98);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(56, 15);
+            this.label18.TabIndex = 2;
+            this.label18.Text = "Thinning";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(115, 52);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(50, 15);
+            this.label19.TabIndex = 2;
+            this.label19.Text = "Y scale";
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(10, 53);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(89, 15);
+            this.label20.TabIndex = 2;
+            this.label20.Text = "Min time span";
+            // 
             // CPDT_LR4_Client_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1101, 567);
+            this.ClientSize = new System.Drawing.Size(1101, 725);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -636,6 +824,11 @@ namespace CPDT_4
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4XScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4YScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numY4Thinning)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -681,6 +874,18 @@ namespace CPDT_4
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox cbNormY3;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.TextBox tbY4MaxSpan;
+        private System.Windows.Forms.CheckBox cbNormY4;
+        private System.Windows.Forms.NumericUpDown numY4XScale;
+        private System.Windows.Forms.NumericUpDown numY4YScale;
+        private System.Windows.Forms.NumericUpDown numY4Thinning;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox tbY4MinSpan;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label label20;
     }
 }
 
