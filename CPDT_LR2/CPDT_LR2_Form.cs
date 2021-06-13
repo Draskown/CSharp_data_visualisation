@@ -53,7 +53,7 @@ namespace CPDT_LR2
             overheadDistance = 25;
             angleX = angleY = 0;
             angleDelta = 0.01;
-            pointSize = 4;
+            pointSize = 2;
 
             stream = new FileStream("UDPFromVelodyneTest_lidardata.pcap", FileMode.Open);
 
@@ -292,7 +292,7 @@ namespace CPDT_LR2
 
             for (int row = 0; row < pointsCloud.Length; row++)
             {
-                for (int column = 0; column < pointsCloud[row].Beams.Length; column += pointSize / 2)
+                for (int column = 0; column < pointsCloud[row].Beams.Length; column++)
                 {
                     var v = pointsCloud[row].Beams[column];
 
@@ -331,7 +331,11 @@ namespace CPDT_LR2
 
             foreach (var obj in foundObjects)
             {
-                if (!CheckDrawability(obj.Centroid))
+                var drawablePoints = new Vector[] { };
+
+                if (obj.Vectors.Count(v => CheckDrawability(v)) >= (int)numMinDensote.Value)
+                    drawablePoints = obj.Vectors.Where(v => CheckDrawability(v)).ToArray();
+                else
                     continue;
 
                 foreach (var v in obj.Vectors)
@@ -368,22 +372,24 @@ namespace CPDT_LR2
                     oG.FillEllipse(new SolidBrush(Color.FromArgb((int)alpha, 0, 255, 0)), (float)projected2d.X, (float)projected2d.Z, pointSize, pointSize);
                 }
 
-                var minX = obj.Vectors.Min(v => v.X);
-                var maxX = obj.Vectors.Max(v => v.X);
-                var minY = obj.Vectors.Min(v => v.Y);
-                var maxY = obj.Vectors.Max(v => v.Y);
-                var minZ = obj.Vectors.Min(v => v.Z);
-                var maxZ = obj.Vectors.Max(v => v.Z);
+                var minX = drawablePoints.Min(v => v.X);
+                var maxX = drawablePoints.Max(v => v.X);
+                var minY = drawablePoints.Min(v => v.Y);
+                var maxY = drawablePoints.Max(v => v.Y);
+                var minZ = drawablePoints.Min(v => v.Z);
+                var maxZ = drawablePoints.Max(v => v.Z);
+
+                var drawableCentroid = new Vector(obj.Centroid, (maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
 
                 var minMaxXYZ = new Vector[] {
-                        new Vector(obj.Centroid, minX, minY, minZ),
-                        new Vector(obj.Centroid, maxX, minY, minZ),
-                        new Vector(obj.Centroid, maxX, maxY, minZ),
-                        new Vector(obj.Centroid, minX, maxY, minZ),
-                        new Vector(obj.Centroid, minX, minY, maxZ),
-                        new Vector(obj.Centroid, maxX, minY, maxZ),
-                        new Vector(obj.Centroid, maxX, maxY, maxZ),
-                        new Vector(obj.Centroid, minX, maxY, maxZ)
+                        new Vector(drawableCentroid, minX, minY, minZ),
+                        new Vector(drawableCentroid, maxX, minY, minZ),
+                        new Vector(drawableCentroid, maxX, maxY, minZ),
+                        new Vector(drawableCentroid, minX, maxY, minZ),
+                        new Vector(drawableCentroid, minX, minY, maxZ),
+                        new Vector(drawableCentroid, maxX, minY, maxZ),
+                        new Vector(drawableCentroid, maxX, maxY, maxZ),
+                        new Vector(drawableCentroid, minX, maxY, maxZ)
                     };
 
                 var isometricMinMaxXYZ = minMaxXYZ;
@@ -455,126 +461,94 @@ namespace CPDT_LR2
                               (float)overheadMinMaxXYZ[2].X, (float)overheadMinMaxXYZ[2].Z);
             }
 
-            var checkableArrayFront = arrayOfPlaneFront.Where(v => v.Distance > 0);
-
-            if (!checkableArrayFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
-                checkableArrayFront.All(v => CheckDrawability(v)))
+            for (int i = 0; i < arrayOfPlaneFront.Length; i++)
             {
-                for (int i = 0; i < arrayOfPlaneFront.Length; i++)
-                {
-                    var v = arrayOfPlaneFront[i];
+                var v = arrayOfPlaneFront[i];
 
-                    Vector rotated = MatMul(isometricRotationX, v);
-                    rotated = MatMul(isometricRotationY, rotated);
+                Vector rotated = MatMul(isometricRotationX, v);
+                rotated = MatMul(isometricRotationY, rotated);
 
-                    Vector projected2d = MatMul(isometricProjection, rotated);
+                Vector projected2d = MatMul(isometricProjection, rotated);
 
-                    projected2d.Mult(isometricDistance);
+                projected2d.Mult(isometricDistance);
 
-                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
+                projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
 
-                    drawablePlaneFront[i] = projected2d;
-                }
-
-                var arrayOfPlanePoints = new PointF[4];
-
-                for (int i = 4; i < drawablePlaneFront.Length; i++)
-                    arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneFront[i].X,
-                                                       (float)drawablePlaneFront[i].Y);
-
-                iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+                drawablePlaneFront[i] = projected2d;
             }
 
-            var checkableArrayBack = arrayOfPlaneBack.Where(v => v.Distance > 0);
+            var arrayOfPlanePoints = new PointF[4];
 
-            if (!checkableArrayBack.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) &&
-                 checkableArrayBack.All(v => CheckDrawability(v)))
+            for (int i = 4; i < drawablePlaneFront.Length; i++)
+                arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneFront[i].X,
+                                                   (float)drawablePlaneFront[i].Y);
+
+            iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+
+
+            for (int i = 0; i < arrayOfPlaneBack.Length; i++)
             {
-                for (int i = 0; i < arrayOfPlaneBack.Length; i++)
-                {
-                    var v = arrayOfPlaneBack[i];
+                var v = arrayOfPlaneBack[i];
 
-                    Vector rotated = MatMul(isometricRotationX, v);
-                    rotated = MatMul(isometricRotationY, rotated);
+                Vector rotated = MatMul(isometricRotationX, v);
+                rotated = MatMul(isometricRotationY, rotated);
 
-                    Vector projected2d = MatMul(isometricProjection, rotated);
+                Vector projected2d = MatMul(isometricProjection, rotated);
 
-                    projected2d.Mult(isometricDistance);
+                projected2d.Mult(isometricDistance);
 
-                    projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
+                projected2d.Move(this.frameIsometric.Width / 2, this.frameIsometric.Height / 2, 0);
 
-                    drawablePlaneBack[i] = projected2d;
-                }
-
-                var arrayOfPlanePoints = new PointF[4];
-
-                for (int i = 4; i < drawablePlaneBack.Length; i++)
-                    arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneBack[i].X,
-                                                       (float)drawablePlaneBack[i].Y);
-
-                iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+                drawablePlaneBack[i] = projected2d;
             }
 
-            if (!checkableArrayFront.All(v => v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0))
+            arrayOfPlanePoints = new PointF[4];
+
+            for (int i = 4; i < drawablePlaneBack.Length; i++)
+                arrayOfPlanePoints[i - 4] = new PointF((float)drawablePlaneBack[i].X,
+                                                   (float)drawablePlaneBack[i].Y);
+
+            iG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+
+            for (int i = 0; i < arrayOfPlaneFront.Length; i++)
             {
-                for (int i = 0; i < arrayOfPlaneFront.Length; i++)
-                {
-                    var v = arrayOfPlaneFront[i];
+                var v = arrayOfPlaneFront[i];
 
-                    Vector rotated = MatMul(overheadRotationY, v);
-                    rotated = MatMul(overheadRotationZ, rotated);
+                Vector rotated = MatMul(overheadRotationY, v);
+                rotated = MatMul(overheadRotationZ, rotated);
 
-                    Vector projected2d = MatMul(overheadProjection, rotated);
+                Vector projected2d = MatMul(overheadProjection, rotated);
 
-                    projected2d.Mult(overheadDistance);
+                projected2d.Mult(overheadDistance);
 
-                    projected2d.Move(175, 0, 200);
+                projected2d.Move(175, 0, 200);
 
-                    drawablePlaneFront[i] = projected2d;
-                }
-
-                for (int i = 0; i < arrayOfPlaneBack.Length; i++)
-                {
-                    var v = arrayOfPlaneBack[i];
-
-                    Vector rotated = MatMul(overheadRotationY, v);
-                    rotated = MatMul(overheadRotationZ, rotated);
-
-                    Vector projected2d = MatMul(overheadProjection, rotated);
-
-                    projected2d.Mult(overheadDistance);
-
-                    projected2d.Move(175, 0, 200);
-
-                    drawablePlaneBack[i] = projected2d;
-                }
-
-                var arrayOfPlanePoints = new PointF[4];
-
-                if (!checkableArrayFront.All(v => CheckDrawability(v)))
-                {
-                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneBack[7].X, (float)drawablePlaneBack[7].Z);
-                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneBack[6].X, (float)drawablePlaneBack[6].Z);
-                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneBack[3].X, (float)drawablePlaneBack[3].Z);
-                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneBack[2].X, (float)drawablePlaneBack[2].Z);
-                }
-                else if (!checkableArrayBack.All(v => CheckDrawability(v)))
-                {
-                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneFront[2].X, (float)drawablePlaneFront[2].Z);
-                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneFront[3].X, (float)drawablePlaneFront[3].Z);
-                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z);
-                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z);
-                }
-                else
-                {
-                    arrayOfPlanePoints[0] = new PointF((float)drawablePlaneBack[6].X, (float)drawablePlaneBack[6].Z);
-                    arrayOfPlanePoints[1] = new PointF((float)drawablePlaneBack[7].X, (float)drawablePlaneBack[7].Z);
-                    arrayOfPlanePoints[2] = new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z);
-                    arrayOfPlanePoints[3] = new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z);
-                }
-
-                oG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
+                drawablePlaneFront[i] = projected2d;
             }
+
+            for (int i = 0; i < arrayOfPlaneBack.Length; i++)
+            {
+                var v = arrayOfPlaneBack[i];
+
+                Vector rotated = MatMul(overheadRotationY, v);
+                rotated = MatMul(overheadRotationZ, rotated);
+
+                Vector projected2d = MatMul(overheadProjection, rotated);
+
+                projected2d.Mult(overheadDistance);
+
+                projected2d.Move(175, 0, 200);
+
+                drawablePlaneBack[i] = projected2d;
+            }
+
+            arrayOfPlanePoints = new PointF[] { new PointF((float)drawablePlaneBack[6].X, (float)drawablePlaneBack[6].Z) ,
+                                                new PointF((float)drawablePlaneBack[7].X, (float)drawablePlaneBack[7].Z),
+                                                new PointF((float)drawablePlaneFront[7].X, (float)drawablePlaneFront[7].Z),
+                                                new PointF((float)drawablePlaneFront[6].X, (float)drawablePlaneFront[6].Z)
+            };
+
+            oG.FillClosedCurve(new SolidBrush(Color.FromArgb(100, 255, 255, 0)), arrayOfPlanePoints, System.Drawing.Drawing2D.FillMode.Winding, 0.1f);
 
             iG.Dispose(); oG.Dispose();
 
@@ -685,8 +659,7 @@ namespace CPDT_LR2
 
         private void ComputeDepth()
         {
-            totalDepthFront = maximumDepth;
-            totalDepthBack = maximumDepth;
+            totalDepthFront = totalDepthBack = maximumDepth;
 
             var width = (double)numCorWidth.Value / 2;
             var height = (double)numCorHeight.Value / 2;
@@ -729,7 +702,8 @@ namespace CPDT_LR2
 
                     foreach (var v in obj.Vectors)
                     {
-                        if (v.X == v.Y && v.X == v.Z && v.X == v.Distance)
+                        if (v.X == v.Y && v.X == v.Z && v.X == v.Distance ||
+                            !CheckDrawability(v))
                             continue;
 
                         while (depthFront < maximumDepth)
