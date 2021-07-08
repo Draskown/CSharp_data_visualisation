@@ -1,5 +1,4 @@
-﻿using static SharpGL.SceneGraph.Evaluators.NurbsBase;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SharpGL.SceneGraph.Assets;
 using System.Windows.Forms;
 using System.Drawing;

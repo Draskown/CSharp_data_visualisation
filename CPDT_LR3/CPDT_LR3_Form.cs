@@ -182,7 +182,7 @@ namespace CPDT_LR3
 
             string value = grid.Rows[e.RowIndex].Cells[e.ColumnIndex].EditedFormattedValue.ToString();
 
-            if (value == "*")
+            if (value == "*" || value == "")
                 return;
 
             try
