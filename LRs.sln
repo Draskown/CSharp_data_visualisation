@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPDT_LR3", "CPDT_LR3\CPDT_L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVT_LR4", "DVT_LR4\DVT_LR4.csproj", "{F6FC4289-B76E-4A49-95A8-DEC570F6DA5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPDT_LR4", "CPDT_4\CPDT_LR4.csproj", "{346D7800-8E4A-4F1B-A2F5-8C43CE8D7189}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{F6FC4289-B76E-4A49-95A8-DEC570F6DA5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6FC4289-B76E-4A49-95A8-DEC570F6DA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6FC4289-B76E-4A49-95A8-DEC570F6DA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{346D7800-8E4A-4F1B-A2F5-8C43CE8D7189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{346D7800-8E4A-4F1B-A2F5-8C43CE8D7189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{346D7800-8E4A-4F1B-A2F5-8C43CE8D7189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{346D7800-8E4A-4F1B-A2F5-8C43CE8D7189}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

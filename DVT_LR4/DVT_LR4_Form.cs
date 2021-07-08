@@ -28,7 +28,6 @@ namespace DVT_LR4
 
         private float[][] calculatedArrays, colours;
 
-        private readonly float[] knots;
         private float[] avgX, avgY, avgZ, recalculatedY, vertices;
 
         private readonly float angleDelta, bitmapsOffset,
@@ -54,8 +53,6 @@ namespace DVT_LR4
 
         private readonly Texture[] textures;
 
-        private IntPtr nurb;
-
         private readonly Color histColor;
         private readonly Brush scatBrush;
 
@@ -78,11 +75,6 @@ namespace DVT_LR4
 
             pointsReg = new List<Point3F>();
             pointsAvg = new List<Point3F>();
-
-            knots = new float[] {
-                0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 1.0f, 1.0f
-            };
 
             angleDelta = 0.2f;
             cubeOffset = 0.4f;
