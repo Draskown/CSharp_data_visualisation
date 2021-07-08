@@ -53,7 +53,7 @@ namespace CPDT_LR2
             overheadDistance = 25;
             angleX = angleY = 0;
             angleDelta = 0.01;
-            pointSize = 2;
+            pointSize = 1;
 
             stream = new FileStream("UDPFromVelodyneTest_lidardata.pcap", FileMode.Open);
 

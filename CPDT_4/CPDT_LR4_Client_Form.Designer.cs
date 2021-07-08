@@ -112,7 +112,6 @@ namespace CPDT_4
             // mainChart
             // 
             this.mainChart.BackColor = System.Drawing.Color.Transparent;
-            chartArea1.AxisX.IsLabelAutoFit = false;
             chartArea1.AxisX.LabelStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             chartArea1.AxisX.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea1.AxisX.LineColor = System.Drawing.Color.Gray;
@@ -147,7 +146,6 @@ namespace CPDT_4
             chartArea3.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Gray;
             chartArea3.BackColor = System.Drawing.Color.Transparent;
             chartArea3.Name = "ChartArea3";
-            chartArea4.AxisX.IsLabelAutoFit = false;
             chartArea4.AxisX.LabelStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             chartArea4.AxisX.LabelStyle.ForeColor = System.Drawing.Color.White;
             chartArea4.AxisX.LineColor = System.Drawing.Color.Gray;
@@ -172,22 +170,26 @@ namespace CPDT_4
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StepLine;
             series1.Color = System.Drawing.Color.RoyalBlue;
             series1.Name = "Series0";
+            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series2.BorderWidth = 3;
             series2.ChartArea = "ChartArea2";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
             series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             series2.Name = "Series1";
+            series2.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series3.BorderWidth = 3;
             series3.ChartArea = "ChartArea3";
             series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
             series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             series3.Name = "Series2";
+            series3.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             series4.BorderWidth = 3;
             series4.ChartArea = "ChartArea4";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
             series4.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
             series4.Name = "Series4";
             series4.YValuesPerPoint = 4;
+            series4.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             this.mainChart.Series.Add(series1);
             this.mainChart.Series.Add(series2);
             this.mainChart.Series.Add(series3);

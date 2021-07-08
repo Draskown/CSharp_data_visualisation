@@ -11,6 +11,7 @@ namespace CPDT_4
 {
     public partial class CPDT_LR4_Client_Form : Form
     {
+
         #region Initialization
 
         private Thread listenerThread;
@@ -34,7 +35,7 @@ namespace CPDT_4
 
         private readonly double[] ysMax, ysSlope;
 
-        private readonly int localPort, depth;
+        private readonly int localPort, windowDepth, overallDepth;
 
         private bool isListening;
 
@@ -65,7 +66,8 @@ namespace CPDT_4
             ysSlope = new double[] { 50.0, 10.0, 2.0, 6.0};
 
             localPort = 8888;
-            depth = 10;
+            windowDepth = 10;
+            overallDepth = 20;
 
             isListening = false;
 
@@ -102,6 +104,10 @@ namespace CPDT_4
                 this.mainChart.ChartAreas[i].AxisX.LabelStyle.Format = "HH:mm:ss:ff";
                 this.mainChart.ChartAreas[i].AxisX.LabelStyle.Interval = 500;
                 this.mainChart.ChartAreas[i].AxisX.LabelStyle.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Milliseconds;
+
+
+                this.mainChart.Series[i].YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
+                this.mainChart.ChartAreas[i].AxisY.LabelStyle.Format = "0.00";
             }
         }
 
@@ -165,22 +171,35 @@ namespace CPDT_4
 
             for (int i = 0; i < ys.Length; i++)
             {
-                if (normies[i].Checked)
+                if ( i % 2 == 0 && normies[i].Checked)
                 {
                     var sum = 0.0;
                     var count = 0;
 
                     for (int j = ys[i].Count - 1; j >= 0; j--)
-                        if (ys[i].Count - j < depth)
+                        if (ys[i].Count - j < windowDepth)
                         {
                             sum += ys[i][j];
                             count++;
                         }
 
-                    ys[i].Add(sum / count);
+                    ys[i].Add(Math.Round(sum / count, 2));
                 }
-                else
-                    ys[i].Add(_data[i]);
+                else if (normies[i].Checked)
+                {
+                    var sum = 0.0;
+                    var count = 0;
+
+                    for (int j = ys[i].Count - overallDepth; j < ys[i].Count - overallDepth + windowDepth; j++)
+                        if (j >= 0)
+                        {
+                            sum += ys[i][j];
+                            count++;
+                        }
+
+                    ys[i].Add(Math.Round(sum / count));
+                }
+                else ys[i].Add(Math.Round((double)_data[i], 2));
 
                 if (_data[i] > ysMax[i])
                     keys += "1";
@@ -196,6 +215,7 @@ namespace CPDT_4
         }
 
         #endregion
+
 
 
         #region DB connection
@@ -316,5 +336,6 @@ namespace CPDT_4
         }
 
         #endregion
+    
     }
 }

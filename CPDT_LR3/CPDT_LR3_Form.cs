@@ -79,7 +79,6 @@ namespace CPDT_LR3
                     {
                         if (!FilterMessage(sendMsg))
                         {
-                            messages.Add(sendMsg);
                             AddMessage("Message did not pass the filter", sendMsg);
                             this.frameIndicator.BackColor = Color.Red;
                             amountOfMessagesSent++;
@@ -204,7 +203,7 @@ namespace CPDT_LR3
 
         private void ReadData()
         {
-            byte[] message = new byte[19];
+            byte[] message = new byte[20];
 
             if (stream.Position == 65456)
                 stream.Position = 0;
@@ -217,7 +216,6 @@ namespace CPDT_LR3
 
             if (!FilterMessage(msg))
             {
-                messages.Add(msg);
                 AddMessage("Message did not pass the filter", msg);
                 this.frameIndicator.BackColor = Color.Red;
                 RemoveConnectionsAndDevices();
@@ -363,7 +361,7 @@ namespace CPDT_LR3
                 if (row.Index == this.gridGate.Rows.Count - 1 ||
                     row.Cells[0].Value == null ||
                     row.Cells[1].Value == null ||
-                    row.Cells[2].Value == null || 
+                    row.Cells[2].Value == null ||
                     row.Cells[0].Value.ToString() == "" ||
                     row.Cells[1].Value.ToString() == "" ||
                     row.Cells[2].Value.ToString() == "")
@@ -485,7 +483,7 @@ namespace CPDT_LR3
         {
             var safe = new List<byte>();
 
-            byte from = 0, into = 0;
+            byte from = 99, into = 99;
             bool allFrom = false, allInto = false;
 
             foreach (DataGridViewRow row in this.gridGate.Rows)
@@ -493,12 +491,14 @@ namespace CPDT_LR3
                 if (row.Index == this.gridGate.Rows.Count - 1)
                     continue;
 
-                if (row.Cells[0].Value.ToString() != allPattern)
+                if (row.Cells[0].Value == null ||
+                    row.Cells[0].Value.ToString() != allPattern)
                     from = Convert.ToByte(row.Cells[0].Value.ToString(), 16);
                 else
                     allFrom = true;
 
-                if (row.Cells[1].Value.ToString() != allPattern)
+                if (row.Cells[1].Value == null ||
+                    row.Cells[1].Value.ToString() != allPattern)
                     into = (Convert.ToByte(row.Cells[1].Value.ToString(), 16));
                 else
                     allInto = true;
@@ -522,6 +522,9 @@ namespace CPDT_LR3
 
                 for (int i = 0; i < devices.Count; i++)
                 {
+                    if (devices[i].ID == from || devices[i].ID == into)
+                        continue;
+
                     if (devices[i].ID != from && !allFrom &&
                         !safe.Contains(devices[i].ID))
                     {
@@ -535,7 +538,6 @@ namespace CPDT_LR3
                     {
                         devices.RemoveAt(i);
                         i = -1;
-                        continue;
                     }
                 }
 
@@ -543,21 +545,19 @@ namespace CPDT_LR3
                 {
                     var d = devices[i];
 
-                    var count = 0;
                     for (int j = 0; j < d.Joints.Count; j++)
                     {
-                        for (int l = 0; l < devices.Count; l++)
-                            if (d.Joints[j].ID == devices[l].ID)
+                        var count = 0;
+                        for (int k = 0; k < devices.Count; k++)
+                            if (d.Joints[j].ID == devices[k].ID)
                                 count++;
 
                         if (count == 0)
                         {
                             d.Joints.RemoveAt(j);
                             j = -1;
-                            continue;
                         }
                     }
-
                 }
 
                 for (int i = 0; i < connections.Count; i++)
@@ -721,7 +721,7 @@ namespace CPDT_LR3
         {
             FileStream writer = new FileStream("sentData.dmp", FileMode.Open, FileAccess.Write);
 
-            var sendingData = new byte[19];
+            var sendingData = new byte[20];
 
             time = (Int16)(DateTime.Now - startTime).TotalSeconds;
 
@@ -750,10 +750,10 @@ namespace CPDT_LR3
                         sendingData[9] = (byte)sendMsg.Value;
                         break;
                     case 18:
-                        sendingData[18] = 0xff;
+                        sendingData[19] = 0xff;
                         break;
                     case 19:
-                        sendingData[19] = 0xff;
+                        sendingData[20] = 0xff;
                         break;
                     default:
                         sendingData[i] = 0x00;
