@@ -1,3 +1,3 @@
 # LRs
 
-Here are the stable projects
+Some projects from the University
