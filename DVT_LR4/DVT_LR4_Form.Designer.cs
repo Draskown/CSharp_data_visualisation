@@ -77,12 +77,13 @@ namespace DVT_LR4
             // 
             // btnSave
             // 
+            this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnSave.Location = new System.Drawing.Point(674, 489);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 2;
             this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.UseVisualStyleBackColor = false;
             // 
             // label1
             // 
@@ -113,6 +114,8 @@ namespace DVT_LR4
             // 
             // numLength
             // 
+            this.numLength.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numLength.ForeColor = System.Drawing.Color.White;
             this.numLength.Location = new System.Drawing.Point(206, 23);
             this.numLength.Maximum = new decimal(new int[] {
             1000,
@@ -158,6 +161,8 @@ namespace DVT_LR4
             // 
             // numDepth
             // 
+            this.numDepth.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numDepth.ForeColor = System.Drawing.Color.White;
             this.numDepth.Location = new System.Drawing.Point(206, 66);
             this.numDepth.Name = "numDepth";
             this.numDepth.Size = new System.Drawing.Size(58, 23);
@@ -183,7 +188,7 @@ namespace DVT_LR4
             this.hideCube.AutoSize = true;
             this.hideCube.Location = new System.Drawing.Point(89, 97);
             this.hideCube.Name = "hideCube";
-            this.hideCube.Size = new System.Drawing.Size(86, 19);
+            this.hideCube.Size = new System.Drawing.Size(87, 19);
             this.hideCube.TabIndex = 7;
             this.hideCube.Text = "Hide cube";
             this.hideCube.UseVisualStyleBackColor = true;
@@ -193,7 +198,7 @@ namespace DVT_LR4
             this.hideXYScat.AutoSize = true;
             this.hideXYScat.Location = new System.Drawing.Point(10, 25);
             this.hideXYScat.Name = "hideXYScat";
-            this.hideXYScat.Size = new System.Drawing.Size(118, 19);
+            this.hideXYScat.Size = new System.Drawing.Size(119, 19);
             this.hideXYScat.TabIndex = 7;
             this.hideXYScat.Text = "Hide XY scatter";
             this.hideXYScat.UseVisualStyleBackColor = true;
@@ -203,7 +208,7 @@ namespace DVT_LR4
             this.hideXYHist.AutoSize = true;
             this.hideXYHist.Location = new System.Drawing.Point(143, 25);
             this.hideXYHist.Name = "hideXYHist";
-            this.hideXYHist.Size = new System.Drawing.Size(135, 19);
+            this.hideXYHist.Size = new System.Drawing.Size(136, 19);
             this.hideXYHist.TabIndex = 7;
             this.hideXYHist.Text = "Hide XY histogram";
             this.hideXYHist.UseVisualStyleBackColor = true;
@@ -213,7 +218,7 @@ namespace DVT_LR4
             this.hideXZScat.AutoSize = true;
             this.hideXZScat.Location = new System.Drawing.Point(10, 48);
             this.hideXZScat.Name = "hideXZScat";
-            this.hideXZScat.Size = new System.Drawing.Size(117, 19);
+            this.hideXZScat.Size = new System.Drawing.Size(118, 19);
             this.hideXZScat.TabIndex = 7;
             this.hideXZScat.Text = "Hide XZ scatter";
             this.hideXZScat.UseVisualStyleBackColor = true;
@@ -223,7 +228,7 @@ namespace DVT_LR4
             this.hideXZHist.AutoSize = true;
             this.hideXZHist.Location = new System.Drawing.Point(143, 48);
             this.hideXZHist.Name = "hideXZHist";
-            this.hideXZHist.Size = new System.Drawing.Size(134, 19);
+            this.hideXZHist.Size = new System.Drawing.Size(135, 19);
             this.hideXZHist.TabIndex = 7;
             this.hideXZHist.Text = "Hide XZ histogram";
             this.hideXZHist.UseVisualStyleBackColor = true;
@@ -233,7 +238,7 @@ namespace DVT_LR4
             this.hideYZScat.AutoSize = true;
             this.hideYZScat.Location = new System.Drawing.Point(10, 72);
             this.hideYZScat.Name = "hideYZScat";
-            this.hideYZScat.Size = new System.Drawing.Size(117, 19);
+            this.hideYZScat.Size = new System.Drawing.Size(118, 19);
             this.hideYZScat.TabIndex = 7;
             this.hideYZScat.Text = "Hide YZ scatter";
             this.hideYZScat.UseVisualStyleBackColor = true;
@@ -243,7 +248,7 @@ namespace DVT_LR4
             this.hideYZHist.AutoSize = true;
             this.hideYZHist.Location = new System.Drawing.Point(143, 72);
             this.hideYZHist.Name = "hideYZHist";
-            this.hideYZHist.Size = new System.Drawing.Size(134, 19);
+            this.hideYZHist.Size = new System.Drawing.Size(135, 19);
             this.hideYZHist.TabIndex = 7;
             this.hideYZHist.Text = "Hide YZ histogram";
             this.hideYZHist.UseVisualStyleBackColor = true;
@@ -253,7 +258,7 @@ namespace DVT_LR4
             this.showPoints.AutoSize = true;
             this.showPoints.Location = new System.Drawing.Point(647, 385);
             this.showPoints.Name = "showPoints";
-            this.showPoints.Size = new System.Drawing.Size(134, 19);
+            this.showPoints.Size = new System.Drawing.Size(98, 19);
             this.showPoints.TabIndex = 7;
             this.showPoints.Text = "Show points";
             this.showPoints.UseVisualStyleBackColor = true;
@@ -263,7 +268,7 @@ namespace DVT_LR4
             this.switchDisplay.AutoSize = true;
             this.switchDisplay.Location = new System.Drawing.Point(647, 420);
             this.switchDisplay.Name = "switchDisplay";
-            this.switchDisplay.Size = new System.Drawing.Size(129, 19);
+            this.switchDisplay.Size = new System.Drawing.Size(130, 19);
             this.switchDisplay.TabIndex = 8;
             this.switchDisplay.Text = "Display averages";
             this.switchDisplay.UseVisualStyleBackColor = true;
@@ -332,6 +337,7 @@ namespace DVT_LR4
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(900, 535);
             this.Controls.Add(this.labelZ);
             this.Controls.Add(this.labelY);

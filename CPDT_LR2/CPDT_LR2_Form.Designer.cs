@@ -131,15 +131,17 @@ namespace CPDT_LR2
             // 
             // btnPp
             // 
+            this.btnPp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnPp.Location = new System.Drawing.Point(253, 48);
             this.btnPp.Name = "btnPp";
             this.btnPp.Size = new System.Drawing.Size(75, 23);
             this.btnPp.TabIndex = 2;
             this.btnPp.Text = "Start";
-            this.btnPp.UseVisualStyleBackColor = true;
+            this.btnPp.UseVisualStyleBackColor = false;
             // 
             // boxLog
             // 
+            this.boxLog.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.boxLog.ForeColor = System.Drawing.Color.White;
             this.boxLog.Location = new System.Drawing.Point(852, 144);
@@ -163,6 +165,8 @@ namespace CPDT_LR2
             // 
             // numFOVHor
             // 
+            this.numFOVHor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numFOVHor.ForeColor = System.Drawing.Color.White;
             this.numFOVHor.Location = new System.Drawing.Point(79, 24);
             this.numFOVHor.Maximum = new decimal(new int[] {
             360,
@@ -181,6 +185,8 @@ namespace CPDT_LR2
             // 
             // numFOVVer
             // 
+            this.numFOVVer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numFOVVer.ForeColor = System.Drawing.Color.White;
             this.numFOVVer.Location = new System.Drawing.Point(79, 53);
             this.numFOVVer.Maximum = new decimal(new int[] {
             32,
@@ -232,6 +238,8 @@ namespace CPDT_LR2
             // 
             // numFramerate
             // 
+            this.numFramerate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numFramerate.ForeColor = System.Drawing.Color.White;
             this.numFramerate.Location = new System.Drawing.Point(166, 52);
             this.numFramerate.Maximum = new decimal(new int[] {
             2000,
@@ -264,7 +272,9 @@ namespace CPDT_LR2
             // 
             // numXYPlane
             // 
+            this.numXYPlane.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numXYPlane.DecimalPlaces = 2;
+            this.numXYPlane.ForeColor = System.Drawing.Color.White;
             this.numXYPlane.Increment = new decimal(new int[] {
             1,
             0,
@@ -297,7 +307,9 @@ namespace CPDT_LR2
             // 
             // numXZPlane
             // 
+            this.numXZPlane.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numXZPlane.DecimalPlaces = 2;
+            this.numXZPlane.ForeColor = System.Drawing.Color.White;
             this.numXZPlane.Increment = new decimal(new int[] {
             1,
             0,
@@ -330,7 +342,9 @@ namespace CPDT_LR2
             // 
             // numYZPlane
             // 
+            this.numYZPlane.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numYZPlane.DecimalPlaces = 2;
+            this.numYZPlane.ForeColor = System.Drawing.Color.White;
             this.numYZPlane.Increment = new decimal(new int[] {
             1,
             0,
@@ -396,7 +410,9 @@ namespace CPDT_LR2
             // 
             // numCorWidth
             // 
+            this.numCorWidth.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numCorWidth.DecimalPlaces = 2;
+            this.numCorWidth.ForeColor = System.Drawing.Color.White;
             this.numCorWidth.Location = new System.Drawing.Point(61, 81);
             this.numCorWidth.Maximum = new decimal(new int[] {
             10,
@@ -415,7 +431,9 @@ namespace CPDT_LR2
             // 
             // numCorHeight
             // 
+            this.numCorHeight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numCorHeight.DecimalPlaces = 2;
+            this.numCorHeight.ForeColor = System.Drawing.Color.White;
             this.numCorHeight.Increment = new decimal(new int[] {
             1,
             0,
@@ -457,6 +475,8 @@ namespace CPDT_LR2
             // 
             // numCorAngle
             // 
+            this.numCorAngle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numCorAngle.ForeColor = System.Drawing.Color.White;
             this.numCorAngle.Location = new System.Drawing.Point(61, 23);
             this.numCorAngle.Maximum = new decimal(new int[] {
             360,
@@ -504,6 +524,8 @@ namespace CPDT_LR2
             // 
             // numMaxDensote
             // 
+            this.numMaxDensote.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numMaxDensote.ForeColor = System.Drawing.Color.White;
             this.numMaxDensote.Location = new System.Drawing.Point(342, 52);
             this.numMaxDensote.Maximum = new decimal(new int[] {
             1000,
@@ -522,6 +544,8 @@ namespace CPDT_LR2
             // 
             // numK
             // 
+            this.numK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numK.ForeColor = System.Drawing.Color.White;
             this.numK.Location = new System.Drawing.Point(468, 40);
             this.numK.Name = "numK";
             this.numK.Size = new System.Drawing.Size(63, 23);
@@ -535,6 +559,8 @@ namespace CPDT_LR2
             // 
             // numMinDensote
             // 
+            this.numMinDensote.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.numMinDensote.ForeColor = System.Drawing.Color.White;
             this.numMinDensote.Location = new System.Drawing.Point(342, 23);
             this.numMinDensote.Maximum = new decimal(new int[] {
             1000,
@@ -562,7 +588,9 @@ namespace CPDT_LR2
             // 
             // numMaxRadius
             // 
+            this.numMaxRadius.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numMaxRadius.DecimalPlaces = 2;
+            this.numMaxRadius.ForeColor = System.Drawing.Color.White;
             this.numMaxRadius.Increment = new decimal(new int[] {
             1,
             0,
@@ -586,7 +614,9 @@ namespace CPDT_LR2
             // 
             // numMinRadius
             // 
+            this.numMinRadius.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numMinRadius.DecimalPlaces = 2;
+            this.numMinRadius.ForeColor = System.Drawing.Color.White;
             this.numMinRadius.Increment = new decimal(new int[] {
             1,
             0,
@@ -648,6 +678,7 @@ namespace CPDT_LR2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(1090, 663);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox2);

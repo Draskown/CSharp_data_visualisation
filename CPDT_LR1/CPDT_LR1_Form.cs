@@ -9,7 +9,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 
-namespace LRs
+namespace CSharp_data_visualisation
 {
     public partial class Application : Form
     {

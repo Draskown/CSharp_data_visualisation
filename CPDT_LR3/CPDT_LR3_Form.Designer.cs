@@ -113,15 +113,17 @@ namespace CPDT_LR3
             this.gridAddresses.AllowUserToDeleteRows = false;
             this.gridAddresses.AllowUserToResizeColumns = false;
             this.gridAddresses.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.Fuchsia;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.White;
             this.gridAddresses.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.gridAddresses.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.gridAddresses.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.gridAddresses.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -132,7 +134,7 @@ namespace CPDT_LR3
             this.gridAddresses.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.addressHeader});
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle4.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle4.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -168,15 +170,17 @@ namespace CPDT_LR3
             this.gridStats.AllowUserToDeleteRows = false;
             this.gridStats.AllowUserToResizeColumns = false;
             this.gridStats.AllowUserToResizeRows = false;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle5.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle5.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.Fuchsia;
             dataGridViewCellStyle5.SelectionForeColor = System.Drawing.Color.White;
             this.gridStats.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle5;
+            this.gridStats.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.gridStats.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.gridStats.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle6.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle6.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -188,7 +192,7 @@ namespace CPDT_LR3
             this.statHeader,
             this.percentageHeader});
             dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle8.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle8.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -228,15 +232,17 @@ namespace CPDT_LR3
             // 
             this.gridGate.AllowUserToResizeColumns = false;
             this.gridGate.AllowUserToResizeRows = false;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle9.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle9.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.Fuchsia;
             dataGridViewCellStyle9.SelectionForeColor = System.Drawing.Color.White;
             this.gridGate.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle9;
+            this.gridGate.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.gridGate.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.gridGate.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle10.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle10.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle10.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -249,7 +255,7 @@ namespace CPDT_LR3
             this.outHeader,
             this.valHeader});
             dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle12.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle12.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle12.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle12.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -289,12 +295,13 @@ namespace CPDT_LR3
             // 
             // btnPP
             // 
+            this.btnPP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnPP.Location = new System.Drawing.Point(201, 322);
             this.btnPP.Name = "btnPP";
             this.btnPP.Size = new System.Drawing.Size(75, 23);
             this.btnPP.TabIndex = 2;
             this.btnPP.Text = "Pause";
-            this.btnPP.UseVisualStyleBackColor = true;
+            this.btnPP.UseVisualStyleBackColor = false;
             // 
             // gridLog
             // 
@@ -302,15 +309,17 @@ namespace CPDT_LR3
             this.gridLog.AllowUserToDeleteRows = false;
             this.gridLog.AllowUserToResizeColumns = false;
             this.gridLog.AllowUserToResizeRows = false;
+            dataGridViewCellStyle13.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle13.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle13.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle13.SelectionBackColor = System.Drawing.Color.Fuchsia;
             dataGridViewCellStyle13.SelectionForeColor = System.Drawing.Color.White;
             this.gridLog.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle13;
+            this.gridLog.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.gridLog.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.gridLog.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle14.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle14.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle14.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle14.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -322,7 +331,7 @@ namespace CPDT_LR3
             this.gridLog.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.messageHeader});
             dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle16.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             dataGridViewCellStyle16.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle16.ForeColor = System.Drawing.Color.White;
             dataGridViewCellStyle16.SelectionBackColor = System.Drawing.Color.Fuchsia;
@@ -363,6 +372,8 @@ namespace CPDT_LR3
             // 
             // comboConnection1
             // 
+            this.comboConnection1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.comboConnection1.ForeColor = System.Drawing.Color.White;
             this.comboConnection1.FormattingEnabled = true;
             this.comboConnection1.Location = new System.Drawing.Point(338, 358);
             this.comboConnection1.Name = "comboConnection1";
@@ -371,6 +382,8 @@ namespace CPDT_LR3
             // 
             // comboConnection3
             // 
+            this.comboConnection3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.comboConnection3.ForeColor = System.Drawing.Color.White;
             this.comboConnection3.FormattingEnabled = true;
             this.comboConnection3.Location = new System.Drawing.Point(338, 496);
             this.comboConnection3.Name = "comboConnection3";
@@ -379,6 +392,8 @@ namespace CPDT_LR3
             // 
             // comboConnection4
             // 
+            this.comboConnection4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.comboConnection4.ForeColor = System.Drawing.Color.White;
             this.comboConnection4.FormattingEnabled = true;
             this.comboConnection4.Location = new System.Drawing.Point(338, 565);
             this.comboConnection4.Name = "comboConnection4";
@@ -387,6 +402,8 @@ namespace CPDT_LR3
             // 
             // comboConnection2
             // 
+            this.comboConnection2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.comboConnection2.ForeColor = System.Drawing.Color.White;
             this.comboConnection2.FormattingEnabled = true;
             this.comboConnection2.Location = new System.Drawing.Point(338, 427);
             this.comboConnection2.Name = "comboConnection2";
@@ -395,6 +412,7 @@ namespace CPDT_LR3
             // 
             // boxFrom
             // 
+            this.boxFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxFrom.Location = new System.Drawing.Point(6, 20);
             this.boxFrom.Name = "boxFrom";
             this.boxFrom.Size = new System.Drawing.Size(100, 23);
@@ -402,6 +420,7 @@ namespace CPDT_LR3
             // 
             // boxInto
             // 
+            this.boxInto.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxInto.Location = new System.Drawing.Point(6, 49);
             this.boxInto.Name = "boxInto";
             this.boxInto.Size = new System.Drawing.Size(100, 23);
@@ -409,6 +428,7 @@ namespace CPDT_LR3
             // 
             // boxPeriod
             // 
+            this.boxPeriod.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxPeriod.Location = new System.Drawing.Point(118, 20);
             this.boxPeriod.Name = "boxPeriod";
             this.boxPeriod.Size = new System.Drawing.Size(100, 23);
@@ -416,6 +436,7 @@ namespace CPDT_LR3
             // 
             // boxAmount
             // 
+            this.boxAmount.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxAmount.Location = new System.Drawing.Point(118, 49);
             this.boxAmount.Name = "boxAmount";
             this.boxAmount.Size = new System.Drawing.Size(100, 23);
@@ -423,6 +444,7 @@ namespace CPDT_LR3
             // 
             // boxValue
             // 
+            this.boxValue.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.boxValue.Location = new System.Drawing.Point(6, 78);
             this.boxValue.Name = "boxValue";
             this.boxValue.Size = new System.Drawing.Size(100, 23);
@@ -446,12 +468,13 @@ namespace CPDT_LR3
             // 
             // btnSend
             // 
+            this.btnSend.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnSend.Location = new System.Drawing.Point(129, 77);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 23);
             this.btnSend.TabIndex = 2;
             this.btnSend.Text = "Send";
-            this.btnSend.UseVisualStyleBackColor = true;
+            this.btnSend.UseVisualStyleBackColor = false;
             // 
             // chart1
             // 
@@ -581,6 +604,7 @@ namespace CPDT_LR3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(806, 630);
             this.Controls.Add(this.chart4);
             this.Controls.Add(this.chart3);

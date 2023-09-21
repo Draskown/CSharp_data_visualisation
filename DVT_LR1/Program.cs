@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LRs
+namespace CSharp_data_visualisation
 {
     static class Program
     {

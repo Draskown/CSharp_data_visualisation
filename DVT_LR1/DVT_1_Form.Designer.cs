@@ -1,5 +1,5 @@
 ﻿
-namespace LRs
+namespace CSharp_data_visualisation
 {
     partial class DVT_1_Form
     {

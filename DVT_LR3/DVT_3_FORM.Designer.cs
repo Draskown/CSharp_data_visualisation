@@ -69,6 +69,7 @@ namespace DVT_LR3
             // 
             // pointsAmount
             // 
+            this.pointsAmount.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.pointsAmount.ForeColor = System.Drawing.Color.White;
             this.pointsAmount.Location = new System.Drawing.Point(538, 176);
             this.pointsAmount.Maximum = new decimal(new int[] {
@@ -111,6 +112,7 @@ namespace DVT_LR3
             // 
             // thinning
             // 
+            this.thinning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.thinning.ForeColor = System.Drawing.Color.White;
             this.thinning.Location = new System.Drawing.Point(538, 246);
             this.thinning.Maximum = new decimal(new int[] {
@@ -135,7 +137,7 @@ namespace DVT_LR3
             // 
             // btnStart
             // 
-            this.btnStart.BackColor = System.Drawing.SystemColors.Control;
+            this.btnStart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnStart.Location = new System.Drawing.Point(543, 288);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
@@ -145,7 +147,7 @@ namespace DVT_LR3
             // 
             // btnLoad
             // 
-            this.btnLoad.BackColor = System.Drawing.SystemColors.Control;
+            this.btnLoad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnLoad.Location = new System.Drawing.Point(528, 332);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(104, 23);
@@ -155,7 +157,7 @@ namespace DVT_LR3
             // 
             // btnSave
             // 
-            this.btnSave.BackColor = System.Drawing.SystemColors.Control;
+            this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnSave.Location = new System.Drawing.Point(528, 376);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(104, 23);

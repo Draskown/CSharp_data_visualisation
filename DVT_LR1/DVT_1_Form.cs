@@ -7,7 +7,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 
-namespace LRs
+namespace CSharp_data_visualisation
 {
     public partial class DVT_1_Form : Form
     {

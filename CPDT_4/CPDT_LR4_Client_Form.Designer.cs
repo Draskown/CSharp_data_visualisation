@@ -200,6 +200,7 @@ namespace CPDT_4
             // 
             // numY1XScale
             // 
+            this.numY1XScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY1XScale.ForeColor = System.Drawing.Color.White;
             this.numY1XScale.Location = new System.Drawing.Point(113, 35);
             this.numY1XScale.Maximum = new decimal(new int[] {
@@ -214,6 +215,7 @@ namespace CPDT_4
             // 
             // numY1YScale
             // 
+            this.numY1YScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY1YScale.ForeColor = System.Drawing.Color.White;
             this.numY1YScale.Location = new System.Drawing.Point(113, 75);
             this.numY1YScale.Maximum = new decimal(new int[] {
@@ -238,6 +240,7 @@ namespace CPDT_4
             // 
             // numY1Thinning
             // 
+            this.numY1Thinning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY1Thinning.ForeColor = System.Drawing.Color.White;
             this.numY1Thinning.Location = new System.Drawing.Point(91, 107);
             this.numY1Thinning.Minimum = new decimal(new int[] {
@@ -293,6 +296,8 @@ namespace CPDT_4
             // 
             // tbY1MaxSpan
             // 
+            this.tbY1MaxSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY1MaxSpan.ForeColor = System.Drawing.Color.White;
             this.tbY1MaxSpan.Location = new System.Drawing.Point(6, 32);
             this.tbY1MaxSpan.Name = "tbY1MaxSpan";
             this.tbY1MaxSpan.Size = new System.Drawing.Size(100, 23);
@@ -300,6 +305,8 @@ namespace CPDT_4
             // 
             // tbY1MinSpan
             // 
+            this.tbY1MinSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY1MinSpan.ForeColor = System.Drawing.Color.White;
             this.tbY1MinSpan.Location = new System.Drawing.Point(7, 79);
             this.tbY1MinSpan.Name = "tbY1MinSpan";
             this.tbY1MinSpan.Size = new System.Drawing.Size(100, 23);
@@ -316,15 +323,17 @@ namespace CPDT_4
             // 
             // btnSave
             // 
+            this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnSave.Location = new System.Drawing.Point(1014, 682);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 4;
             this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.UseVisualStyleBackColor = false;
             // 
             // numY2XScale
             // 
+            this.numY2XScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY2XScale.ForeColor = System.Drawing.Color.White;
             this.numY2XScale.Location = new System.Drawing.Point(112, 32);
             this.numY2XScale.Maximum = new decimal(new int[] {
@@ -339,6 +348,7 @@ namespace CPDT_4
             // 
             // numY2YScale
             // 
+            this.numY2YScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY2YScale.ForeColor = System.Drawing.Color.White;
             this.numY2YScale.Location = new System.Drawing.Point(112, 72);
             this.numY2YScale.Maximum = new decimal(new int[] {
@@ -363,6 +373,7 @@ namespace CPDT_4
             // 
             // numY2Thinning
             // 
+            this.numY2Thinning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY2Thinning.ForeColor = System.Drawing.Color.White;
             this.numY2Thinning.Location = new System.Drawing.Point(96, 99);
             this.numY2Thinning.Minimum = new decimal(new int[] {
@@ -427,6 +438,8 @@ namespace CPDT_4
             // 
             // tbY2MaxSpan
             // 
+            this.tbY2MaxSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY2MaxSpan.ForeColor = System.Drawing.Color.White;
             this.tbY2MaxSpan.Location = new System.Drawing.Point(6, 32);
             this.tbY2MaxSpan.Name = "tbY2MaxSpan";
             this.tbY2MaxSpan.Size = new System.Drawing.Size(100, 23);
@@ -434,6 +447,8 @@ namespace CPDT_4
             // 
             // tbY2MinSpan
             // 
+            this.tbY2MinSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY2MinSpan.ForeColor = System.Drawing.Color.White;
             this.tbY2MinSpan.Location = new System.Drawing.Point(6, 71);
             this.tbY2MinSpan.Name = "tbY2MinSpan";
             this.tbY2MinSpan.Size = new System.Drawing.Size(100, 23);
@@ -441,6 +456,7 @@ namespace CPDT_4
             // 
             // numY3XScale
             // 
+            this.numY3XScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY3XScale.ForeColor = System.Drawing.Color.White;
             this.numY3XScale.Location = new System.Drawing.Point(111, 27);
             this.numY3XScale.Maximum = new decimal(new int[] {
@@ -455,6 +471,7 @@ namespace CPDT_4
             // 
             // numY3YScale
             // 
+            this.numY3YScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY3YScale.DecimalPlaces = 2;
             this.numY3YScale.ForeColor = System.Drawing.Color.White;
             this.numY3YScale.Increment = new decimal(new int[] {
@@ -485,6 +502,7 @@ namespace CPDT_4
             // 
             // numY3Thinning
             // 
+            this.numY3Thinning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY3Thinning.ForeColor = System.Drawing.Color.White;
             this.numY3Thinning.Location = new System.Drawing.Point(95, 94);
             this.numY3Thinning.Minimum = new decimal(new int[] {
@@ -549,6 +567,8 @@ namespace CPDT_4
             // 
             // tbY3MaxSpan
             // 
+            this.tbY3MaxSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY3MaxSpan.ForeColor = System.Drawing.Color.White;
             this.tbY3MaxSpan.Location = new System.Drawing.Point(4, 27);
             this.tbY3MaxSpan.Name = "tbY3MaxSpan";
             this.tbY3MaxSpan.Size = new System.Drawing.Size(100, 23);
@@ -556,6 +576,8 @@ namespace CPDT_4
             // 
             // tbY3MinSpan
             // 
+            this.tbY3MinSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY3MinSpan.ForeColor = System.Drawing.Color.White;
             this.tbY3MinSpan.Location = new System.Drawing.Point(4, 67);
             this.tbY3MinSpan.Name = "tbY3MinSpan";
             this.tbY3MinSpan.Size = new System.Drawing.Size(100, 23);
@@ -566,7 +588,7 @@ namespace CPDT_4
             this.cbNormY1.AutoSize = true;
             this.cbNormY1.Location = new System.Drawing.Point(52, 137);
             this.cbNormY1.Name = "cbNormY1";
-            this.cbNormY1.Size = new System.Drawing.Size(85, 19);
+            this.cbNormY1.Size = new System.Drawing.Size(86, 19);
             this.cbNormY1.TabIndex = 5;
             this.cbNormY1.Text = "Normalize";
             this.cbNormY1.UseVisualStyleBackColor = true;
@@ -595,7 +617,7 @@ namespace CPDT_4
             this.cbNormY2.AutoSize = true;
             this.cbNormY2.Location = new System.Drawing.Point(59, 128);
             this.cbNormY2.Name = "cbNormY2";
-            this.cbNormY2.Size = new System.Drawing.Size(85, 19);
+            this.cbNormY2.Size = new System.Drawing.Size(86, 19);
             this.cbNormY2.TabIndex = 5;
             this.cbNormY2.Text = "Normalize";
             this.cbNormY2.UseVisualStyleBackColor = true;
@@ -624,7 +646,7 @@ namespace CPDT_4
             this.cbNormY3.AutoSize = true;
             this.cbNormY3.Location = new System.Drawing.Point(56, 123);
             this.cbNormY3.Name = "cbNormY3";
-            this.cbNormY3.Size = new System.Drawing.Size(85, 19);
+            this.cbNormY3.Size = new System.Drawing.Size(86, 19);
             this.cbNormY3.TabIndex = 5;
             this.cbNormY3.Text = "Normalize";
             this.cbNormY3.UseVisualStyleBackColor = true;
@@ -669,6 +691,8 @@ namespace CPDT_4
             // 
             // tbY4MaxSpan
             // 
+            this.tbY4MaxSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY4MaxSpan.ForeColor = System.Drawing.Color.White;
             this.tbY4MaxSpan.Location = new System.Drawing.Point(4, 27);
             this.tbY4MaxSpan.Name = "tbY4MaxSpan";
             this.tbY4MaxSpan.Size = new System.Drawing.Size(100, 23);
@@ -679,13 +703,14 @@ namespace CPDT_4
             this.cbNormY4.AutoSize = true;
             this.cbNormY4.Location = new System.Drawing.Point(56, 123);
             this.cbNormY4.Name = "cbNormY4";
-            this.cbNormY4.Size = new System.Drawing.Size(85, 19);
+            this.cbNormY4.Size = new System.Drawing.Size(86, 19);
             this.cbNormY4.TabIndex = 5;
             this.cbNormY4.Text = "Normalize";
             this.cbNormY4.UseVisualStyleBackColor = true;
             // 
             // numY4XScale
             // 
+            this.numY4XScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY4XScale.ForeColor = System.Drawing.Color.White;
             this.numY4XScale.Location = new System.Drawing.Point(111, 27);
             this.numY4XScale.Maximum = new decimal(new int[] {
@@ -700,6 +725,7 @@ namespace CPDT_4
             // 
             // numY4YScale
             // 
+            this.numY4YScale.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY4YScale.ForeColor = System.Drawing.Color.White;
             this.numY4YScale.Location = new System.Drawing.Point(111, 67);
             this.numY4YScale.Maximum = new decimal(new int[] {
@@ -724,6 +750,7 @@ namespace CPDT_4
             // 
             // numY4Thinning
             // 
+            this.numY4Thinning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.numY4Thinning.ForeColor = System.Drawing.Color.White;
             this.numY4Thinning.Location = new System.Drawing.Point(95, 94);
             this.numY4Thinning.Minimum = new decimal(new int[] {
@@ -752,6 +779,8 @@ namespace CPDT_4
             // 
             // tbY4MinSpan
             // 
+            this.tbY4MinSpan.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tbY4MinSpan.ForeColor = System.Drawing.Color.White;
             this.tbY4MinSpan.Location = new System.Drawing.Point(4, 67);
             this.tbY4MinSpan.Name = "tbY4MinSpan";
             this.tbY4MinSpan.Size = new System.Drawing.Size(100, 23);
@@ -797,6 +826,7 @@ namespace CPDT_4
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(1101, 725);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);

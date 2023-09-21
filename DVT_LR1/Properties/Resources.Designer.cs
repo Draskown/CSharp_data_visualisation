@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LRs.Properties {
+namespace CSharp_data_visualisation.Properties {
     using System;
     
     

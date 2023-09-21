@@ -37,17 +37,19 @@ namespace CPDT_4
             // 
             // btnStart
             // 
+            this.btnStart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnStart.Location = new System.Drawing.Point(76, 20);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(87, 27);
             this.btnStart.TabIndex = 0;
             this.btnStart.Text = "Start Server";
-            this.btnStart.UseVisualStyleBackColor = true;
+            this.btnStart.UseVisualStyleBackColor = false;
             // 
             // CPDT_LR4_Server_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(246, 65);
             this.Controls.Add(this.btnStart);
             this.Font = new System.Drawing.Font("Gilroy", 9.749999F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
