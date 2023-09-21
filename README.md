@@ -1,4 +1,4 @@
-# CSharp data collection and visualisation projects
+# C# data collection and visualisation projects
 
 These projects were given to me in the university and are only for educational purposes.
 
