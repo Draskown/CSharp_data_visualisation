@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace CPDT_4.Properties
+namespace CPDT_LR4.Properties
 {
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.

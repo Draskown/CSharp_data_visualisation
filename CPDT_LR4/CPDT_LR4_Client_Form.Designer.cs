@@ -1,5 +1,5 @@
 ﻿
-namespace CPDT_4
+namespace CPDT_LR4
 {
     partial class CPDT_LR4_Client_Form
     {

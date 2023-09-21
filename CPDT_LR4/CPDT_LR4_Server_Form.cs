@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using System.Net.Sockets;
 using System;
 
-namespace CPDT_4
+namespace CPDT_LR4
 {
     public partial class CPDT_LR4_Server_Form : Form
     {

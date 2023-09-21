@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CPDT_4
+namespace CPDT_LR4
 {
     static class Program
     {

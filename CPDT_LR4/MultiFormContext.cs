@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using System.Threading;
 
-namespace CPDT_4
+namespace CPDT_LR4
 {
     public class MultiFormContext : ApplicationContext
     {
