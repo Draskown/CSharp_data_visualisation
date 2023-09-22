@@ -6,7 +6,7 @@ Each side of the cube is a different statistics graph. Three of which are histog
 
 <center><img src="./Images/Main.png" height="350" width="600"/></center>
 
-- `Minimum package length` sets the minimum size of the proccessing arrays.
+- `Minimum package length` sets the minimum size of the processing arrays.
 
 - `Depth of average calculation` corresponds to the size of the sliding average window for normalizing of the data.
 

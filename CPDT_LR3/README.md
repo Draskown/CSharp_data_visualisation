@@ -6,7 +6,7 @@ Reads .dmp file with CAN connections data in bytes with time stamps, visualises 
 
 ## Features
 
-- You can choose one of the sources (but only if reading is paused) by address. The program will calculate and visualise the source's connectoins and percentage of incoming/outcoming messages to all of the available connections (*green line* represents an incoming message and *blue line* represents an outcoming one):
+- You can choose one of the sources (but only if reading is paused) by address. The program will calculate and visualise the source's connections and percentage of incoming/outcoming messages to all of the available connections (*green line* represents an incoming message and *blue line* represents an outcoming one):
 
 <center><img src="./Images/Connections.png" height="350" width="600"/></center>
 

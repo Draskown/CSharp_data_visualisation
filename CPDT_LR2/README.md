@@ -8,7 +8,7 @@ You may dump your own LIDAR data, but make sure that it is .pcap.
 
 `FrameRate` stands not as much for framerate but for the seconds of delay between the reading iterations of the data.
 
-The block at the top of the window holds KMeans parameters, tweaking which will result in different segmentaion results.
+The block at the top of the window holds KMeans parameters, tweaking which will result in different segmentation results.
 
 `Field of View` and `The corridor` correspond to the visualisation limits and parameters of the cloud of points and the passage.
 
